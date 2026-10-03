@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-03",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "method": "Chrome default graphics backend; running toy, four consecutive 2.1 second samples after initialization",
+  "context": {
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "devicePixelRatio": 1,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+  },
+  "samples": [
+    {
+      "fps": 16.854211074206546,
+      "quality": "economy",
+      "pixelRatio": 0.8,
+      "triangles": 32616,
+      "drawCalls": 130,
+      "geometries": 130
+    },
+    {
+      "fps": 29.997000299969997,
+      "quality": "economy",
+      "pixelRatio": 0.8,
+      "triangles": 32616,
+      "drawCalls": 130,
+      "geometries": 130
+    },
+    {
+      "fps": 30.00491883915396,
+      "quality": "economy",
+      "pixelRatio": 0.8,
+      "triangles": 32616,
+      "drawCalls": 130,
+      "geometries": 130
+    },
+    {
+      "fps": 30.001967342120796,
+      "quality": "economy",
+      "pixelRatio": 0.8,
+      "triangles": 32616,
+      "drawCalls": 130,
+      "geometries": 130
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "researchDate": "2026-10-03",
+  "runtimeNetwork": "Local files only",
+  "researchRecord": "docs/asset-research.md",
+  "attributions": "ATTRIBUTIONS.md",
+  "assets": [
+    {
+      "id": "original-models",
+      "sourcePage": null,
+      "creator": "Original artwork created for Sharara Lab",
+      "license": "CC0-1.0",
+      "licenseFile": "licenses/ORIGINAL-ASSETS-CC0.txt",
+      "format": "Procedural JavaScript Three.js geometry + JSON",
+      "models": [
+        "single-cell toy car",
+        "single-cell portable radio",
+        "home refrigerator with hinged door",
+        "AA ordinary cell",
+        "wheeled lab cart",
+        "science room",
+        "Sharara robot"
+      ],
+      "downloaded": false,
+      "original": true,
+      "permissions": {
+        "use": true,
+        "modify": true,
+        "redistribute": true,
+        "attributionRequired": false
+      },
+      "triangles": null,
+      "geometryNote": "Complete initial scene measured at 32616 triangles; per-model counts not separately measured. Geometry regenerated locally; no downloaded GLB claimed.",
+      "localFiles": [
+        {
+          "path": "src/scene.js",
+          "bytes": 15602,
+          "sha256": "a4c7d5e9aafa17a3ed2203bb501b8b7c304838269996c308fc31257ced66aeb0"
+        },
+        {
+          "path": "assets/models/lab-design.json",
+          "bytes": 376,
+          "sha256": "f87c438bf3eafe1a2234bd585a13aea6656c79938d9c0458f6dfc12a27fe09b5"
+        }
+      ],
+      "totalBytes": 15978
+    },
+    {
+      "id": "original-interface",
+      "sourcePage": null,
+      "creator": "Original artwork created for Sharara Lab",
+      "license": "CC0-1.0",
+      "licenseFile": "licenses/ORIGINAL-ASSETS-CC0.txt",
+      "format": "SVG",
+      "downloaded": false,
+      "original": true,
+      "permissions": {
+        "use": true,
+        "modify": true,
+        "redistribute": true,
+        "attributionRequired": false
+      },
+      "localFiles": [
+        {
+          "path": "src/icons.js",
+          "bytes": 2873,
+          "sha256": "aa1168d9a71e8bcb215466a5edef53ef3ce4ab6fdab05803d44c1bb62efd62af"
+        },
+        {
+          "path": "public/favicon.svg",
+          "bytes": 177,
+          "sha256": "51632424e4bd2fe7d4fdec02c600737970d0daae2a96ee0901238b1130f79083"
+        }
+      ],
+      "totalBytes": 3050
+    },
+    {
+      "id": "original-audio",
+      "sourcePage": null,
+      "creator": "Original short synthesized phrase for Sharara Lab",
+      "license": "CC0-1.0",
+      "licenseFile": "licenses/ORIGINAL-ASSETS-CC0.txt",
+      "format": "Web Audio oscillator synthesis",
+      "downloaded": false,
+      "original": true,
+      "permissions": {
+        "use": true,
+        "modify": true,
+        "redistribute": true,
+        "attributionRequired": false
+      },
+      "localFiles": [
+        {
+          "path": "src/audio.js",
+          "bytes": 1060,
+          "sha256": "14d63d0b97cb4a7fdba2de8bdb4fafa18edae9f8d8ea2eab3c88acfd471d2319"
+        }
+      ],
+      "totalBytes": 1060
+    },
+    {
+      "id": "three",
+      "sourcePage": "https://github.com/mrdoob/three.js/tree/r180",
+      "creator": "Three.js authors and contributors",
+      "version": "0.180.0",
+      "license": "MIT",
+      "licenseFile": "licenses/THREE-MIT.txt",
+      "format": "ES modules",
+      "downloaded": true,
+      "downloadMethod": "npm package three@0.180.0; required files vendored locally",
+      "permissions": {
+        "use": true,
+        "modify": true,
+        "redistribute": true,
+        "attributionRequired": true
+      },
+      "modifications": "three.module.min.js copied as three.module.js; source content unmodified",
+      "localFiles": [
+        {
+          "path": "vendor/three.module.js",
+          "bytes": 338908,
+          "sha256": "e2b5ee6bccd38fd6d8a2428546b83c5f2426d84b152ef82be8055556e3b40eb6"
+        },
+        {
+          "path": "vendor/three.core.min.js",
+          "bytes": 381124,
+          "sha256": "61ba0df005b05991361d040d8ff670e1aadfd0ce7aeebd1fdb0725957a8957de"
+        },
+        {
+          "path": "vendor/addons/geometries/RoundedBoxGeometry.js",
+          "bytes": 6476,
+          "sha256": "c1b7c9bd2cddff2e3f3a0723f618a3d364a47450e3d25771d21faed88410bec8"
+        }
+      ],
+      "totalBytes": 726508
+    },
+    {
+      "id": "tajawal",
+      "sourcePage": "https://fontsource.org/fonts/tajawal",
+      "creator": "Google Inc., copyright per packaged license",
+      "version": "@fontsource/tajawal 5.2.6",
+      "license": "OFL-1.1",
+      "licenseFile": "licenses/TAJAWAL-OFL.txt",
+      "format": "WOFF2",
+      "downloaded": true,
+      "downloadMethod": "npm package @fontsource/tajawal@5.2.6",
+      "permissions": {
+        "use": true,
+        "modify": true,
+        "redistribute": true,
+        "attributionRequired": true
+      },
+      "modifications": "None; four unmodified supplied subsets selected",
+      "localFiles": [
+        {
+          "path": "assets/fonts/tajawal-arabic-400-normal.woff2",
+          "bytes": 8944,
+          "sha256": "23b83b14d389fe939ef93df560ce5da3a992daa34ef4236ab4738bdf47b27855"
+        },
+        {
+          "path": "assets/fonts/tajawal-arabic-700-normal.woff2",
+          "bytes": 9044,
+          "sha256": "00faae007e32de07f97656ea0e51020c682e1e9010f3c2a46869d9eff33fa1ee"
+        },
+        {
+          "path": "assets/fonts/tajawal-latin-400-normal.woff2",
+          "bytes": 10256,
+          "sha256": "b081f7bf790678b56a2c0502651d6873cbabc09e78fe40655df15f918b1e369b"
+        },
+        {
+          "path": "assets/fonts/tajawal-latin-700-normal.woff2",
+          "bytes": 9996,
+          "sha256": "de8f431c146ab1feb612cb7ced0842ae5c4e2f12067d13db0badeca73977200b"
+        }
+      ],
+      "totalBytes": 38240
+    }
+  ],
+  "rejectedCandidatePolicy": "Candidate pages and unverified metadata are recorded in the research document; no rejected model is included or claimed as downloaded."
+}

@@ -1,0 +1,8 @@
+{
+  "author": "Original geometry authored for Sharara Lab",
+  "license": "CC0-1.0",
+  "geometrySource": "src/scene.js",
+  "singleCellDevices": ["car", "radio"],
+  "cell": {"type": "AA", "nominalVoltage": 1.5, "rechargeable": false},
+  "palette": {"blue": 3183575, "navy": 2443873, "mint": 6343611, "yellow": 16764759, "white": 16251636, "dark": 2704722, "orange": 15966300}
+}

@@ -1,0 +1,13 @@
+Original Sharara Lab artwork, 2026
+
+The original procedural geometry in src/scene.js, model design data in
+assets/models/lab-design.json, original SVG symbols in src/icons.js and
+public/favicon.svg, and synthesized musical phrase in src/audio.js are
+dedicated to the public domain under CC0 1.0 Universal, to the extent
+permitted by law. They may be used, modified and redistributed, including
+commercially. Attribution is appreciated but not required.
+
+CC0 legal terms: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+This dedication does NOT cover Three.js or the Tajawal font. Those works
+retain the licenses and copyright notices included alongside this file.
