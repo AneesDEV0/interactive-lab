@@ -1,0 +1,101 @@
+/* ═══════════════════════════════════════════════════════════
+   المظهر المركزي الموحد للمنصة التعليمية (Global Theme)
+   يوحد الألوان، الخطوط، أحجام الأزرار، ونمط التصميم بين الأنشطة الثابتة والمتحركة
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* نظام الألوان المركزي المعتمد */
+  --frog-dark: #2F3E36;
+  --frog: #5B7065;
+  --frog-soft: #859B8E;
+  --frog-light: #EBF1ED;
+  --bg-cream: #F8FAF7;
+  --white: #FFFFFF;
+
+  /* تدرجات الطاقة الذهبية والبرتقالية */
+  --gold: #FFB703;
+  --gold-dark: #D48B00;
+  --gold-light: #FFE8A3;
+  --gold-gradient: linear-gradient(135deg, #FFB703 0%, #FB8500 100%);
+
+  /* ألوان التغذية الراجعة والحالات */
+  --success: #2EC4B6;
+  --error: #E63946;
+  --warning: #FB8500;
+  --accent: #3A86FF;
+  --teal: #137d7e;
+  --teal-dark: #076466;
+
+  /* النصوص والخطوط والظلال */
+  --ink: var(--frog-dark);
+  --muted: var(--frog);
+  --paper: var(--bg-cream);
+  --line: #d9e5df;
+  --radius: 22px;
+  --card-radius: 26px;
+  --shadow-sm: 0 4px 12px rgba(47, 62, 54, 0.06);
+  --shadow-md: 0 10px 25px rgba(47, 62, 54, 0.1);
+  --shadow-lg: 0 20px 40px rgba(47, 62, 54, 0.15);
+
+  font-family: Tajawal, 'Cairo', Arial, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+/* توحيد الأزرار والتحكم */
+.btn-primary, button.primary {
+  background: var(--gold-gradient) !important;
+  color: var(--frog-dark) !important;
+  font-weight: 900 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 14px rgba(251, 133, 0, 0.35) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-primary:hover:not(:disabled), button.primary:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(251, 133, 0, 0.45) !important;
+}
+
+/* توحيد شكل النوافذ المنبثقة (Dialog Modal) */
+dialog {
+  border: 1.5px solid var(--line) !important;
+  border-radius: 26px !important;
+  background: var(--white) !important;
+  box-shadow: var(--shadow-lg) !important;
+  padding: 30px !important;
+  font-family: inherit !important;
+}
+
+dialog::backdrop {
+  background: rgba(47, 62, 54, 0.55) !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+/* توحيد فقاعات حوار ومساعد المنصة (شرارة) */
+.speech-bubble {
+  background: var(--frog-light) !important;
+  border: 1.5px solid rgba(91, 112, 101, 0.22) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.speech-bubble:before {
+  background: var(--frog-light) !important;
+  border-color: rgba(91, 112, 101, 0.22) !important;
+}
+
+/* توحيد بطاقات الأجهزة والـ Grid */
+.device-card {
+  border: 1.5px solid var(--line) !important;
+  border-radius: 18px !important;
+  background: var(--white) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: all 0.22s ease !important;
+}
+
+.device-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: var(--shadow-md) !important;
+  border-color: var(--gold) !important;
+}

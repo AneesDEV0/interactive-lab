@@ -1,14 +1,1049 @@
-<!doctype html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#eaf5f5" />
-    <meta name="description" content="مختبر شرارة: تجربة تعليمية آمنة على الشاشة لاكتشاف مصادر الطاقة الكهربائية." />
-    <title>مختبر شرارة | البطاريات والأجهزة</title>
-    <link rel="icon" href="./public/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./src/styles.css" />
-    <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
-  </head>
-  <body><div id="app"></div><script type="module" src="/src/main.js"></script></body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#2F3E36" />
+  <title>بوابة مختبر شرارة التعليمي | وحدة الكهرباء والمغناطيسية</title>
+  
+  <!-- خط تجوال العربي -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── الهوية البصرية الموحدة (الأصفر الذهبي والسكني الضفدعي الدافئ) ─── */
+    :root {
+      --gold: #FFB703;
+      --gold-dark: #FB8500;
+      --gold-gradient: linear-gradient(135deg, #FFB703 0%, #FB8500 100%);
+      --gold-soft: #FFF3D6;
+      
+      --frog-dark: #2F3E36;
+      --frog: #5B7065;
+      --frog-soft: #859B8E;
+      --frog-light: #EBF1ED;
+      --frog-subtle: #f2f7f4;
+      
+      --bg-cream: #F8FAF7;
+      --white: #FFFFFF;
+      --line: #e2ece7;
+      --accent-blue: #3A86FF;
+      --success-green: #2EC4B6;
+      
+      --shadow-sm: 0 4px 14px rgba(47, 62, 54, 0.05);
+      --shadow-md: 0 12px 28px rgba(47, 62, 54, 0.08);
+      --shadow-lg: 0 20px 42px rgba(47, 62, 54, 0.14);
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Tajawal', Arial, sans-serif;
+      background-color: var(--bg-cream);
+      color: var(--frog-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+      background-image:
+        radial-gradient(circle at 10% 15%, rgba(255, 183, 3, 0.10) 0%, transparent 35%),
+        radial-gradient(circle at 90% 85%, rgba(91, 112, 101, 0.12) 0%, transparent 40%),
+        radial-gradient(#5B7065 0.75px, transparent 0.75px);
+      background-size: 100% 100%, 100% 100%, 28px 28px;
+    }
+
+    /* ─── الترويسة الرئيسية ─── */
+    .portal-header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 2px solid rgba(255, 183, 3, 0.25);
+      padding: 12px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+    .header-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--frog-dark);
+    }
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      background: var(--gold-gradient);
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 23px;
+      box-shadow: 0 4px 12px rgba(251, 133, 0, 0.35);
+      animation: pulseBrand 3s infinite ease-in-out;
+    }
+    @keyframes pulseBrand {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .brand-text h1 {
+      font-size: 1.22rem;
+      font-weight: 900;
+      line-height: 1.2;
+      color: var(--frog-dark);
+    }
+    .brand-text p {
+      font-size: 0.82rem;
+      color: var(--frog);
+      font-weight: 700;
+    }
+    .grade-badge {
+      background: var(--frog-light);
+      color: var(--frog-dark);
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      border: 1px solid rgba(91, 112, 101, 0.22);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    /* ─── الحاوية الرئيسية للمحتوى ─── */
+    .main-container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 26px 18px 46px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      width: 100%;
+    }
+
+    /* ─── بانر التوثيق الأكاديمي والترحيب ─── */
+    .hero-banner {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 26px 30px;
+      box-shadow: var(--shadow-md);
+      border: 1.5px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      left: -50px;
+      top: -50px;
+      width: 160px;
+      height: 160px;
+      background: radial-gradient(circle, rgba(255, 183, 3, 0.22) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .sharara-avatar {
+      width: 86px;
+      height: 86px;
+      min-width: 86px;
+      background: var(--gold-gradient);
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      font-size: 44px;
+      box-shadow: 0 8px 22px rgba(251, 133, 0, 0.35);
+      border: 3px solid #ffffff;
+      animation: floatRobot 3.5s ease-in-out infinite;
+    }
+    @keyframes floatRobot {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+    .hero-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .unit-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--frog-light);
+      color: var(--frog-dark);
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 4px 14px;
+      border-radius: 20px;
+      width: fit-content;
+      border: 1px solid rgba(91, 112, 101, 0.2);
+    }
+    .hero-content h2 {
+      font-size: 1.58rem;
+      font-weight: 900;
+      color: var(--frog-dark);
+      line-height: 1.3;
+    }
+    
+    /* صندوق بيانات الباحثة والمشرف */
+    .research-meta-box {
+      background: var(--frog-subtle);
+      border: 1px dashed rgba(91, 112, 101, 0.3);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--frog-dark);
+      margin: 4px 0 6px;
+    }
+    .meta-divider {
+      color: var(--frog-soft);
+      font-weight: 400;
+    }
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .meta-item strong {
+      color: #1b2620;
+    }
+    
+    .hero-intro-text {
+      font-size: 1.02rem;
+      color: #3e5046;
+      font-weight: 500;
+      line-height: 1.65;
+    }
+
+    /* ─── عنوان قسم الاختيار الرئيسي ─── */
+    .section-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .section-header h3 {
+      font-size: 1.55rem;
+      font-weight: 900;
+      color: var(--frog-dark);
+    }
+    .section-header p {
+      color: var(--frog);
+      font-size: 0.98rem;
+      font-weight: 600;
+    }
+
+    /* ─── شبكة البطاقتين الرئيسيتين في المنتصف ─── */
+    .activities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 26px;
+    }
+
+    .activity-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 2px solid transparent;
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: all 0.28s ease;
+      overflow: hidden;
+    }
+    .activity-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+    }
+    .card-dynamic:hover {
+      border-color: rgba(255, 183, 3, 0.8);
+    }
+    .card-static:hover {
+      border-color: rgba(91, 112, 101, 0.5);
+    }
+
+    .card-header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      padding: 5px 14px;
+      border-radius: 50px;
+      width: fit-content;
+      margin-bottom: 18px;
+    }
+    .badge-dynamic {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    .badge-static {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .card-icon-banner {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      font-size: 36px;
+      margin-bottom: 18px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+    .icon-dynamic {
+      background: var(--gold-gradient);
+      box-shadow: 0 6px 18px rgba(251, 133, 0, 0.35);
+    }
+    .icon-static {
+      background: linear-gradient(135deg, #5B7065 0%, #2F3E36 100%);
+      color: #ffffff;
+      box-shadow: 0 6px 18px rgba(47, 62, 54, 0.28);
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--frog-dark);
+      margin-bottom: 10px;
+    }
+    .card-desc {
+      font-size: 0.98rem;
+      color: var(--frog);
+      margin-bottom: 22px;
+      line-height: 1.65;
+    }
+
+    /* قائمة الأنشطة الخمسة داخل الكرت */
+    .activity-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .activity-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: var(--frog-dark);
+    }
+    .feature-num {
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      border-radius: 50%;
+      background: var(--frog-light);
+      color: var(--frog-dark);
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    /* أزرار الانتقال الكبيرة والمميزة */
+    .card-launch-btn {
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 24px;
+      border-radius: 16px;
+      font-size: 1.08rem;
+      font-weight: 900;
+      transition: all 0.22s ease;
+      cursor: pointer;
+      border: 0;
+      font-family: inherit;
+    }
+    .btn-dynamic {
+      background: var(--gold-gradient);
+      color: var(--frog-dark);
+      box-shadow: 0 6px 18px rgba(251, 133, 0, 0.35);
+    }
+    .btn-dynamic:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 9px 24px rgba(251, 133, 0, 0.48);
+    }
+    .btn-static {
+      background: var(--frog-dark);
+      color: #ffffff;
+      box-shadow: 0 6px 18px rgba(47, 62, 54, 0.25);
+    }
+    .btn-static:hover {
+      background: #1b2620;
+      transform: translateY(-2px);
+      box-shadow: 0 9px 24px rgba(47, 62, 54, 0.4);
+    }
+
+    /* ─── الفوتر التوثيقي ─── */
+    .portal-footer {
+      background: #ffffff;
+      border-top: 1px solid var(--line);
+      padding: 22px 20px;
+      text-align: center;
+      color: var(--frog);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: auto;
+    }
+    .footer-credits {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 6px;
+      font-weight: 700;
+      color: var(--frog-dark);
+    }
+
+    /* ─── النوافذ المنبثقة التفاعلية لإدارة الـ 10 أنشطة (Modals) ─── */
+    .activities-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(47, 62, 54, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .activities-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .activities-modal-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      transform: scale(0.95) translateY(10px);
+      transition: transform 0.25s ease;
+      border: 2px solid var(--line);
+    }
+    .activities-modal-overlay.active .activities-modal-card {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1.5px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: var(--bg-cream);
+    }
+    .modal-header-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .modal-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .modal-title h3 {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--frog-dark);
+      line-height: 1.2;
+    }
+    .modal-title p {
+      font-size: 0.84rem;
+      color: var(--frog);
+      font-weight: 700;
+    }
+    .modal-close-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1.5px solid var(--line);
+      font-size: 18px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: var(--frog);
+      transition: all 0.2s;
+    }
+    .modal-close-btn:hover {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fca5a5;
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* كرت النشاط الفردي داخل القائمة */
+    .activity-list-item {
+      background: var(--bg-cream);
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all 0.2s ease;
+    }
+    .activity-list-item:hover {
+      border-color: rgba(255, 183, 3, 0.7);
+      background: #ffffff;
+      box-shadow: var(--shadow-sm);
+      transform: translateX(-4px);
+    }
+    .activity-item-main {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      flex: 1;
+    }
+    .activity-index-badge {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 10px;
+      background: var(--frog-light);
+      color: var(--frog-dark);
+      font-weight: 900;
+      font-size: 14px;
+      display: grid;
+      place-items: center;
+      margin-top: 2px;
+    }
+    .item-text h4 {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: var(--frog-dark);
+      margin-bottom: 3px;
+    }
+    .item-text p {
+      font-size: 0.85rem;
+      color: var(--frog);
+      line-height: 1.45;
+      font-weight: 600;
+    }
+    .item-status-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-top: 4px;
+    }
+    .tag-available {
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .tag-upcoming {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .activity-action-btn {
+      text-decoration: none;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-play-static {
+      background: var(--frog-dark);
+      color: #ffffff;
+    }
+    .btn-play-static:hover {
+      background: #1b2620;
+      transform: translateY(-2px);
+    }
+    .btn-play-dynamic {
+      background: var(--gold-gradient);
+      color: var(--frog-dark);
+    }
+    .btn-play-dynamic:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(251, 133, 0, 0.4);
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1.5px solid var(--line);
+      background: var(--bg-cream);
+      display: flex;
+      justify-content: flex-end;
+    }
+    .modal-back-btn {
+      background: #ffffff;
+      border: 1.5px solid var(--line);
+      padding: 8px 18px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      color: var(--frog-dark);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .modal-back-btn:hover {
+      background: var(--frog-light);
+    }
+
+    /* ─── التجاوب مع الجوال (Mobile-First) ─── */
+    @media (max-width: 768px) {
+      .hero-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 22px 18px;
+      }
+      .unit-tag {
+        margin: 0 auto;
+      }
+      .research-meta-box {
+        justify-content: center;
+        text-align: center;
+      }
+      .hero-content h2 {
+        font-size: 1.35rem;
+      }
+      .brand-text h1 {
+        font-size: 1.05rem;
+      }
+      .activities-grid {
+        grid-template-columns: 1fr;
+      }
+      .activity-card {
+        padding: 26px 20px;
+      }
+      .activity-list-item {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .activity-action-btn {
+        justify-content: center;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- الترويسة الرئيسية -->
+  <header class="portal-header">
+    <div class="header-inner">
+      <a href="./index.html" class="brand-box">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>مختبر شرارة للعلوم</h1>
+          <p>منصة استكشاف مصادر الطاقة والكهرباء</p>
+        </div>
+      </a>
+      <div class="grade-badge">
+        <span>🎓 الصف الرابع الأساسي</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- الحاوية الرئيسية للمحتوى -->
+  <main class="main-container">
+
+    <!-- بانر التوثيق الأكاديمي والترحيب -->
+    <section class="hero-banner">
+      <div class="sharara-avatar" title="المساعد التعليمي الذكي شرارة">🤖</div>
+      <div class="hero-content">
+        <span class="unit-tag">⚡ منهاج العلوم والحياة التفاعلي</span>
+        <h2>وحدة الكهرباء والمغناطيسية (الصف الرابع الأساسي) 🌟</h2>
+        
+        <!-- توثيق المشروع والباحثة والمشرف -->
+        <div class="research-meta-box">
+          <span class="meta-item">👩‍🎓 <strong>إعداد الباحثة:</strong> ولاء حامد الصيداوي</span>
+          <span class="meta-divider">|</span>
+          <span class="meta-item">👨‍🏫 <strong>إشراف:</strong> د. حسن ربحي مهدي</span>
+        </div>
+
+        <p class="hero-intro-text">
+          "تهدف المنصة إلى مساعدة طلبة الصف الرابع على فهم المفاهيم الأساسية في الكهرباء ومعالجة الفاقد التعليمي من خلال أنشطة تفاعلية (ثابتة ومتحركة). تعلّم، استكشف، أجب، وتلقَّ تغذية راجعة."
+        </p>
+      </div>
+    </section>
+
+    <!-- عنوان قسم الاختيار الرئيسي -->
+    <div class="section-header">
+      <h3>اختر نمط التعلم والاستكشاف للبدء</h3>
+      <p>تضم المنصة 10 أنشطة تعليمية متكاملة مقسمة بين الأنشطة الثابتة والمتحركة</p>
+    </div>
+
+    <!-- شبكة الاختيار الرئيسي (البطاقتان الأساسيتان في المنتصف) -->
+    <section class="activities-grid">
+
+      <!-- البطاقة الأولى: الأنشطة الثابتة (5 أنشطة) -->
+      <article class="activity-card card-static">
+        <div>
+          <span class="card-header-badge badge-static">🔍 استكشاف وتصنيف علمي</span>
+          <div class="card-icon-banner icon-static">🔋</div>
+          <h4 class="card-title">الأنشطة الثابتة (Static AR)</h4>
+          <p class="card-desc">
+            أنشطة استكشافية قائمة على البطاقات التفاعلية والتحليل البصري لمصادر الطاقة، مع مسارات تعليمية مبسطة لمعالجة الفاقد التعليمي وتأكيد الفهم العلمي.
+          </p>
+          <ul class="activity-features">
+            <li><span class="feature-num">1</span> محطة البطاريات الجافة واستخداماتها المنزلية</li>
+            <li><span class="feature-num">2</span> افتح المسار واستكشاف عمل الدوائر الكهربائية</li>
+            <li><span class="feature-num">3</span> مصنف المواد: موصل أم عازل للتيار الكهربائي؟</li>
+            <li><span class="feature-num">4</span> قطبا المغناطيس وقوى التجاذب والتنافر</li>
+            <li><span class="feature-num">5</span> بنك التحديات والتقييم الذاتي مع شهادة التفوق</li>
+          </ul>
+        </div>
+        <button type="button" class="card-launch-btn btn-static" onclick="openStaticModal()">
+          <span>استعراض الأنشطة الثابتة (5 أنشطة)</span>
+          <span>🔍 ➔</span>
+        </button>
+      </article>
+
+      <!-- البطاقة الثانية: الأنشطة المتحركة (5 أنشطة) -->
+      <article class="activity-card card-dynamic">
+        <div>
+          <span class="card-header-badge badge-dynamic">✨ محاكاة 3D تفاعلية حرة</span>
+          <div class="card-icon-banner icon-dynamic">⚡</div>
+          <h4 class="card-title">الأنشطة المتحركة (Dynamic Simulation)</h4>
+          <p class="card-desc">
+            مختبر محاكاة ثلاثي الأبعاد تفاعلي حر (Mobile-First)، يعتمد على السحب والإفلات المباشر للبطارية والقابس لتشغيل الأجهزة وتفحص تفاصيلها الحركية.
+          </p>
+          <ul class="activity-features">
+            <li><span class="feature-num">1</span> مختبر البطاريات والأجهزة ثلاثي الأبعاد 3D (24 جهازاً)</li>
+            <li><span class="feature-num">2</span> محاكاة تركيب الدارة الكهربائية وسريان الشحنات</li>
+            <li><span class="feature-num">3</span> محاكاة المفتاح الكهربائي والتحكم في إضاءة المصباح</li>
+            <li><span class="feature-num">4</span> محاكاة البوصلة والمجال المغناطيسي الحركي</li>
+            <li><span class="feature-num">5</span> ورشة فحص التوصيل الكهربائي والتجربة الحرة</li>
+          </ul>
+        </div>
+        <button type="button" class="card-launch-btn btn-dynamic" onclick="openDynamicModal()">
+          <span>استعراض الأنشطة المتحركة (5 أنشطة)</span>
+          <span>⚡ ➔</span>
+        </button>
+      </article>
+
+    </section>
+
+  </main>
+
+  <!-- الفوتر التوثيقي -->
+  <footer class="portal-footer">
+    <p>منصة مختبر شرارة التفاعلية | منهاج العلوم والحياة - الصف الرابع الأساسي</p>
+    <div class="footer-credits">
+      <span>إعداد الباحثة: <strong>ولاء حامد الصيداوي</strong></span>
+      <span>•</span>
+      <span>إشراف: <strong>د. حسن ربحي مهدي</strong></span>
+    </div>
+  </footer>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- 1. نافذة قائمة الأنشطة الثابتة الخمسة (5 Static Activities)   -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div id="static-modal" class="activities-modal-overlay" onclick="handleOverlayClick(event, 'static-modal')">
+    <div class="activities-modal-card">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <div class="modal-icon icon-static">🔋</div>
+          <div class="modal-title">
+            <h3>قائمة الأنشطة الثابتة (5 أنشطة تعليمية)</h3>
+            <p>وحدة الكهرباء والمغناطيسية - الصف الرابع الأساسي</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('static-modal')" title="إغلاق">✕</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- نشاط 1 -->
+        <div class="activity-list-item">
+          <div class="activity-item-main">
+            <span class="activity-index-badge">1</span>
+            <div class="item-text">
+              <h4>متحري مصادر الكهرباء والبطاريات 🔋</h4>
+              <p>استكشاف بطاقات الأجهزة المنزلية وتصنيف مصادر طاقتها (بطارية جافة 1.5V مقابل قابس الجدار 220V).</p>
+              <span class="item-status-tag tag-available">جاهز ومتاح الآن 🌟</span>
+            </div>
+          </div>
+          <a href="./public/static-lab.html" class="activity-action-btn btn-play-static">
+            <span>دخول النشاط</span> ➔
+          </a>
+        </div>
+
+        <!-- نشاط 2 -->
+        <div class="activity-list-item">
+          <div class="activity-item-main">
+            <span class="activity-index-badge">2</span>
+            <div class="item-text">
+              <h4>افتح وأغلق المسار (الدارة الكهربائية البسيطة) 💡</h4>
+              <p>التعرف على أجزاء الدارة الكهربائية البسيطة (البطارية، الأسلاك، المصباح، المفتاح) وكيفية اكتمال المسار.</p>
+              <span class="item-status-tag tag-available">متاح في المنصة 🌟</span>
+            </div>
+          </div>
+          <a href="./public/static-lab.html#circuit" class="activity-action-btn btn-play-static">
+            <span>دخول النشاط</span> ➔
+          </a>
+        </div>
+
+        <!-- نشاط 3 -->
+        <div class="activity-list-item">
+          <div class="activity-item-main">
+            <span class="activity-index-badge">3</span>
+            <div class="item-text">
+              <h4>مصنف المواد: موصل أم عازل للكهرباء؟ 🔌</h4>
+              <p>تجربة تصنيف المواد المختلفة في الدارة (حديد، نحاس، بلاستيك، خشب، ماء) والتأكد من إضاءة المصباح.</p>
+              <span class="item-status-tag tag-available">متاح في المنصة 🌟</span>
+            </div>
+          </div>
+          <a href="./public/static-lab.html#conductors" class="activity-action-btn btn-play-static">
+            <span>دخول النشاط</span> ➔
+          </a>
+        </div>
+
+        <!-- نشاط 4 -->
+        <div class="activity-list-item">
+          <div class="activity-item-main">
+            <span class="activity-index-badge">4</span>
+            <div class="item-text">
+              <h4>قطبا المغناطيس وقوى التجاذب والتنافر 🧲</h4>
+              <p>استكشاف القطبين الشمالي والجنوبي للمغناطيس وتجربة تأثير تقريب الأقطاب المتشابهة والمختلفة.</p>
+              <span class="item-status-tag tag-available">متاح في المنصة 🌟</span>
+            </div>
+          </div>
+          <a href="./public/static-lab.html#magnet" class="activity-action-btn btn-play-static">
+            <span>دخول النشاط</span> ➔
+          </a>
+        </div>
+
+        <!-- نشاط 5 -->
+        <div class="activity-list-item">
+          <div class="activity-item-main">
+            <span class="activity-index-badge">5</span>
+            <div class="item-text">
+              <h4>بنك التحديات والتقييم الذاتي مع شهادة التفوق 🎓</h4>
+              <p>اختبار تفاعلي شامل يؤكد إتقان المفاهيم مع استخراج شهادة رقمية فورية باسم المستكشف الصغير.</p>
+              <span class="item-status-tag tag-available">متاح في المنصة 🌟</span>
+            </div>
+          </div>
+          <a href="./public/static-lab.html#quiz" class="activity-action-btn btn-play-static">
+            <span>دخول التحدي</span> ➔
+          </a>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="modal-back-btn" onclick="closeModal('static-modal')">
+          <span>⬅ العودة للرئيسية</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- 2. نافذة قائمة الأنشطة المتحركة الخمسة (5 Dynamic Activities) -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div id="dynamic-modal" class="activities-modal-overlay" onclick="handleOverlayClick(event, 'dynamic-modal')">
+    <div class="activities-modal-card">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <div class="modal-icon icon-dynamic">⚡</div>
+          <div class="modal-title">
+            <h3>قائمة الأنشطة المتحركة والمحاكاة (5 أنشطة تفاعلية)</h3>
+            <p>وحدة الكهرباء والمغناطيسية - الصف الرابع الأساسي</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('dynamic-modal')" title="إغلاق">✕</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- نشاط متحرك 1 -->
+        <div class="activity-list-item">
+          <div class="activity-item-main">
+            <span class="activity-index-badge">1</span>
+            <div class="item-text">
+              <h4>مختبر البطاريات والأجهزة ثلاثي الأبعاد 3D ⚡</h4>
+              <p>محاكاة حرة بالسحب والإفلات للبطارية والفيشة مع بنك 24 جهازاً ودوران 3D وأنيميشن مستمر وأصوات تفاعلية.</p>
+              <span class="item-status-tag tag-available">جاهز ومتاح الآن 🌟</span>
+            </div>
+          </div>
+          <a href="./public/dynamic-lab.html" class="activity-action-btn btn-play-dynamic">
+            <span>دخول المختبر</span> ➔
+          </a>
+        </div>
+
+        <!-- نشاط متحرك 2 -->
+        <div class="activity-list-item">
+          <div class="activity-item-main">
+            <span class="activity-index-badge">2</span>
+            <div class="item-text">
+              <h4>محاكاة تركيب الدارة الكهربائية الحركية 💡</h4>
+              <p>تركيب عناصر الدارة بالسحب والإفلات ومشاهدة توهج المصباح وحركة الشحنات الكهربائية داخل الأسلاك.</p>
+              <span class="item-status-tag tag-available">متاح في المنصة 🌟</span>
+            </div>
+          </div>
+          <a href="./public/dynamic-lab.html" class="activity-action-btn btn-play-dynamic">
+            <span>دخول النشاط</span> ➔
+          </a>
+        </div>
+
+        <!-- نشاط متحرك 3 -->
+        <div class="activity-list-item">
+          <div class="activity-item-main">
+            <span class="activity-index-badge">3</span>
+            <div class="item-text">
+              <h4>محاكاة المفتاح الكهربائي وسريان التيار 🔄</h4>
+              <p>تجربة إغلاق وفتح القاطع الكهربائي ومشاهدة التأثير المباشر على توقف أو تدفق التيار في ثوانٍ.</p>
+              <span class="item-status-tag tag-available">متاح في المنصة 🌟</span>
+            </div>
+          </div>
+          <a href="./public/dynamic-lab.html" class="activity-action-btn btn-play-dynamic">
+            <span>دخول النشاط</span> ➔
+          </a>
+        </div>
+
+        <!-- نشاط متحرك 4 -->
+        <div class="activity-list-item">
+          <div class="activity-item-main">
+            <span class="activity-index-badge">4</span>
+            <div class="item-text">
+              <h4>محاكي البوصلة والمجال المغناطيسي الحركي 🧭</h4>
+              <p>تدوير وتحريك المغناطيس لملاحظة استجابة إبرة البوصلة التفاعلية ودورانها نحو القطب المناظر حركياً.</p>
+              <span class="item-status-tag tag-available">متاح في المنصة 🌟</span>
+            </div>
+          </div>
+          <a href="./public/dynamic-lab.html" class="activity-action-btn btn-play-dynamic">
+            <span>دخول النشاط</span> ➔
+          </a>
+        </div>
+
+        <!-- نشاط متحرك 5 -->
+        <div class="activity-list-item">
+          <div class="activity-item-main">
+            <span class="activity-index-badge">5</span>
+            <div class="item-text">
+              <h4>ورشة الاختبارات الحرة والتوصيل المزدوج 🛠️</h4>
+              <p>طاولة محاكاة حرة لتجربة تشغيل أكثر من جهاز معاً وفحص أحمال الطاقة والجهد الكهربائي المناسب.</p>
+              <span class="item-status-tag tag-available">متاح في المنصة 🌟</span>
+            </div>
+          </div>
+          <a href="./public/dynamic-lab.html" class="activity-action-btn btn-play-dynamic">
+            <span>دخول الورشة</span> ➔
+          </a>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="modal-back-btn" onclick="closeModal('dynamic-modal')">
+          <span>⬅ العودة للرئيسية</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openStaticModal() {
+      document.getElementById('static-modal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function openDynamicModal() {
+      document.getElementById('dynamic-modal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function handleOverlayClick(event, id) {
+      if (event.target.id === id) {
+        closeModal(id);
+      }
+    }
+
+    // إغلاق عبر زر الهروب Esc
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal('static-modal');
+        closeModal('dynamic-modal');
+      }
+    });
+
+    // دعم الروابط المباشرة للأنشطة عبر الهاش (#static أو #dynamic)
+    if (window.location.hash === '#static' || window.location.hash === '#static-modal') {
+      openStaticModal();
+    } else if (window.location.hash === '#dynamic' || window.location.hash === '#dynamic-modal') {
+      openDynamicModal();
+    }
+  </script>
+
+</body>
 </html>
+
