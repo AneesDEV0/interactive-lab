@@ -819,6 +819,11 @@ window.addEventListener('touchmove', e => {
     g.style.left = touch.clientX + 'px';
     g.style.top = touch.clientY + 'px';
   }
+
+  // تحديث موقع العنصر وسلك الكهرباء التفاعلي ثلاثي الأبعاد مباشرة
+  if (drag.moved && scene?.setDragWorld) {
+    scene.setDragWorld(drag.tool, touch.clientX, touch.clientY);
+  }
 }, { passive: false });
 
 // نهاية اللمس على شاشات الجوال والتابلت
@@ -833,6 +838,7 @@ window.addEventListener('touchend', e => {
   drag = null;
   const g = $('#drag-ghost');
   if (g) g.hidden = true;
+  scene?.clearDragWorld?.();
 
   if (!moved) {
     // لمسة سريعة بدون سحب: نطق التوجيه الصوتي للطفل
@@ -859,6 +865,7 @@ window.addEventListener('touchcancel', () => {
     drag = null;
     const g = $('#drag-ghost');
     if (g) g.hidden = true;
+    scene?.clearDragWorld?.();
     dispatch({type: 'CANCEL_DRAG'});
   }
 });
@@ -874,6 +881,9 @@ document.addEventListener('pointermove', e => {
       g.style.left = e.clientX + 'px';
       g.style.top = e.clientY + 'px';
     }
+    if (scene?.setDragWorld) {
+      scene.setDragWorld(drag.tool, e.clientX, e.clientY);
+    }
   }
 });
 
@@ -884,6 +894,7 @@ document.addEventListener('pointerup', e => {
   drag = null;
   const g = $('#drag-ghost');
   if (g) g.hidden = true;
+  scene?.clearDragWorld?.();
   if (!moved) {
     if (!state.muted) speakToolPick(tool);
     return;
@@ -907,6 +918,7 @@ document.addEventListener('pointercancel', () => {
     drag = null;
     const g = $('#drag-ghost');
     if (g) g.hidden = true;
+    scene?.clearDragWorld?.();
     dispatch({type: 'CANCEL_DRAG'});
   }
 });

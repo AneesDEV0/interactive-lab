@@ -212,6 +212,31 @@ function createArBattery() {
   pole.position.y = 1.32;
   group.add(pole);
 
+  // سلكان كهربائيان (أحمر موجب وأسود سالب) يخرجان من قطبي البطارية
+  const redWireCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 1.32, 0),
+    new THREE.Vector3(0.35, 1.45, 0.2),
+    new THREE.Vector3(0.65, 1.1, 0.35),
+    new THREE.Vector3(0.85, 0.45, 0.45)
+  ]);
+  const redWire = new THREE.Mesh(
+    new THREE.TubeGeometry(redWireCurve, 20, 0.032, 8, false),
+    new THREE.MeshStandardMaterial({ color: 0xE63946, roughness: 0.5 })
+  );
+  group.add(redWire);
+
+  const blackWireCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0.08, 0),
+    new THREE.Vector3(-0.35, 0.15, -0.2),
+    new THREE.Vector3(-0.65, 0.35, -0.35),
+    new THREE.Vector3(-0.85, 0.45, -0.45)
+  ]);
+  const blackWire = new THREE.Mesh(
+    new THREE.TubeGeometry(blackWireCurve, 20, 0.032, 8, false),
+    new THREE.MeshStandardMaterial({ color: 0x1A1A1A, roughness: 0.5 })
+  );
+  group.add(blackWire);
+
   // حلقة طاقة كهربائية متوهجة تدور حول البطارية
   const ringGeo = new THREE.TorusGeometry(0.55, 0.03, 16, 32);
   const ringMat = new THREE.MeshBasicMaterial({ color: 0xFFB703, transparent: true, opacity: 0.75 });

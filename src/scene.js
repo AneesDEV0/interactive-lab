@@ -134,12 +134,117 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
   const robotArm = box(robot, 0.18, 0.59, 0.2, palette.mint, -0.5, 0.81, 0, 0.06);
   robotArm.rotation.z = -0.25;
 
-  // Mains Wire
+  // ─── كابل الكهرباء الرئيسي ثلاثي الأبعاد الديناميكي (Dynamic 3D Flexible Cable) ───
   const mainsWire = new THREE.Group();
   scene.add(mainsWire);
-  const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(-3.1, 2.1, -1), new THREE.Vector3(-4.1, 1.7, -1.4), new THREE.Vector3(-4.5, 1.9, -2)]);
-  mesh(mainsWire, new THREE.TubeGeometry(curve, 20, 0.035, 8, false), palette.navy);
+  const socketPos = new THREE.Vector3(-4.5, 1.9, -2.0);
+  const initialCurve = new THREE.CatmullRomCurve3([
+    socketPos,
+    new THREE.Vector3(-3.8, 1.85, -1.3),
+    new THREE.Vector3(-3.1, 2.05, -1.0)
+  ]);
+  let mainsWireMesh = mesh(mainsWire, new THREE.TubeGeometry(initialCurve, 24, 0.038, 8, false), palette.navy);
   mainsWire.visible = false;
+
+  // مجسم فيشة الكهرباء الواقعية (3D Plug Model)
+  const plugModel = new THREE.Group();
+  scene.add(plugModel);
+  box(plugModel, 0.26, 0.20, 0.40, palette.navy, 0, 0, 0, 0.04);
+  const prong1 = cyl(plugModel, 0.025, 0.16, 0xD0D0D0, -0.065, 0, 0.25); prong1.rotation.x = Math.PI / 2;
+  const prong2 = cyl(plugModel, 0.025, 0.16, 0xD0D0D0, 0.065, 0, 0.25); prong2.rotation.x = Math.PI / 2;
+  const plugBoot = cyl(plugModel, 0.055, 0.10, 0x1A1A1A, 0, 0, -0.22); plugBoot.rotation.x = Math.PI / 2;
+  plugModel.visible = false;
+
+  function updateMainsCable(targetPlugPos) {
+    const midPoint = new THREE.Vector3().addVectors(socketPos, targetPlugPos).multiplyScalar(0.5);
+    // محاكاة جاذبية وتدلي السلك بفيزيائية طبيعية فوق الطاولة
+    midPoint.y = Math.max(1.72, Math.min(midPoint.y, 2.2) - 0.48);
+    midPoint.z += 0.25;
+    const dynamicCurve = new THREE.CatmullRomCurve3([
+      socketPos,
+      new THREE.Vector3(-3.8, 1.85, -1.3),
+      midPoint,
+      targetPlugPos
+    ]);
+    if (mainsWireMesh) {
+      mainsWireMesh.geometry.dispose();
+      mainsWireMesh.geometry = new THREE.TubeGeometry(dynamicCurve, 24, 0.038, 8, false);
+    }
+    plugModel.position.copy(targetPlugPos);
+    plugModel.lookAt(targetPlugPos.x, targetPlugPos.y, targetPlugPos.z + 1);
+    mainsWire.visible = true;
+    plugModel.visible = true;
+  }
+
+  // ─── نظام الشرارات والتوهج الكهربائي ثلاثي الأبعاد (Electrical Sparks & Glow) ───
+  const sparksGroup = new THREE.Group();
+  scene.add(sparksGroup);
+  const sparksPointLight = new THREE.PointLight(0xFFD700, 0, 4.5);
+  sparksGroup.add(sparksPointLight);
+
+  const sparkMeshes = [];
+  const sparkVelocities = [];
+  const sparkGeo = new THREE.SphereGeometry(0.045, 6, 6);
+  const sparkMatYellow = new THREE.MeshBasicMaterial({color: 0xFFD700});
+  const sparkMatBlue = new THREE.MeshBasicMaterial({color: 0x00E5FF});
+
+  for (let i = 0; i < 22; i++) {
+    const sm = new THREE.Mesh(sparkGeo, i % 2 === 0 ? sparkMatYellow : sparkMatBlue);
+    sm.visible = false;
+    sparksGroup.add(sm);
+    sparkMeshes.push(sm);
+    sparkVelocities.push(new THREE.Vector3());
+  }
+  let sparksActive = false, sparksStartTime = 0;
+
+  function triggerSparks(pos) {
+    sparksGroup.position.copy(pos);
+    sparksPointLight.intensity = 2.8;
+    sparksActive = true;
+    sparksStartTime = performance.now();
+    sparkMeshes.forEach((m, idx) => {
+      m.position.set(0, 0, 0);
+      m.visible = true;
+      m.scale.setScalar(1);
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI * 0.7;
+      const speed = 0.09 + Math.random() * 0.16;
+      sparkVelocities[idx].set(
+        Math.sin(phi) * Math.cos(theta) * speed,
+        Math.cos(phi) * speed + 0.06,
+        Math.sin(phi) * Math.sin(theta) * speed
+      );
+    });
+  }
+
+  function updateSparks(now) {
+    if (!sparksActive) return;
+    const elapsed = (now - sparksStartTime) / 1000;
+    if (elapsed > 0.75) {
+      sparksActive = false;
+      sparkMeshes.forEach(m => m.visible = false);
+      sparksPointLight.intensity = 0;
+      return;
+    }
+    sparksPointLight.intensity = Math.max(0, 2.8 * (1 - elapsed / 0.75));
+    const factor = Math.max(0, 1 - elapsed / 0.75);
+    sparkMeshes.forEach((m, idx) => {
+      m.position.add(sparkVelocities[idx]);
+      sparkVelocities[idx].y -= 0.007; // gravity
+      m.scale.setScalar(factor);
+    });
+  }
+
+  // ─── حلقة هالة التوصيل المغناطيسية أسفل الجهاز الأقرب ───
+  const snapRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.65, 0.8, 32),
+    new THREE.MeshBasicMaterial({color: 0xFFB703, side: THREE.DoubleSide, transparent: true, opacity: 0.85})
+  );
+  snapRing.rotation.x = -Math.PI / 2;
+  snapRing.position.y = 1.99;
+  snapRing.visible = false;
+  scene.add(snapRing);
+
 
   // ─── 4 أماكن للأجهزة على الطاولة متناسقة وموزعة بدقة ───
   const SLOT_X = [-2.55, -0.85, 0.85, 2.55];
@@ -574,6 +679,55 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
     return null;
   }
 
+  // ─── التحكم في سحب العناصر ثلاثي الأبعاد باللمس والماوس (3D World Drag Tracking) ───
+  const tableSurfacePlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1.98);
+  const dragRaycaster = new THREE.Raycaster();
+  const dragPointerVec = new THREE.Vector2();
+  const dragIntersectWorld = new THREE.Vector3();
+  let currentDragTool = null;
+
+  function setDragWorld(tool, clientX, clientY) {
+    currentDragTool = tool;
+    const r = host.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    dragPointerVec.set(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1);
+    dragRaycaster.setFromCamera(dragPointerVec, camera);
+    const hit = dragRaycaster.ray.intersectPlane(tableSurfacePlane, dragIntersectWorld);
+    if (!hit) return;
+
+    if (tool === 'mains') {
+      const targetPos = dragIntersectWorld.clone();
+      targetPos.y = Math.max(1.98, targetPos.y + 0.15);
+      updateMainsCable(targetPos);
+    } else if (tool === 'battery') {
+      battery.position.copy(dragIntersectWorld);
+      battery.position.y = Math.max(2.15, dragIntersectWorld.y + 0.22);
+      battery.visible = true;
+    }
+
+    // إبراز هالة الجهاز الأقرب
+    const nearestId = at(clientX, clientY);
+    if (nearestId && objects[nearestId]) {
+      const v = new THREE.Vector3();
+      objects[nearestId].getWorldPosition(v);
+      snapRing.position.set(v.x, 1.99, v.z);
+      snapRing.visible = true;
+    } else {
+      snapRing.visible = false;
+    }
+  }
+
+  function clearDragWorld() {
+    currentDragTool = null;
+    snapRing.visible = false;
+    const s = getState();
+    const mainsRunning = Object.values(s.devices || {}).some(d => d.status === 'running' && d.source === 'mains');
+    if (!mainsRunning) {
+      mainsWire.visible = false;
+      plugModel.visible = false;
+    }
+  }
+
   let down = null, isRotating = false, rotateDevice = null, lastPointerX = 0, lastPointerY = 0;
   let didRotate = false;
 
@@ -657,6 +811,7 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
   cameraUpdate();
 
   let last = 0, lastRevision = -1, previousLocation = 'tray', insertionStart = 0, mountedDevicesKey = '';
+  let sparkTriggeredBattery = false, sparkTriggeredMains = false;
   const batteryPos = new THREE.Vector3(), insertionFrom = new THREE.Vector3(0.65, 2.24, 1.15);
 
   function tick(now) {
@@ -692,13 +847,41 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
 
     const progress = s.reducedMotion ? 1 : Math.min(1, (now - insertionStart) / 380);
     battery.position.lerpVectors(insertionFrom, batteryPos, progress);
-    battery.position.y += Math.sin(progress * Math.PI) * 0.22;
+    battery.position.y += Math.sin(progress * Math.PI) * 0.28;
     battery.visible = s.batteryLocation !== 'held' && s.batteryLocation !== 'tray' && Boolean(objects[s.batteryLocation]);
 
-    // حركة الروبوت ومؤشرات الكهرباء الرئيسية
-    const mainsRunning = Object.values(s.devices || {}).some(d => d.status === 'running' && d.source === 'mains');
-    mainsWire.visible = mainsRunning;
-    robotArm.rotation.z = mainsRunning ? -0.95 : -0.25;
+    if (s.batteryLocation !== 'held' && s.batteryLocation !== 'tray' && objects[s.batteryLocation]) {
+      if (progress >= 0.95 && !sparkTriggeredBattery) {
+        sparkTriggeredBattery = true;
+        const bp = new THREE.Vector3();
+        battery.getWorldPosition(bp);
+        triggerSparks(bp);
+      }
+    } else {
+      sparkTriggeredBattery = false;
+    }
+
+    // حركة الروبوت وكابل الكهرباء الرئيسية مع الشرارات
+    const mainsRunningId = Object.keys(s.devices || {}).find(id => s.devices[id].status === 'running' && s.devices[id].source === 'mains');
+    if (mainsRunningId && objects[mainsRunningId]) {
+      const devPos = new THREE.Vector3();
+      objects[mainsRunningId].getWorldPosition(devPos);
+      devPos.y += 0.25;
+      devPos.z -= 0.35;
+      updateMainsCable(devPos);
+      if (!sparkTriggeredMains) {
+        sparkTriggeredMains = true;
+        triggerSparks(devPos);
+      }
+    } else if (!currentDragTool) {
+      mainsWire.visible = false;
+      plugModel.visible = false;
+      sparkTriggeredMains = false;
+    }
+    robotArm.rotation.z = mainsRunningId ? -0.95 : -0.25;
+
+    // تحديث حركة الشرارات الكهربائية
+    updateSparks(now);
 
     // تأثيرات تشغيل الأجهزة المعروضة (Dynamic Continuous Animations)
     for (const id in objects) {
@@ -1025,6 +1208,9 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
 
   return {
     at,
+    setDragWorld,
+    clearDragWorld,
+    triggerSparks,
     zoomIn() { zoom = Math.min(1.65, zoom + 0.15); cameraUpdate(); },
     zoomOut() { zoom = Math.max(0.75, zoom - 0.15); cameraUpdate(); },
     reset() {
