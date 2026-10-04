@@ -608,7 +608,20 @@ function settings() {
 
 function renderChat() {
   const c = t();
-  $('#chat-history').innerHTML = history.map(h => `<div class="chat-bubble ${h.role}"><strong>${h.role === 'user' ? (state.language === 'ar' ? 'أنت' : 'You') : c.robot}</strong><p>${escape(h.text)}</p>${h.response && h === history.at(-1) ? `<div class="suggestions">${actionsHTML(h.response.suggestedActions)}</div>` : ''}</div>`).join('') || `<div class="chat-bubble assistant"><p>${c.intro}</p></div>`;
+  const currentIds = Object.keys(state.devices || {});
+  $('#chat-history').innerHTML = history.map(h => {
+    let extraChips = '';
+    if (h.response && h === history.at(-1)) {
+      if (h.response.intent === 'clarify') {
+        extraChips = `<div class="suggestions" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">` +
+          currentIds.map(id => `<button type="button" class="action-chip" data-action="quickQuestion" data-question="${name(id)}">${name(id)} ➔</button>`).join('') +
+          `</div>`;
+      } else if (h.response.suggestedActions?.length) {
+        extraChips = `<div class="suggestions">${actionsHTML(h.response.suggestedActions)}</div>`;
+      }
+    }
+    return `<div class="chat-bubble ${h.role}"><strong>${h.role === 'user' ? (state.language === 'ar' ? 'أنت' : 'You') : c.robot}</strong><p>${escape(h.text)}</p>${extraChips}</div>`;
+  }).join('') || `<div class="chat-bubble assistant"><p>${c.intro}</p></div>`;
   $('#chat-history').scrollTop = $('#chat-history').scrollHeight;
 }
 
@@ -617,11 +630,14 @@ function ask(q) {
   const key = normalize(q), repeat = counts.get(key) || 0;
   counts.set(key, repeat + 1);
   try {
-    const r = answerQuestion(q, state, {repeat});
+    const r = answerQuestion(q, state, {repeat, history});
     dispatch({type: 'CHAT_RESPONSE', response: r});
     history.push({role: 'user', text: String(q).slice(0, 600)}, {role: 'assistant', text: r.text, response: r});
     if (history.length > 30) history.splice(0, 2);
     renderChat();
+    if (!state.muted && r?.text) {
+      speak(r.text, state.language);
+    }
   } catch {
     dispatch({type: 'CHAT_FAILED'});
   }
