@@ -99,3 +99,520 @@ dialog::backdrop {
   box-shadow: var(--shadow-md) !important;
   border-color: var(--gold) !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   مدخل الواقع المعزز الحقيقي (True AR Gateway)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ar-gateway-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 99999 !important;
+  background-color: #0b1410 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  font-family: 'Tajawal', Arial, sans-serif !important;
+  direction: rtl !important;
+  color: #FFFFFF !important;
+  animation: arFadeIn 0.35s ease-out;
+}
+
+@keyframes arFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.ar-gateway-overlay.fade-out {
+  opacity: 0;
+  transform: scale(1.02);
+  transition: all 0.38s ease-in;
+  pointer-events: none;
+}
+
+.ar-camera-feed {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  z-index: 1 !important;
+  background-color: #000000;
+}
+
+.ar-gateway-overlay.ar-simulated-mode {
+  background-color: #0b1410 !important;
+  background: radial-gradient(circle at 50% 40%, #17261f 0%, #080f0c 85%) !important;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(255, 183, 3, 0.12) 0%, transparent 60%),
+    linear-gradient(rgba(47, 62, 54, 0.6) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(47, 62, 54, 0.6) 1px, transparent 1px) !important;
+  background-size: 100% 100%, 30px 30px, 30px 30px !important;
+}
+
+.ar-enable-cam-banner {
+  position: absolute !important;
+  top: 76px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 25 !important;
+  background: linear-gradient(135deg, #FFB703 0%, #FB8500 100%) !important;
+  color: #2F3E36 !important;
+  border: 2.5px solid #FFFFFF !important;
+  border-radius: 50px !important;
+  padding: 10px 22px !important;
+  font-size: 0.94rem !important;
+  font-weight: 900 !important;
+  font-family: inherit !important;
+  cursor: pointer !important;
+  box-shadow: 0 8px 24px rgba(251, 133, 0, 0.6), 0 0 16px rgba(255, 183, 3, 0.5) !important;
+  animation: arPulseBtn 1.8s infinite !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+}
+.ar-enable-cam-banner:hover {
+  transform: translateX(-50%) scale(1.05) !important;
+  background: linear-gradient(135deg, #FFC526 0%, #FFA200 100%) !important;
+}
+
+.ar-canvas-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  touch-action: none;
+  cursor: grab;
+}
+.ar-canvas-container:active {
+  cursor: grabbing;
+}
+
+.ar-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 14px 18px;
+  background: linear-gradient(180deg, rgba(13, 21, 18, 0.88) 0%, rgba(13, 21, 18, 0) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.ar-brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ar-pulse-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #2EC4B6;
+  box-shadow: 0 0 12px #2EC4B6;
+  animation: arDotPulse 1.6s infinite;
+}
+
+@keyframes arDotPulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.35); opacity: 0.4; }
+}
+
+.ar-logo-spark {
+  font-size: 1.6rem;
+  filter: drop-shadow(0 2px 8px rgba(255, 183, 3, 0.6));
+}
+
+.ar-title-group strong {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #FFB703;
+  line-height: 1.2;
+}
+.ar-title-group small {
+  display: block;
+  font-size: 0.75rem;
+  color: #EBF1ED;
+  opacity: 0.9;
+}
+
+.ar-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ar-icon-btn {
+  background: rgba(47, 62, 54, 0.75);
+  border: 1.5px solid rgba(255, 183, 3, 0.4);
+  color: #FFFFFF;
+  padding: 7px 12px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+}
+.ar-icon-btn:hover {
+  background: #FFB703;
+  color: #2F3E36;
+  border-color: #FFB703;
+  transform: translateY(-1px);
+}
+
+.ar-tracking-status-pill {
+  position: absolute;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: rgba(13, 21, 18, 0.85);
+  border: 1.5px solid rgba(255, 183, 3, 0.5);
+  border-radius: 50px;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #FFF3D6;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.35s ease;
+  white-space: nowrap;
+  max-width: 90%;
+}
+
+.ar-tracking-status-pill.detected {
+  border-color: #2EC4B6;
+  background: rgba(46, 196, 182, 0.22);
+  color: #FFFFFF;
+  box-shadow: 0 0 22px rgba(46, 196, 182, 0.55);
+}
+
+.ar-detective-floating-card {
+  position: absolute;
+  top: 126px;
+  right: 18px;
+  left: 18px;
+  max-width: 440px;
+  margin: 0 auto;
+  z-index: 10;
+  background: rgba(47, 62, 54, 0.88);
+  border: 2px solid rgba(255, 183, 3, 0.45);
+  border-radius: 18px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ar-detective-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #FFB703 0%, #FB8500 100%);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(251, 133, 0, 0.4);
+}
+
+.ar-detective-bubble strong {
+  display: block;
+  font-size: 0.92rem;
+  color: #FFB703;
+  margin-bottom: 2px;
+}
+.ar-detective-bubble p {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #EBF1ED;
+  margin: 0;
+}
+
+.ar-model-switcher {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(13, 21, 18, 0.82);
+  border: 1.5px solid rgba(255, 183, 3, 0.35);
+  border-radius: 50px;
+  padding: 6px 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  max-width: 95%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ar-model-switcher::-webkit-scrollbar { display: none; }
+
+.ar-model-chip {
+  background: transparent;
+  border: none;
+  color: #EBF1ED;
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.ar-model-chip:hover {
+  background: rgba(255, 183, 3, 0.2);
+  color: #FFB703;
+}
+.ar-model-chip.active {
+  background: linear-gradient(135deg, #FFB703 0%, #FB8500 100%);
+  color: #2F3E36;
+  font-weight: 900;
+  box-shadow: 0 2px 10px rgba(251, 133, 0, 0.4);
+}
+
+.ar-bottom-controls {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  right: 18px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.ar-btn-primary-golden {
+  background: linear-gradient(135deg, #FFB703 0%, #FB8500 100%);
+  color: #2F3E36;
+  border: 2px solid #FFFFFF;
+  border-radius: 50px;
+  padding: 12px 28px;
+  font-size: 1.05rem;
+  font-weight: 900;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(251, 133, 0, 0.55), 0 0 16px rgba(255, 183, 3, 0.4);
+  animation: arPulseBtn 2s infinite;
+  transition: all 0.25s ease;
+}
+@keyframes arPulseBtn {
+  0%, 100% { transform: scale(1); box-shadow: 0 8px 24px rgba(251, 133, 0, 0.55); }
+  50% { transform: scale(1.04); box-shadow: 0 10px 30px rgba(251, 133, 0, 0.75), 0 0 24px rgba(255, 183, 3, 0.6); }
+}
+
+.ar-btn-primary-golden:hover {
+  transform: scale(1.06) translateY(-2px);
+  background: linear-gradient(135deg, #FFC526 0%, #FFA200 100%);
+}
+
+.ar-btn-secondary {
+  background: rgba(47, 62, 54, 0.85);
+  color: #EBF1ED;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  padding: 11px 18px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.ar-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+.ar-marker-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: rgba(13, 21, 18, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  animation: arFadeIn 0.25s ease;
+}
+
+.ar-marker-card {
+  background: #FFFFFF;
+  color: #2F3E36;
+  border-radius: 24px;
+  padding: 24px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.ar-marker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.ar-marker-head h3 {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #2F3E36;
+}
+.ar-modal-close {
+  background: #EBF1ED;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  color: #5B7065;
+  cursor: pointer;
+}
+
+.ar-marker-hint {
+  font-size: 0.88rem;
+  color: #5B7065;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.ar-marker-preview-box {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 18px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(47, 62, 54, 0.2);
+}
+.ar-svg-marker {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ar-marker-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.ar-btn-print {
+  background: #EBF1ED;
+  color: #2F3E36;
+  border: 1.5px solid #859B8E;
+  border-radius: 50px;
+  padding: 10px 18px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.ar-btn-ok {
+  background: linear-gradient(135deg, #FFB703 0%, #FB8500 100%);
+  color: #2F3E36;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 900;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.header-ar-launch-btn {
+  background: linear-gradient(135deg, #FFB703 0%, #FB8500 100%);
+  color: #2F3E36;
+  border: 2px solid #FFFFFF;
+  border-radius: 50px;
+  padding: 6px 14px;
+  font-size: 0.84rem;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(251, 133, 0, 0.35);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.header-ar-launch-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(251, 133, 0, 0.5);
+}
+
+@media (max-width: 600px) {
+  .ar-top-bar {
+    padding: 10px 14px;
+  }
+  .ar-icon-btn span {
+    display: none;
+  }
+  .ar-detective-floating-card {
+    top: 115px;
+    padding: 8px 12px;
+    right: 12px;
+    left: 12px;
+  }
+  .ar-detective-bubble p {
+    font-size: 0.74rem;
+  }
+  .ar-model-switcher {
+    bottom: 76px;
+    padding: 4px 8px;
+    gap: 5px;
+  }
+  .ar-model-chip {
+    padding: 5px 10px;
+    font-size: 0.76rem;
+  }
+  .ar-bottom-controls {
+    bottom: 12px;
+    gap: 8px;
+  }
+  .ar-btn-primary-golden {
+    padding: 10px 20px;
+    font-size: 0.92rem;
+  }
+  .ar-btn-secondary {
+    padding: 10px 14px;
+    font-size: 0.8rem;
+  }
+}
+

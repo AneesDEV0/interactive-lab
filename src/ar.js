@@ -431,6 +431,11 @@ export async function launchArGateway(options = {}) {
       <span class="ar-status-text" id="ar-status-text">وجّه الكاميرا نحو بطاقة التتبع أو سطح الطاولة...</span>
     </div>
 
+    <!-- زر تفعيل الكاميرا المباشر بنقرة يد عند حاجة المتصفح لإذن -->
+    <button type="button" id="ar-enable-cam-banner" class="ar-enable-cam-banner" style="display:none;" title="انقر لتشغيل كاميرا الجهاز">
+      📷 <span>اضغط هنا لتشغيل الكاميرا والسماح بالوصول</span>
+    </button>
+
     <!-- بطاقة توجيه المحقق الصغير الطافية (فصل مرحلة التعلم بالكاميرا عن الاختبار) -->
     <div class="ar-detective-floating-card" id="ar-detective-card">
       <div class="ar-detective-avatar">⚡</div>
@@ -522,6 +527,7 @@ export async function launchArGateway(options = {}) {
   const markerOkBtn = overlay.querySelector('#ar-marker-ok-btn');
   const voiceBtn = overlay.querySelector('#ar-voice-btn');
   const flipBtn = overlay.querySelector('#ar-flip-camera-btn');
+  const enableCamBtn = overlay.querySelector('#ar-enable-cam-banner');
   const switcherBtns = overlay.querySelectorAll('.ar-model-chip');
 
   trackingCanvas = overlay.querySelector('#ar-tracking-canvas');
@@ -529,39 +535,97 @@ export async function launchArGateway(options = {}) {
 
   let currentFacingMode = 'environment';
 
-  // 1. تشغيل كاميرا الهاتف
+  // دالة متقدمة متعددة المستويات لطلب الكاميرا تضمن التشغيل على الجوال واللابتوب والكمبيوتر
+  async function acquireCameraStream(facing) {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      throw new Error('الكاميرا غير مدعومة في هذا المتصفح');
+    }
+
+    const attempts = [
+      // 1. الكاميرا المطلوبة بالدقة المفضلة
+      { video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } } },
+      // 2. الكاميرا المطلوبة دون شروط دقة
+      { video: { facingMode: { ideal: facing } } },
+      // 3. الكاميرا المعاكسة (مهمة لأجهزة اللابتوب والكمبيوتر التي تملك كاميرا أمامية/ويب فقط)
+      { video: { facingMode: facing === 'environment' ? 'user' : 'environment' } },
+      // 4. أي كاميرا متاحة بالجهاز على الإطلاق
+      { video: true }
+    ];
+
+    let lastError = null;
+    for (const c of attempts) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(c);
+        if (stream && stream.getVideoTracks().length > 0) {
+          return stream;
+        }
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    throw lastError || new Error('تعذر الوصول لكاميرا الجهاز');
+  }
+
+  // 1. تشغيل الكاميرا الحقيقية للجهاز
   async function startCamera(facing = 'environment') {
+    if (enableCamBtn) enableCamBtn.style.display = 'none';
+
     try {
       if (activeStream) {
         activeStream.getTracks().forEach(t => t.stop());
+        activeStream = null;
       }
-      const constraints = {
-        video: {
-          facingMode: { ideal: facing },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        },
-        audio: false
-      };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      statusText.textContent = 'جاري فتح الكاميرا...';
+      statusIcon.textContent = '📷';
+
+      const stream = await acquireCameraStream(facing);
       activeStream = stream;
+
+      videoEl.style.display = 'block';
+      videoEl.muted = true;
+      videoEl.defaultMuted = true;
+      videoEl.playsInline = true;
+      videoEl.setAttribute('playsinline', '');
+      videoEl.setAttribute('webkit-playsinline', '');
+      videoEl.setAttribute('autoplay', '');
       videoEl.srcObject = stream;
-      await videoEl.play();
+
+      // تشغيل الفيديو بأمان عند تحميل البيانات الوصفية
+      await new Promise((resolve) => {
+        const playSafe = () => {
+          videoEl.play().catch(e => console.warn('Video play warning:', e)).finally(resolve);
+        };
+        if (videoEl.readyState >= 2) {
+          playSafe();
+        } else {
+          videoEl.onloadedmetadata = playSafe;
+          setTimeout(resolve, 1000);
+        }
+      });
+
+      overlay.classList.remove('ar-simulated-mode');
       statusText.textContent = 'الكاميرا نشطة! وجّه نحو البطاقة أو سطح الطاولة';
       statusIcon.textContent = '📷';
       startTrackingLoop();
     } catch (err) {
       console.warn('Camera access error in AR Gateway:', err);
-      // في حال تعذر فتح الكاميرا (حاسوب مكتبي بلا كاميرا أو تم رفض الإذن):
-      // تفعيل خلفية بيئة طاولة الواقع المعزز الافتراضية بسلاسة
+      // في حال تعذر فتح الكاميرا (تم رفض الإذن أو حاسوب بلا كاميرا):
+      // إظهار زر تفعيل الكاميرا للطفل بنقرة يد مباشرة لمنح الإذن
+      if (enableCamBtn) enableCamBtn.style.display = 'inline-flex';
       videoEl.style.display = 'none';
       overlay.classList.add('ar-simulated-mode');
-      statusText.textContent = 'وضع المحاكاة ثلاثي الأبعاد نشط (السطح الافتراضي)';
-      statusIcon.textContent = '🪐';
+      statusText.textContent = 'انقر الزر الذهبي أعلاه للسماح بالكاميرا، أو استكشف المجسم في الفضاء التفاعلي';
+      statusIcon.textContent = '📷';
       markerDetected = true;
       updateDetectedState();
     }
   }
+
+  // ربط زر تفعيل الكاميرا المباشر
+  enableCamBtn?.addEventListener('click', async () => {
+    await startCamera(currentFacingMode);
+  });
 
   // 2. حلقة التعرف البصري على البطاقة والسطح (Vision Tracking Loop)
   function startTrackingLoop() {
