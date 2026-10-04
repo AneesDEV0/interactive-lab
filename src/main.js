@@ -176,16 +176,17 @@ function hideCentralFeedback() {
 function shell() {
   const c = t();
   const currentIds = Object.keys(state.devices);
+  const navBase = typeof window !== 'undefined' && window.location.pathname.includes('/public/') ? '../' : './';
 
   app.innerHTML = `
    <header class="header compact-header">
-     <a class="brand" href="./index.html" aria-label="${c.brand}">
+     <a class="brand" href="${navBase}index.html" aria-label="${c.brand}">
        <span class="brand-mark">${icon('bolt')}</span>
        <span><strong>${c.brand} 3D</strong><small>${c.tagline}</small></span>
      </a>
      <nav class="top-actions" aria-label="${c.settings}">
-       <a href="./index.html" class="nav-link-btn" title="الرئيسية">🏠 <span>الرئيسية</span></a>
-       <a href="./static-lab.html" class="nav-link-btn" title="النشاط الثابت">🔍 <span>الثابت</span></a>
+       <a href="${navBase}index.html" class="nav-link-btn" title="الرئيسية">🏠 <span>الرئيسية</span></a>
+       <a href="${navBase}static-lab.html" class="nav-link-btn" title="النشاط الثابت">🔍 <span>الثابت</span></a>
        ${button('sound', state.muted ? c.muted : c.sound, state.muted ? 'muted' : 'volume', 'quiet', 'id="sound-button"')}
        ${button('compare', c.compare, 'book', 'quiet', 'id="comparison-button" title="جدول الاكتشافات"')}
        ${button('chat', c.chat, 'chat', 'quiet', 'id="chat-toggle" aria-expanded="false" title="تحدث مع شرارة"')}

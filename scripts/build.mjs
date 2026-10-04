@@ -6,6 +6,7 @@ await mkdir('dist', { recursive: true });
 
 const targets = [
   'dynamic-lab.html',
+  'static-lab.html',
   'src',
   'vendor',
   'assets',
