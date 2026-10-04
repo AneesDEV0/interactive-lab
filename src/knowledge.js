@@ -373,6 +373,28 @@ export const knowledge = [
     ar: 'البطارية مصدر محمول للطاقة الكهربائية. تخزن طاقة كيميائية تتحول إلى كهرباء في دائرة مناسبة.',
     en: 'A battery is a portable source of electrical energy. Its stored chemical energy is converted in a suitable circuit.',
     examples: ['ما هي البطارية؟', 'ما هو الحجر؟', 'what is a battery?']
+  },
+  {
+    id: 'list_devices',
+    patterns: [
+      /(?:ما|ماهي|ما هي|شو|ايش|اذكر|قائمه|اسماء|وريني|ورجي|فرجيني|عرفني|احكيلي|وين|كم|عدد).*(اجهز|جاهز|اغراض|ادوات|قطع)/,
+      /(اجهز|جاهز|اغراض|ادوات|قطع).*(معروض|موجود|متاح|عالطاول|على الطاول|في المختبر|بالمختبر|هنا|معنا|قدام)/,
+      /كم (جهاز|جاهز|اجهزه)/,
+      /عدد.*(اجهز|جاهز|ادوات|اغراض)/,
+      /^(?:شو|ايش|ما|ماهي|ما هي) (عنا|عندنا|في|موجود|معنا)(?: اجهز)?$/,
+      /(?:شو|ايش|ما|ماهي|ما هي).*(?:علي|عال|في).*(?:طاول|مكتب|مختبر)/,
+      /^(?:ال)?(اجهز|اجهزه|اغراض|ادوات)$/,
+      /(what|which|how many|list).*(device|appliance|table|here)/
+    ],
+    concepts: [
+      [['شو', 'ما', 'ماهي', 'ما هي', 'ايش', 'عرفني', 'احكيلي', 'كم', 'عدد', 'قائمه', 'اسماء', 'اذكر', 'وريني', 'ورجي', 'فرجيني', 'what', 'which', 'how many', 'list', 'show'], ['اجهز', 'اجهزه', 'الاجهزه', 'جهاز', 'جاهز', 'اغراض', 'ادوات', 'قطع', 'devices', 'appliances']],
+      [['معروض', 'موجود', 'عالطاول', 'على الطاول', 'في المختبر', 'بالمختبر', 'متاح', 'display', 'table', 'here'], ['اجهز', 'اجهزه', 'جهاز', 'جاهز', 'اغراض', 'ادوات', 'devices']],
+      [['كم جهاز', 'كم جاهز', 'عدد الاجهزه', 'شو الاجهزه', 'ايش الاجهزه', 'ما هي الاجهزه', 'ماهي الاجهزه', 'ما الاجهزه', 'شو في اجهزه', 'شو عنا اجهزه', 'شو عندنا اجهزه', 'اسماء الاجهزه', 'قائمه الاجهزه', 'شو المعروض', 'ايش المعروض', 'شو على الطاوله', 'ايش على الطاوله', 'شو في عالمكتب', 'شو في عالطاوله', 'شو في عالطاولة']]
+    ],
+    dynamic: 'list_devices',
+    ar: 'الأجهزة المعروضة في مختبرنا هي أجهزة متنوعة للاستكشاف: بعضها بالبطارية الجافة وبعضها بكهرباء المنزل.',
+    en: 'The devices displayed on the table are diverse appliances for exploration: some for battery and some for mains power.',
+    examples: ['ما هي الأجهزة؟', 'شو الأجهزة المعروضة؟', 'كم جهاز موجود؟', 'what devices are here?']
   }
 ];
 
@@ -501,6 +523,19 @@ export function answerQuestion(input, s, {now = Date.now(), repeat = 0, history 
       text = k[s.language === 'en' ? 'en' : 'ar'];
       if (k.actions) actions.splice(0, actions.length, ...k.actions);
       if (k.dynamic === 'hint') text = hint(s);
+      if (k.dynamic === 'list_devices') {
+        const activeIds = s?.devices ? Object.keys(s.devices) : (config.devices || ['car', 'radio', 'fridge']);
+        if (s.language === 'en') {
+          const names = activeIds.map(id => DEVICE_MAP[id]?.id || deviceNames.en[id] || id);
+          text = `The active appliances on our table right now (${activeIds.length} devices) are: ${names.join(', ')}. Some need the dry battery, and others need the mains socket!`;
+        } else {
+          const names = activeIds.map(id => `«${DEVICE_MAP[id]?.name || deviceNames.ar[id] || id}»`);
+          const formatted = names.length > 1
+            ? names.slice(0, -1).join('، و') + '، و' + names[names.length - 1]
+            : names[0] || 'الأجهزة المعروضة';
+          text = `الأجهزة المعروضة أمامنا على الطاولة الآن (${activeIds.length} أجهزة) هي: ${formatted}. بعضها يعمل بالبطارية الجافة وبعضها الآخر يحتاج كهرباء المنزل. اختر بطارية 🔋 أو فيشة 🔌 وجرّب بنفسك!`;
+        }
+      }
       if (k.dynamic === 'where') {
         text = s.selectedDevice
           ? bi(s, `اختر البطارية ثم ${deviceNames.ar[s.selectedDevice] || s.selectedDevice}. سنجرّب تركيبها في مكانها الصحيح على الشاشة.`, `Choose the battery then ${deviceNames.en[s.selectedDevice] || s.selectedDevice}. We will try it in its proper place on screen.`)
