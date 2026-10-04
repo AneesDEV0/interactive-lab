@@ -174,6 +174,11 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
           w.rotation.x = Math.PI / 2;
           fx.wheels.push(w);
         }
+        fx.headlights = [
+          ball(g, 0.08, 0xfef08a, 0.78, 0.42, -0.32),
+          ball(g, 0.08, 0xfef08a, 0.78, 0.42, 0.32)
+        ];
+        fx.headlights.forEach(h => h.visible = false);
         break;
 
       case 'radio':
@@ -211,24 +216,46 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
         box(g, 0.55, 0.14, 1.25, palette.dark, 0, 0.12, 0, 0.08);
         for (let r = 0; r < 4; r++) for (let c = -1; c <= 1; c++) cyl(g, 0.045, 0.06, palette.silver, c * 0.13, 0.2, -0.3 + r * 0.17);
         fx.irLed = ball(g, 0.05, palette.red, 0, 0.12, -0.64);
+        fx.irWaves = new THREE.Group(); fx.irWaves.position.set(0, 0.12, -0.7); g.add(fx.irWaves);
+        fx.irArcs = [];
+        for (let i = 0; i < 3; i++) {
+          const arc = mesh(fx.irWaves, new THREE.TorusGeometry(0.16 + i * 0.1, 0.018, 6, 16, Math.PI), 0xef4444);
+          arc.rotation.x = Math.PI / 2;
+          arc.material.transparent = true;
+          fx.irArcs.push(arc);
+        }
+        fx.irWaves.visible = false;
         break;
 
       case 'calculator':
         box(g, 0.85, 0.15, 1.2, 0xd8e2dc, 0, 0.12, 0, 0.08);
-        fx.calcLcd = box(g, 0.65, 0.04, 0.28, 0x86efac, 0, 0.21, -0.34, 0.02);
+        fx.calcLcd = label(g, '50 × 2 = 100', 0, 0.21, -0.34, 0.65, 0.22, '#0f172a', '#22c55e');
+        fx.calcLcd.rotation.x = -Math.PI / 2;
+        fx.calcLcd.visible = false;
         for (let r = 0; r < 3; r++) for (let c = -1; c <= 1; c++) box(g, 0.13, 0.05, 0.11, palette.navy, c * 0.21, 0.21, 0.05 + r * 0.17, 0.02);
         break;
 
       case 'digitalScale':
         box(g, 1.3, 0.12, 1.3, 0xe2e8f0, 0, 0.1, 0, 0.1);
         cyl(g, 0.45, 0.02, palette.silver, 0, 0.17, 0.1);
-        fx.scaleLcd = box(g, 0.52, 0.03, 0.2, 0x2d3748, 0, 0.17, -0.42);
+        fx.scaleLcd = label(g, '24.5 kg', 0, 0.17, -0.42, 0.55, 0.2, '#0f172a', '#10b981');
+        fx.scaleLcd.rotation.x = -Math.PI / 2;
+        fx.scaleLcd.visible = false;
         break;
 
       case 'smokeDetector':
         cyl(g, 0.62, 0.22, palette.white, 0, 0.16, 0);
         mesh(g, new THREE.TorusGeometry(0.62, 0.05, 8, 24), palette.silver, [0, 0.16, 0]).rotation.x = Math.PI / 2;
-        fx.smokeLed = ball(g, 0.06, palette.mint, 0, 0.34, 0);
+        fx.smokeLed = cyl(g, 0.18, 0.08, palette.red, 0, 0.28, 0);
+        fx.alarmWaves = new THREE.Group(); fx.alarmWaves.position.set(0, 0.35, 0); g.add(fx.alarmWaves);
+        fx.alarmRings = [];
+        for (let i = 0; i < 3; i++) {
+          const ring = mesh(fx.alarmWaves, new THREE.TorusGeometry(0.28 + i * 0.14, 0.02, 8, 24), 0xef4444);
+          ring.rotation.x = Math.PI / 2;
+          ring.material.transparent = true;
+          fx.alarmRings.push(ring);
+        }
+        fx.alarmWaves.visible = false;
         break;
 
       case 'laserPointer':
@@ -238,13 +265,29 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
         fx.laser = mesh(g, lBeam, palette.red, [2.1, 0.35, 0], 1.0);
         fx.laser.rotation.z = Math.PI / 2;
         fx.laser.visible = false;
+        fx.laserDot = ball(g, 0.07, palette.red, 3.7, 0.35, 0, 1.0);
+        fx.laserDot.visible = false;
         break;
 
       case 'hearingAid':
         const hp = new THREE.CatmullRomCurve3([new THREE.Vector3(-0.12, 0.1, 0), new THREE.Vector3(-0.04, 0.45, 0), new THREE.Vector3(0.16, 0.4, 0), new THREE.Vector3(0.22, 0.18, 0)]);
         mesh(g, new THREE.TubeGeometry(hp, 16, 0.11, 10, false), 0xf6d365);
-        fx.aidPulse = ball(g, 0.16, palette.mint, 0.24, 0.15, 0);
-        fx.aidPulse.visible = false;
+        cyl(g, 0.08, 0.12, palette.silver, 0.24, 0.15, 0).rotation.z = Math.PI / 2;
+        fx.soundWaves = new THREE.Group(); fx.soundWaves.position.set(0.32, 0.15, 0); g.add(fx.soundWaves);
+        fx.soundRings = [];
+        for (let i = 0; i < 3; i++) {
+          const sw = mesh(fx.soundWaves, new THREE.TorusGeometry(0.14 + i * 0.09, 0.018, 8, 20), palette.mint);
+          sw.rotation.y = Math.PI / 2;
+          sw.material.transparent = true;
+          fx.soundRings.push(sw);
+        }
+        fx.soundWaves.visible = false;
+        fx.eqBars = [];
+        for (let i = 0; i < 3; i++) {
+          const bar = box(g, 0.03, 0.08 + i * 0.04, 0.03, [0x22c55e, 0xfacc15, 0xef4444][i], -0.06 + i * 0.05, 0.35, 0.11);
+          bar.visible = false;
+          fx.eqBars.push(bar);
+        }
         break;
 
       case 'fridge':
@@ -260,18 +303,31 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
 
       case 'microwave':
         box(g, 1.4, 0.88, 0.9, palette.silver, 0, 0.52, 0, 0.09);
-        box(g, 0.85, 0.6, 0.05, palette.dark, -0.18, 0.52, 0.46);
+        box(g, 0.85, 0.6, 0.05, 0x1e293b, -0.18, 0.52, 0.46);
+        fx.microGlow = box(g, 0.82, 0.56, 0.02, 0x1e293b, -0.18, 0.52, 0.44);
+        fx.microPlate = cyl(g, 0.28, 0.02, 0xf1f5f9, -0.18, 0.26, 0.22);
+        fx.microFood = cyl(g, 0.14, 0.06, 0xf97316, -0.18, 0.30, 0.22);
         box(g, 0.28, 0.62, 0.04, palette.white, 0.46, 0.52, 0.46);
-        fx.microLight = ball(g, 0.07, 0xfff382, -0.18, 0.52, 0.44);
-        fx.microLight.visible = false;
+        fx.microTimer = label(g, '0:45', 0.46, 0.72, 0.49, 0.22, 0.09, '#0f172a', '#22c55e');
+        fx.microTimer.visible = false;
         break;
 
       case 'washer':
         box(g, 1.25, 1.5, 1.15, palette.white, 0, 0.8, 0, 0.1);
         box(g, 1.15, 0.22, 0.05, palette.navy, 0, 1.38, 0.58);
         mesh(g, new THREE.TorusGeometry(0.4, 0.06, 10, 24), palette.silver, [0, 0.72, 0.58]);
-        fx.drum = cyl(g, 0.36, 0.04, palette.blue, 0, 0.72, 0.57);
+        fx.drumGroup = new THREE.Group(); fx.drumGroup.position.set(0, 0.72, 0.57); g.add(fx.drumGroup);
+        fx.drum = cyl(fx.drumGroup, 0.36, 0.04, palette.navy, 0, 0, 0);
         fx.drum.rotation.x = Math.PI / 2;
+        const clothesColors = [0xef4444, 0x3b82f6, 0xfacc15, 0x10b981];
+        fx.clothes = [];
+        for (let i = 0; i < 4; i++) {
+          const ang = (i * Math.PI) / 2;
+          const cl = ball(fx.drumGroup, 0.09, clothesColors[i], Math.cos(ang) * 0.2, Math.sin(ang) * 0.2, 0.03);
+          fx.clothes.push(cl);
+        }
+        fx.washerLed = label(g, '🌀 SPIN', 0.36, 1.38, 0.61, 0.35, 0.12, '#0f172a', '#38bdf8');
+        fx.washerLed.visible = false;
         break;
 
       case 'airConditioner':
@@ -279,9 +335,7 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
         fx.acFlap = box(g, 1.38, 0.14, 0.04, palette.mint, 0, 0.88, 0.28, 0.02);
         fx.acLed = ball(g, 0.04, palette.mint, 0.62, 1.28, 0.28);
         fx.acLed.visible = false;
-        // خروج هواء بارد متحرك من المكيف (Wind / Air streams)
-        fx.airWind = new THREE.Group();
-        g.add(fx.airWind);
+        fx.airWind = new THREE.Group(); g.add(fx.airWind);
         fx.airWind.position.set(0, 0.78, 0.38);
         fx.airParticles = [];
         for (let i = 0; i < 5; i++) {
@@ -300,6 +354,13 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
         const vp = new THREE.CatmullRomCurve3([new THREE.Vector3(0.4, 0.55, 0), new THREE.Vector3(0.65, 0.9, 0), new THREE.Vector3(0.85, 0.35, 0.25), new THREE.Vector3(0.85, 0.05, 0.55)]);
         mesh(g, new THREE.TubeGeometry(vp, 16, 0.05, 8, false), palette.dark);
         box(g, 0.48, 0.09, 0.32, palette.navy, 0.85, 0.05, 0.55, 0.04);
+        const canister = cyl(g, 0.18, 0.35, 0x93c5fd, -0.15, 0.68, 0);
+        canister.material.transparent = true; canister.material.opacity = 0.5;
+        fx.vacSwirl = new THREE.Group(); fx.vacSwirl.position.set(-0.15, 0.68, 0); g.add(fx.vacSwirl);
+        for (let i = 0; i < 4; i++) {
+          ball(fx.vacSwirl, 0.035, 0x78716c, Math.cos(i * 1.5) * 0.1, (i - 1.5) * 0.06, Math.sin(i * 1.5) * 0.1);
+        }
+        fx.vacSwirl.visible = false;
         break;
 
       case 'lamp':
@@ -309,7 +370,6 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
         cyl(g, 0.3, 0.38, palette.yellow, 0.42, 1.22, 0).rotation.z = -0.45;
         fx.bulb = ball(g, 0.14, 0xfff382, 0.52, 1.12, 0);
         fx.bulb.visible = false;
-        // مخروط ضوء ساطع ينير الطاولة
         const lampConeGeo = new THREE.ConeGeometry(0.85, 1.35, 16, 1, true);
         fx.lightCone = mesh(g, lampConeGeo, 0xfff382, [0.72, 0.5, 0], 0.7);
         fx.lightCone.rotation.z = 0.45;
@@ -321,8 +381,11 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
       case 'electricOven':
         box(g, 1.3, 1.2, 1.0, 0x4a5568, 0, 0.66, 0, 0.09);
         box(g, 1.1, 0.7, 0.05, 0x1a202c, 0, 0.58, 0.51);
-        fx.ovenCoils = box(g, 0.85, 0.04, 0.04, palette.red, 0, 0.76, 0.48);
+        fx.ovenChamber = box(g, 1.05, 0.65, 0.02, 0x1a202c, 0, 0.58, 0.49);
+        fx.ovenCoils = box(g, 0.85, 0.04, 0.04, palette.red, 0, 0.82, 0.48);
         fx.ovenCoils.visible = false;
+        fx.ovenTemp = label(g, '🔥 220°C', 0.36, 1.12, 0.54, 0.38, 0.12, '#0f172a', '#f97316');
+        fx.ovenTemp.visible = false;
         break;
 
       case 'iron':
@@ -330,23 +393,44 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
         box(g, 1.08, 0.05, 0.56, palette.silver, 0, 0.04, 0);
         const ih = new THREE.CatmullRomCurve3([new THREE.Vector3(-0.38, 0.24, 0), new THREE.Vector3(-0.32, 0.62, 0), new THREE.Vector3(0.18, 0.62, 0), new THREE.Vector3(0.32, 0.24, 0)]);
         mesh(g, new THREE.TubeGeometry(ih, 12, 0.055, 8, false), palette.navy);
-        fx.ironLed = ball(g, 0.05, palette.orange, 0.14, 0.28, 0);
-        fx.ironLed.visible = false;
+        fx.steamGroup = new THREE.Group(); g.add(fx.steamGroup);
+        fx.steamPuffs = [];
+        for (let i = 0; i < 5; i++) {
+          const puff = ball(fx.steamGroup, 0.08 + i * 0.02, 0xffffff, -0.3 + i * 0.15, 0.15, 0.2);
+          puff.material.transparent = true;
+          fx.steamPuffs.push(puff);
+        }
+        fx.steamGroup.visible = false;
         break;
 
       case 'hairDryer':
         const db = cyl(g, 0.2, 0.85, 0xd53f8c, 0, 0.78, 0); db.rotation.z = Math.PI / 2;
         cyl(g, 0.16, 0.22, palette.dark, 0.48, 0.78, 0).rotation.z = Math.PI / 2;
         const dh = cyl(g, 0.11, 0.72, 0x702459, -0.14, 0.38, 0); dh.rotation.z = 0.2;
-        fx.dryerAir = ball(g, 0.14, palette.orange, 0.58, 0.78, 0);
-        fx.dryerAir.visible = false;
+        fx.dryerWind = new THREE.Group(); fx.dryerWind.position.set(0.6, 0.78, 0); g.add(fx.dryerWind);
+        fx.windRays = [];
+        for (let i = 0; i < 4; i++) {
+          const ray = cyl(fx.dryerWind, 0.015, 0.65, 0xf97316, 0.3, -0.1 + i * 0.07, 0);
+          ray.rotation.z = Math.PI / 2;
+          ray.material.transparent = true;
+          fx.windRays.push(ray);
+        }
+        fx.dryerWind.visible = false;
         break;
 
       case 'electricWaterHeater':
         cyl(g, 0.52, 1.75, 0xedf2f7, 0, 0.98, 0);
         mesh(g, new THREE.TorusGeometry(0.52, 0.05, 8, 24), palette.silver, [0, 0.98, 0]).rotation.x = Math.PI / 2;
-        fx.heaterLed = ball(g, 0.055, palette.red, 0, 1.35, 0.54);
-        fx.heaterLed.visible = false;
+        fx.waterTemp = label(g, '♨ 85°C', 0, 1.45, 0.54, 0.65, 0.22, '#0f172a', '#ef4444');
+        fx.waterTemp.visible = false;
+        fx.steamVent = new THREE.Group(); fx.steamVent.position.set(0, 1.9, 0); g.add(fx.steamVent);
+        fx.bubbles = [];
+        for (let i = 0; i < 4; i++) {
+          const b = ball(fx.steamVent, 0.05 + i * 0.015, 0xffffff, -0.08 + i * 0.05, 0, 0);
+          b.material.transparent = true;
+          fx.bubbles.push(b);
+        }
+        fx.steamVent.visible = false;
         break;
 
       case 'robotToy':
@@ -366,8 +450,18 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
         cyl(g, 0.13, 1.1, palette.white, 0, 0.65, 0);
         cyl(g, 0.14, 0.32, palette.mint, 0, 0.35, 0);
         cyl(g, 0.045, 0.65, palette.silver, 0, 1.35, 0);
-        fx.brushHead = cyl(g, 0.09, 0.22, 0x38bdf8, 0, 1.68, 0.06);
-        fx.brushHead.rotation.x = Math.PI / 2;
+        fx.brushHead = new THREE.Group(); fx.brushHead.position.set(0, 1.68, 0); g.add(fx.brushHead);
+        cyl(fx.brushHead, 0.09, 0.18, 0x38bdf8, 0, 0, 0.06).rotation.x = Math.PI / 2;
+        box(fx.brushHead, 0.12, 0.15, 0.08, 0xffffff, 0, 0, 0.16, 0.02);
+        fx.sonicWaves = new THREE.Group(); fx.brushHead.add(fx.sonicWaves);
+        fx.sonicRings = [];
+        for (let i = 0; i < 3; i++) {
+          const w = mesh(fx.sonicWaves, new THREE.TorusGeometry(0.16 + i * 0.08, 0.015, 6, 16, Math.PI), 0x38bdf8, [0, 0, 0.06]);
+          w.rotation.z = Math.PI / 2;
+          w.material.transparent = true;
+          fx.sonicRings.push(w);
+        }
+        fx.sonicWaves.visible = false;
         break;
 
       case 'electricHeater':
@@ -382,8 +476,7 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
         for (let i = -6; i <= 6; i++) {
           cyl(g, 0.012, 0.85, palette.silver, i * 0.11, 0.65, 0.25);
         }
-        fx.heatWaves = new THREE.Group();
-        g.add(fx.heatWaves);
+        fx.heatWaves = new THREE.Group(); g.add(fx.heatWaves);
         fx.heatWaves.position.set(0, 1.25, 0);
         fx.heatParticles = [];
         for (let i = 0; i < 6; i++) {
@@ -591,18 +684,31 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
       switch (id) {
         case 'car':
         case 'toyCar':
-          // حركة واهتزاز مستمر للسيارة مع دوران سريع للعجلات
+          // حركة واهتزاز مستمر للسيارة مع دوران سريع للعجلات وإضاءة المصابيح الأمامية
           objects[id].position.z = isRunning && !s.reducedMotion ? Math.sin(t * 4) * 0.28 : 0;
+          if (isRunning && !s.reducedMotion) objects[id].rotation.z = Math.sin(t * 8) * 0.03;
+          else objects[id].rotation.z = 0;
           if (fx.wheels) for (const w of fx.wheels) w.rotation.x = isRunning ? t * 7 : 0;
+          if (fx.headlights) fx.headlights.forEach(h => {
+            h.visible = isRunning;
+            if (isRunning) h.material = mat(0xfef08a, 0.85 + Math.sin(t * 6) * 0.15);
+          });
           break;
+
         case 'radio':
           // موجات صوتية نابضة ووميض لمبة الإشارة
           if (fx.waves) {
             fx.waves.visible = isRunning;
-            if (isRunning) fx.waves.scale.setScalar(1 + Math.sin(t * 8) * 0.15);
+            if (isRunning) {
+              fx.waves.scale.setScalar(1 + Math.sin(t * 8) * 0.15);
+              fx.waves.children.forEach((c, idx) => {
+                if (c.material) c.material.opacity = 0.5 + Math.sin(t * 10 + idx * 1.2) * 0.4;
+              });
+            }
           }
           if (fx.radioLight) fx.radioLight.material = mat(isRunning ? palette.mint : 0x6b7b78, isRunning ? (0.6 + Math.sin(t * 6) * 0.4) : 0);
           break;
+
         case 'flashlight':
           // شعاع ضوئي نابض متوهج
           if (fx.beam) {
@@ -610,6 +716,7 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
             if (isRunning) fx.beam.material.opacity = 0.45 + Math.sin(t * 5) * 0.15;
           }
           break;
+
         case 'wallClock':
           // دوران مستمر وسريع لعقرب الدقائق والثواني
           if (isRunning) {
@@ -617,52 +724,110 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
             if (fx.hourHand) fx.hourHand.rotation.z -= 0.01;
           }
           break;
+
         case 'remote':
-          // وميض أحمر للأشعة تحت الحمراء
+          // وميض أحمر للأشعة تحت الحمراء وانطلاق موجات تحكم متتالية
           if (fx.irLed) fx.irLed.material = mat(palette.red, isRunning && Math.sin(t * 12) > 0 ? 1.0 : 0);
+          if (fx.irWaves) {
+            fx.irWaves.visible = isRunning;
+            if (isRunning && fx.irArcs) {
+              fx.irArcs.forEach((arc, i) => {
+                const ph = (t * 4 + i * 0.33) % 1;
+                arc.scale.setScalar(0.7 + ph * 0.9);
+                arc.material.opacity = Math.max(0, 1 - ph);
+                arc.position.z = -ph * 0.35;
+              });
+            }
+          }
           break;
+
         case 'calculator':
-          // شاشة رقمية مضيئة بنبضات حية
-          if (fx.calcLcd) fx.calcLcd.material = mat(isRunning ? 0x22c55e : 0x86efac, isRunning ? (0.7 + Math.sin(t * 4) * 0.3) : 0);
+          // شاشة رقمية حاسبة تعرض العملية الحسابية فور التشغيل
+          if (fx.calcLcd) fx.calcLcd.visible = isRunning;
           break;
+
         case 'digitalScale':
-          // شاشة رقمية مستمرة
-          if (fx.scaleLcd) fx.scaleLcd.material = mat(isRunning ? 0x10b981 : 0x2d3748, isRunning ? 0.95 : 0);
+          // شاشة رقمية تعرض قراءة الوزن بالكيلوجرام فور التشغيل
+          if (fx.scaleLcd) fx.scaleLcd.visible = isRunning;
           break;
+
         case 'smokeDetector':
-          // وميض صافرة الإنذار المتقطع
-          if (fx.smokeLed) fx.smokeLed.material = mat(palette.mint, isRunning && Math.sin(t * 7) > 0 ? 1.0 : 0);
+          // وميض صافرة الإنذار وموجات صوت التنبيه المتوسعة
+          if (fx.smokeLed) fx.smokeLed.material = mat(palette.red, isRunning && Math.sin(t * 10) > 0 ? 1.0 : 0);
+          if (fx.alarmWaves) {
+            fx.alarmWaves.visible = isRunning;
+            if (isRunning && fx.alarmRings) {
+              fx.alarmRings.forEach((ring, i) => {
+                const ph = (t * 5 + i * 0.33) % 1;
+                ring.scale.setScalar(0.6 + ph * 1.1);
+                ring.material.opacity = Math.max(0, 1 - ph);
+              });
+            }
+          }
           break;
+
         case 'laserPointer':
-          // ليزر ساطع مستمر
+          // شعاع ليزر أحمر ساطع ونقطة ليزر نابضة على الهدف
           if (fx.laser) {
             fx.laser.visible = isRunning;
             if (isRunning) fx.laser.material.emissiveIntensity = 0.8 + Math.sin(t * 10) * 0.2;
           }
-          break;
-        case 'hearingAid':
-          // نبضات دائرية صوتية في السماعة
-          if (fx.aidPulse) {
-            fx.aidPulse.visible = isRunning;
-            if (isRunning) fx.aidPulse.scale.setScalar(1 + Math.sin(t * 6) * 0.2);
+          if (fx.laserDot) {
+            fx.laserDot.visible = isRunning;
+            if (isRunning) fx.laserDot.scale.setScalar(1 + Math.sin(t * 15) * 0.25);
           }
           break;
+
+        case 'hearingAid':
+          // موجات صوتية متوسعة ومؤشر طاقة الصوت (Equalizer) يرتفع وينخفض
+          if (fx.soundWaves) {
+            fx.soundWaves.visible = isRunning;
+            if (isRunning && fx.soundRings) {
+              fx.soundRings.forEach((r, i) => {
+                const ph = (t * 4 + i * 0.33) % 1;
+                r.scale.setScalar(0.6 + ph * 0.9);
+                r.material.opacity = Math.max(0, 1 - ph);
+              });
+            }
+          }
+          if (fx.eqBars) {
+            fx.eqBars.forEach((bar, i) => {
+              bar.visible = isRunning;
+              if (isRunning) bar.scale.y = 0.5 + Math.abs(Math.sin(t * 10 + i * 1.8)) * 1.2;
+            });
+          }
+          break;
+
         case 'fridge':
           // شارة التبريد وبخار البرودة
           if (fx.cooling) fx.cooling.visible = isRunning;
           if (fx.door) fx.door.rotation.y = s.doorOpen ? -Math.PI * 0.58 : 0;
           break;
+
         case 'microwave':
-          // إضاءة داخلية وتوهج الحرارة
-          if (fx.microLight) {
-            fx.microLight.visible = isRunning;
-            if (isRunning) fx.microLight.material = mat(0xffcf57, 0.7 + Math.sin(t * 5) * 0.3);
+          // إضاءة الحجرة الداخلية، دوران طبق الطعام، وشاشة المؤقت الرقمي
+          if (fx.microTimer) fx.microTimer.visible = isRunning;
+          if (fx.microGlow) {
+            fx.microGlow.material = mat(isRunning ? 0xfef08a : 0x1e293b, isRunning ? (0.75 + Math.sin(t * 4) * 0.25) : 0);
+          }
+          if (isRunning) {
+            if (fx.microPlate) fx.microPlate.rotation.y += 0.05;
+            if (fx.microFood) fx.microFood.rotation.y += 0.05;
           }
           break;
+
         case 'washer':
-          // دوران حوض الغسالة المستمر والسريع
-          if (isRunning && fx.drum) fx.drum.rotation.z += 0.22;
+          // دوران حوض الغسيل سريعاً مع تقليب الملابس واهتزاز الغسالة وشاشة الدوران
+          if (fx.washerLed) fx.washerLed.visible = isRunning;
+          if (isRunning) {
+            if (fx.drumGroup) fx.drumGroup.rotation.z += 0.26;
+            const slotIdx = Object.keys(objects).indexOf(id);
+            if (slotIdx >= 0 && !s.reducedMotion) {
+              objects[id].position.x = SLOT_X[slotIdx] + Math.sin(t * 35) * 0.018;
+            }
+          }
           break;
+
         case 'airConditioner':
           // تدفق هواء متحرك ورفرفة الموزع (Wind animation)
           if (fx.acLed) fx.acLed.visible = isRunning;
@@ -677,10 +842,18 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
             }
           }
           break;
+
         case 'vacuum':
-          // اهتزاز محرك الشفط القوي للمكنسة
-          if (isRunning && fx.vacBody) fx.vacBody.position.y = 0.42 + Math.sin(t * 35) * 0.03;
+          // دوامة سريعة لجسيمات الأتربة في حجرة الشفط واهتزاز هيكل المكنسة بقوة
+          if (fx.vacSwirl) {
+            fx.vacSwirl.visible = isRunning;
+            if (isRunning) fx.vacSwirl.rotation.y += 0.38;
+          }
+          if (isRunning && fx.vacBody && !s.reducedMotion) {
+            fx.vacBody.position.y = 0.42 + Math.sin(t * 35) * 0.025;
+          }
           break;
+
         case 'lamp':
           // إضاءة مصباح ساطعة مع مخروط ضوء ناصع على الطاولة
           if (fx.bulb) {
@@ -689,40 +862,68 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
           }
           if (fx.lightCone) {
             fx.lightCone.visible = isRunning;
-            if (isRunning) fx.lightCone.material.opacity = 0.32 + Math.sin(t * 5) * 0.08;
+            if (isRunning) fx.lightCone.material.opacity = 0.35 + Math.sin(t * 5) * 0.08;
           }
           break;
+
         case 'electricOven':
-          // توهج سخان الفرن باللون الأحمر الحراري
+          // توهج حجرة الفرن وقضبان التسخين باللون الأحمر الحراري وشاشة درجة الحرارة 220°C
+          if (fx.ovenTemp) fx.ovenTemp.visible = isRunning;
           if (fx.ovenCoils) {
             fx.ovenCoils.visible = isRunning;
-            if (isRunning) fx.ovenCoils.material = mat(0xef4444, 0.8 + Math.sin(t * 4) * 0.2);
+            if (isRunning) fx.ovenCoils.material = mat(0xef4444, 0.85 + Math.sin(t * 4) * 0.15);
+          }
+          if (fx.ovenChamber) {
+            fx.ovenChamber.material = mat(isRunning ? 0xf97316 : 0x1a202c, isRunning ? (0.65 + Math.sin(t * 3) * 0.2) : 0);
           }
           break;
+
         case 'iron':
-          // وميض لمبة التسخين البخاري
-          if (fx.ironLed) {
-            fx.ironLed.visible = isRunning;
-            if (isRunning) fx.ironLed.material = mat(palette.orange, 0.9);
-          }
-          break;
-        case 'hairDryer':
-          // تدفق هواء ساخن متحرك من فوهة الاستشوار
-          if (fx.dryerAir) {
-            fx.dryerAir.visible = isRunning;
-            if (isRunning) {
-              fx.dryerAir.scale.setScalar(1 + Math.sin(t * 12) * 0.25);
-              fx.dryerAir.material = mat(palette.orange, 0.7 + Math.sin(t * 8) * 0.3);
+          // سحب بخار بيضاء تتصاعد وتنتفخ من قاعدة المكواة
+          if (fx.steamGroup) {
+            fx.steamGroup.visible = isRunning;
+            if (isRunning && fx.steamPuffs) {
+              fx.steamPuffs.forEach((puff, idx) => {
+                const ph = (t * 2.5 + idx * 0.22) % 1;
+                puff.position.y = 0.15 + ph * 0.48;
+                puff.scale.setScalar(0.7 + ph * 0.85);
+                puff.material.opacity = Math.max(0, 0.8 - ph * 0.8);
+              });
             }
           }
           break;
-        case 'electricWaterHeater':
-          // إضاءة تسخين الماء
-          if (fx.heaterLed) {
-            fx.heaterLed.visible = isRunning;
-            if (isRunning) fx.heaterLed.material = mat(palette.red, 0.95);
+
+        case 'hairDryer':
+          // تيارات هواء ساخنة برتقالية تتدفق بسرعة من الفوهة
+          if (fx.dryerWind) {
+            fx.dryerWind.visible = isRunning;
+            if (isRunning && fx.windRays) {
+              fx.windRays.forEach((ray, idx) => {
+                const ph = (t * 6 + idx * 0.28) % 1;
+                ray.position.x = 0.2 + ph * 0.55;
+                ray.scale.set(0.6 + ph * 0.6, 1, 1);
+                ray.material.opacity = Math.max(0, 0.8 - ph * 0.7);
+              });
+            }
           }
           break;
+
+        case 'electricWaterHeater':
+          // فقاعات بخار متصاعدة من الفوهة العلوية وشاشة الحرارة 85°C
+          if (fx.waterTemp) fx.waterTemp.visible = isRunning;
+          if (fx.steamVent) {
+            fx.steamVent.visible = isRunning;
+            if (isRunning && fx.bubbles) {
+              fx.bubbles.forEach((b, idx) => {
+                const ph = (t * 2.8 + idx * 0.28) % 1;
+                b.position.y = ph * 0.42;
+                b.scale.setScalar(0.6 + ph * 0.7);
+                b.material.opacity = Math.max(0, 0.8 - ph * 0.7);
+              });
+            }
+          }
+          break;
+
         case 'electricHeater':
           // توهج قضبان التدفئة بالأحمر الناري مع تموجات حرارية حية متصاعدة
           if (fx.heatBars) {
@@ -740,6 +941,7 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
             }
           }
           break;
+
         case 'blender':
           // دوران فائق لشفرات الخلاط مع دوامة العصير
           if (isRunning) {
@@ -750,8 +952,9 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
             }
           }
           break;
+
         case 'robotToy':
-          // حركة رأس وأذرع الروبوت مع وميض العيون
+          // حركة رأس وأذرع الروبوت مع وميض العيون والهوائي
           if (isRunning) {
             if (fx.robotHead) fx.robotHead.rotation.y = Math.sin(t * 3.5) * 0.25;
             if (fx.robotArmL) fx.robotArmL.rotation.x = Math.sin(t * 7) * 0.5;
@@ -760,12 +963,25 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
             if (fx.robotEyes) fx.robotEyes.forEach(eye => { eye.material = mat(0x38bdf8, 0.75 + Math.sin(t * 6) * 0.25); });
           }
           break;
+
         case 'electricToothbrush':
-          // دوران رأس الفرشاة واهتزاز سريع
+          // تذبذب دوراني فائق لرأس الفرشاة وموجات صوتية واهتزاز سريع
+          if (fx.sonicWaves) {
+            fx.sonicWaves.visible = isRunning;
+            if (isRunning && fx.sonicRings) {
+              fx.sonicRings.forEach((r, idx) => {
+                const ph = (t * 8 + idx * 0.33) % 1;
+                r.scale.setScalar(0.7 + ph * 0.7);
+                r.material.opacity = Math.max(0, 0.8 - ph * 0.8);
+              });
+            }
+          }
           if (isRunning) {
-            if (fx.brushHead) fx.brushHead.rotation.y += 0.45;
+            if (fx.brushHead) fx.brushHead.rotation.z = Math.sin(t * 50) * 0.28;
             const slotIdx = Object.keys(objects).indexOf(id);
-            if (slotIdx >= 0) objects[id].position.x = SLOT_X[slotIdx] + Math.sin(t * 40) * 0.015;
+            if (slotIdx >= 0 && !s.reducedMotion) {
+              objects[id].position.x = SLOT_X[slotIdx] + Math.sin(t * 40) * 0.015;
+            }
           }
           break;
       }
