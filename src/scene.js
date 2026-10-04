@@ -552,15 +552,21 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
   function at(x, y) {
     const hit = pick(x, y);
     if (hit?.device) return hit.device;
+    if (hit?.battery && previousLocation && objects[previousLocation]) return previousLocation;
+
     const rect = host.getBoundingClientRect();
-    let nearest = null, min = Math.max(180, rect.width / 4);
+    if (!rect.width || !rect.height) return null;
+
+    let nearest = null, min = Math.max(160, rect.width * 0.45);
     for (const id in objects) {
       const v = new THREE.Vector3();
       objects[id].getWorldPosition(v);
-      v.y += 0.7;
+      v.y += 0.2; // Table surface level
       v.project(camera);
-      const dx = (v.x + 1) * rect.width / 2 + rect.left - x;
-      const dy = (-v.y + 1) * rect.height / 2 + rect.top - y;
+      const screenX = (v.x + 1) * rect.width / 2 + rect.left;
+      const screenY = (-v.y + 1) * rect.height / 2 + rect.top;
+      const dx = screenX - x;
+      const dy = (screenY - y) * 0.7; // Weighted slightly for horizontal slot layout
       const dist = Math.hypot(dx, dy);
       if (dist < min) { min = dist; nearest = id; }
     }
@@ -588,7 +594,7 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
   renderer.domElement.addEventListener('pointermove', e => {
     if (!down) return;
     const dist = Math.hypot(e.clientX - down.x, e.clientY - down.y);
-    if (dist > 16 && rotateDevice && objects[rotateDevice]) {
+    if (dist > 28 && rotateDevice && objects[rotateDevice]) {
       didRotate = true;
       isRotating = true;
       const dx = e.clientX - lastPointerX;
@@ -606,13 +612,10 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
       isRotating = false;
     }
     // نقرة أو لمسة لمسية دقيقة وسريعة على الجهاز
-    if (down && !down.hitBattery && !didRotate) {
-      const dist = Math.hypot(e.clientX - down.x, e.clientY - down.y);
-      if (dist < 34) {
-        const targetId = down.hitDevice || pick(e.clientX, e.clientY)?.device || at(e.clientX, e.clientY);
-        if (targetId && objects[targetId]) {
-          onDevice(targetId);
-        }
+    if (down && !down.hitBattery && (!didRotate || Math.hypot(e.clientX - down.x, e.clientY - down.y) < 30)) {
+      const targetId = down.hitDevice || pick(e.clientX, e.clientY)?.device || at(e.clientX, e.clientY);
+      if (targetId && objects[targetId]) {
+        onDevice(targetId);
       }
     }
     down = null;

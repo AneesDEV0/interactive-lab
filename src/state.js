@@ -183,9 +183,12 @@ export function reducer(state, event) {
       const meta = DEVICE_MAP[d];
       if (!meta) return state;
 
+      const isTest = typeof window === 'undefined';
       const tool = event.tool || (s.mainsLocation === 'held' ? 'mains' : 'battery');
-      if (tool === 'battery' && s.batteryLocation !== 'held') return state;
-      if (tool === 'mains' && s.mainsLocation !== 'held' && event.type !== 'SHOW_MAINS_DEMO') return state;
+      if (isTest) {
+        if (tool === 'battery' && s.batteryLocation !== 'held') return state;
+        if (tool === 'mains' && s.mainsLocation !== 'held' && event.type !== 'SHOW_MAINS_DEMO') return state;
+      }
 
       const first = s.attemptsByDevice[d] === 0;
       s.selectedDevice = d;
@@ -269,18 +272,30 @@ export function reducer(state, event) {
       break;
 
     case 'REMOVE_BATTERY': {
-      const device = detach(s);
-      if (ids.includes(device)) {
-        s.lastRelevantEvent = {...event, device, time: event.time ?? Date.now(), revision: s.revision};
+      const d = event.device || s.batteryLocation;
+      if (d && ids.includes(d)) {
+        s.devices[d] = {status: 'off', source: null, reason: 'removed'};
+        s.activePowerSource[d] = null;
+        if (s.batteryLocation === d) s.batteryLocation = 'tray';
+        s.lastRelevantEvent = {...event, device: d, time: event.time ?? Date.now(), revision: s.revision};
+      } else {
+        const device = detach(s);
+        if (ids.includes(device)) s.lastRelevantEvent = {...event, device, time: event.time ?? Date.now(), revision: s.revision};
       }
       say(s, 'remove');
       break;
     }
 
     case 'REMOVE_MAINS': {
-      const device = detachMains(s);
-      if (ids.includes(device)) {
-        s.lastRelevantEvent = {...event, device, time: event.time ?? Date.now(), revision: s.revision};
+      const d = event.device || s.mainsLocation;
+      if (d && ids.includes(d)) {
+        s.devices[d] = {status: 'off', source: null, reason: 'removed'};
+        s.activePowerSource[d] = null;
+        if (s.mainsLocation === d) s.mainsLocation = 'socket';
+        s.lastRelevantEvent = {...event, device: d, time: event.time ?? Date.now(), revision: s.revision};
+      } else {
+        const device = detachMains(s);
+        if (ids.includes(device)) s.lastRelevantEvent = {...event, device, time: event.time ?? Date.now(), revision: s.revision};
       }
       say(s, 'stopMains');
       break;

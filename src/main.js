@@ -563,9 +563,9 @@ function tryDevice(id) {
   // إذا كان الجهاز يعمل بالفعل، نقرة عليه تقوم بإيقافه وفصله بأمان
   if (state.devices[id]?.status === 'running') {
     if (state.devices[id].source === 'battery') {
-      dispatch({type: 'REMOVE_BATTERY'});
+      dispatch({type: 'REMOVE_BATTERY', device: id});
     } else {
-      dispatch({type: 'REMOVE_MAINS'});
+      dispatch({type: 'REMOVE_MAINS', device: id});
     }
     return;
   }
@@ -573,8 +573,8 @@ function tryDevice(id) {
   const isHeld = state.batteryLocation === 'held' || state.mainsLocation === 'held';
   if (!isHeld) {
     dispatch({type: 'SELECT_DEVICE', device: id});
-    if (state.attemptsByDevice[id] === 0 && state.predictionByDevice[id] === null) {
-      showPrediction(id, true);
+    if (id === 'car' && state.attemptsByDevice.car === 0 && state.predictionByDevice.car === null) {
+      showPrediction('car', true);
     } else {
       showDevicePowerChoice(id);
     }
@@ -582,8 +582,8 @@ function tryDevice(id) {
   }
 
   const tool = state.mainsLocation === 'held' ? 'mains' : 'battery';
-  if (tool === 'battery' && state.attemptsByDevice[id] === 0 && state.predictionByDevice[id] === null) {
-    showPrediction(id, true);
+  if (id === 'car' && tool === 'battery' && state.attemptsByDevice.car === 0 && state.predictionByDevice.car === null) {
+    showPrediction('car', true);
     return;
   }
   dispatch({type: 'DROP_ON_DEVICE', device: id, tool});
@@ -718,9 +718,12 @@ async function playRadio() {
   if (rev !== state.sessionRevision || state.muted || (state.devices.radio && state.devices.radio.status !== 'running')) stopAudio();
 }
 
+let lastToolDownTime = 0;
+
 // السحب والإفلات للبطارية والفيشة
 function toolDown(tool, e) {
   if (['intro', 'loading', 'recoverable_error'].includes(state.phase)) return;
+  lastToolDownTime = Date.now();
   playClickSound();
   if (tool === 'battery') dispatch({type: 'PICK_BATTERY', mode: e.pointerType === 'touch' ? 'touch' : 'drag'});
   else dispatch({type: 'PICK_MAINS', mode: e.pointerType === 'touch' ? 'touch' : 'drag'});
@@ -753,6 +756,7 @@ document.addEventListener('pointerup', e => {
   const target = el?.closest('[data-target]')?.dataset.target;
   let id = target;
   if (!id && el?.closest('#scene')) id = scene?.at(e.clientX, e.clientY);
+  if (!id) id = scene?.at(e.clientX, e.clientY);
 
   const currentIds = Object.keys(state.devices);
   if (currentIds.includes(id)) {
@@ -795,17 +799,19 @@ app.addEventListener('click', e => {
     case 'doneTutorial': tutorial = false; render(); $('#battery-button').focus(); break;
     case 'help': tutorial = true; render(); break;
     case 'pick':
+      if (Date.now() - lastToolDownTime < 450) break;
       if (state.batteryLocation === 'held') dispatch({type: 'CANCEL_DRAG'});
       else dispatch({type: 'PICK_BATTERY', mode: e.detail === 0 ? 'keyboard' : 'click'});
       break;
     case 'pickMains':
+      if (Date.now() - lastToolDownTime < 450) break;
       if (state.mainsLocation === 'held') dispatch({type: 'CANCEL_DRAG'});
       else dispatch({type: 'PICK_MAINS', mode: e.detail === 0 ? 'keyboard' : 'click'});
       break;
     case 'chooseBattery': testWithBattery(b.dataset.device); break;
     case 'chooseMains': testWithMains(b.dataset.device); break;
-    case 'remove': dispatch({type: 'REMOVE_BATTERY'}); break;
-    case 'stopMains': dispatch({type: 'REMOVE_MAINS'}); break;
+    case 'remove': dispatch({type: 'REMOVE_BATTERY', device: b.dataset.device}); break;
+    case 'stopMains': dispatch({type: 'REMOVE_MAINS', device: b.dataset.device}); break;
     case 'device': tryDevice(b.dataset.device); break;
     case 'predictYes': prediction(true); break;
     case 'predictNo': prediction(false); break;
