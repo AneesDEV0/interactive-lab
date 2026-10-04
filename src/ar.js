@@ -777,3 +777,6 @@ export async function launchArGateway(options = {}) {
     );
   }, 450);
 }
+
+export { launchArGateway as launchARGateway };
+

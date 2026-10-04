@@ -3,7 +3,7 @@
 // مدعوم بمدخل الواقع المعزز الحقيقي (True AR)، والتوجيه الصوتي، والبطاقات ثلاثية الأبعاد
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { launchARGateway } from './ar.js';
+import { launchArGateway, launchARGateway } from './ar.js';
 import { speak, stopAudio } from './audio.js';
 import { ALL_DEVICES } from './config.js';
 
@@ -169,8 +169,11 @@ export function initStaticLab() {
             <span id="target-title">تحدي البطاريات الجافة</span>
           </div>
           <div class="static-mission-instruction" id="mission-instruction">
-            انقر لتحديد جهازين يعملان بهذا المصدر، واضغط "فحص 3D" لكشف دائرة كل جهاز!
+            حَدِّدْ يا بطل جهازين يعملان بهذا المصدر، واضغط "فحص 3D" لكشف دائرة كل جهاز!
           </div>
+          <button type="button" class="static-btn-listen" id="btn-listen-mission" title="استمع للتعليمات صوتياً">
+            📢 <span>استمع للتوجيه</span>
+          </button>
         </div>
 
         <div class="static-mission-stats">
@@ -274,10 +277,12 @@ export function initStaticLab() {
 
 // ─── فتح مدخل الواقع المعزز الحقيقي (True AR Gateway) ───
 function openArGateway() {
-  launchARGateway({
+  launchArGateway({
+    title: 'النشاط التقويمي الثابت | مصادر الكهرباء',
+    mode: 'static',
     onContinue: () => {
       speakArabic(
-        'مرحباً بك يا متحرّي العلوم في النشاط التقويمي! مهمتك كشف جهازين يعملان بالمصدر المطلوب وتجنب الفخاخ. اضغط على الأجهزة لاختيارها وفحصها!'
+        'مرحباً بك يا بطل العلوم في النشاط التقويمي! حَدِّدْ جهازين يعملان بالمصدر المطلوب وتجنب الفخاخ. اضغط على الأجهزة لاختيارها، واضغط فحص ثري دي لكشف أسرارها!'
       );
     }
   });
@@ -324,6 +329,7 @@ function bindEvents() {
   document.getElementById('btn-hint')?.addEventListener('click', giveDetectiveHint);
   document.getElementById('btn-refresh')?.addEventListener('click', startNewChallenge);
   document.getElementById('btn-next-challenge')?.addEventListener('click', startNewChallenge);
+  document.getElementById('btn-listen-mission')?.addEventListener('click', speakCurrentMission);
 
   // ضبط الروابط وفق موضع الملف (public أو root)
   const isInsidePublic = window.location.pathname.includes('/public/');
@@ -362,11 +368,15 @@ function startNewChallenge() {
   currentDevices = pickChallengeDevices();
   renderCards(currentDevices);
 
-  // نطق التعليمات باللغة العربية
+  // نطق التعليمات باللغة العربية الواضحة
+  speakCurrentMission();
+}
+
+function speakCurrentMission() {
   if (currentTargetType === 'battery') {
-    speakArabic('تحدي البطاريات الجافة! حدد جهازين يعملان بالبطارية الجافة وتجنب أجهزة كهرباء المنزل.');
+    speakArabic('حَدِّدْ يا بطل جهازين يعملان بالبطارية الجافة، وتجنب أجهزة كهرباء المنزل! انقر على الأجهزة لاختيارها.');
   } else {
-    speakArabic('تحدي كهرباء المنزل! حدد جهازين يحتاجان تياراً قوياً من مقبس الجدار 220 فولت.');
+    speakArabic('حَدِّدْ يا بطل جهازين يحتاجان تياراً قوياً من مقبس كهرباء المنزل 220 فولت! انقر على الأجهزة لاختيارها.');
   }
 }
 
@@ -405,6 +415,9 @@ function renderCards(devices) {
           <div class="back-reason-box">
             <div class="back-reason-title">${dev.name}</div>
             <div class="back-reason-text">${dev.reason}</div>
+            <button type="button" class="static-btn-listen" data-speak-reason="${dev.id}" style="align-self:center; margin-top:4px;">
+              📢 <span>استمع للشرح</span>
+            </button>
           </div>
           <button type="button" class="btn-flip-back" data-flipback="${dev.id}">
             ↩️ عودة للبطاقة
@@ -424,6 +437,7 @@ function renderCards(devices) {
     // تفاعل القلب 3D للفحص
     const inspectBtn = wrap.querySelector(`[data-inspect="${dev.id}"]`);
     const flipBackBtn = wrap.querySelector(`[data-flipback="${dev.id}"]`);
+    const speakReasonBtn = wrap.querySelector(`[data-speak-reason="${dev.id}"]`);
     const inner = wrap.querySelector(`#card-inner-${dev.id}`);
 
     inspectBtn.addEventListener('click', (e) => {
@@ -437,6 +451,11 @@ function renderCards(devices) {
       e.stopPropagation();
       inner.classList.remove('is-flipped');
       playFlipSound();
+    });
+
+    speakReasonBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      speakArabic(`فحص ${dev.name}: يعمل بجهد ${dev.voltage || (dev.type === 'battery' ? '1.5 فولت بطارية' : '220 فولت مقبس')}. ${dev.reason}`);
     });
 
     // تأثير الإمالة ثلاثي الأبعاد بالماوس أو اللمس (3D Perspective Tilt)
@@ -476,17 +495,21 @@ function toggleDeviceSelection(devId) {
     cardFront?.classList.remove('is-selected');
     if (badge) badge.textContent = '○';
     playSelectSound();
-    speakArabic(`ألغيت تحديد ${dev.name}`);
+    speakArabic(`ألغيتَ تحديد ${dev.name}! اخْتَرْ جهازاً آخر.`);
   } else {
     if (selectedIds.size >= 2) {
-      speakArabic('حدد جهازين فقط يا بطل، أو ألغِ تحديد أحدهما أولاً!');
+      speakArabic('حَدِّدْ جهازين فقط يا بطل، أو ألغِ تحديد أحدهما أولاً!');
       return;
     }
     selectedIds.add(devId);
     cardFront?.classList.add('is-selected');
     if (badge) badge.textContent = '✔️';
     playSelectSound();
-    speakArabic(`حددت ${dev.name}`);
+    if (selectedIds.size === 2) {
+      speakArabic(`حَدَّدْتَ ${dev.name}! رائع، اكتمل جهازان! اضغط الآن زر: تحقق من إجابتي.`);
+    } else {
+      speakArabic(`حَدَّدْتَ ${dev.name}! اخْتَرْ جهازاً ثانياً يا بطل.`);
+    }
   }
 
   updateSelectionCounter();
@@ -500,12 +523,12 @@ function updateSelectionCounter() {
 // ─── التحقق من الإجابة التقويمية ───
 function validateSelection() {
   if (selectedIds.size === 0) {
-    speakArabic('اختر جهازين أولاً يا بطل العلوم!');
+    speakArabic('اخْتَرْ جهازين أولاً يا بطل العلوم!');
     return;
   }
 
   if (selectedIds.size < 2) {
-    speakArabic('اختر جهازين لتكتمل إجابتك، متبقٍ جهاز واحد!');
+    speakArabic('اخْتَرْ جهازين لتكتمل إجابتك، متبقٍ جهاز واحد يا بطل!');
     return;
   }
 
@@ -530,7 +553,7 @@ function validateSelection() {
     playWinSound();
     showVictoryBanner();
 
-    speakArabic('رائع جداً يا بطل العلوم! أحسنت عملاً، إجابتك صحيحة مئة بالمئة! كشفت جميع الأجهزة وتجنبت الفخاخ!');
+    speakArabic('رائع جداً! أحسنت عملاً يا بطل العلوم! إجابتك صحيحة مئة بالمئة! كشفت جميع الأجهزة وتجنبت الفخاخ ببراعة!');
   } else {
     // ❌ إجابة تحتوي على فخ
     playErrorSound();
@@ -541,7 +564,7 @@ function validateSelection() {
 
     if (wrongDev) {
       const guidance = wrongDev.wrongReason || wrongDev.reason;
-      speakArabic(`حاول مرة أخرى يا بطل! انتبه: ${wrongDev.name} ${guidance}`);
+      speakArabic(`حاول مرة أخرى يا بطل! انتبه: جهاز ${wrongDev.name} ${guidance} اضغط على جهاز آخر لتصحيح اختيارك.`);
     } else {
       speakArabic('حاول مرة أخرى يا بطل، وتأكد من مصدر الطاقة المناسب لكل جهاز!');
     }
