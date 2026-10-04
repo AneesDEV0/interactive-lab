@@ -267,12 +267,13 @@ html, body {
 
 /* ─── 3. ساحة البطاقات التفاعلية 3D (Interactive 3D Stage) ─── */
 .static-cards-stage, main.static-cards-stage {
-  flex: 1 1 0% !important;
+  flex: 1 1 auto !important;
   min-height: 0 !important;
+  max-height: clamp(330px, 50vh, 430px) !important;
   width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 12px 18px !important;
+  max-width: 1100px !important;
+  margin: auto !important;
+  padding: 10px 18px !important;
   box-sizing: border-box !important;
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -319,13 +320,14 @@ html, body {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   border-radius: var(--radius-card);
-  border: 2.5px solid var(--line);
+  border: 2px solid var(--line);
   background: #FFFFFF;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: space-between;
-  padding: 14px 14px 12px;
+  padding: 12px 12px 10px;
   cursor: pointer;
   user-select: none;
   overflow: hidden;
@@ -346,7 +348,7 @@ html, body {
 .card-face-front.is-selected {
   border-color: var(--gold);
   background: linear-gradient(180deg, #FFFDF5 0%, #FEF8E7 100%);
-  box-shadow: 0 0 0 3.5px var(--gold), 0 8px 24px rgba(251, 133, 0, 0.35);
+  box-shadow: 0 0 0 3px var(--gold), 0 8px 24px rgba(251, 133, 0, 0.3);
   transform: translateY(-4px);
 }
 
@@ -374,31 +376,58 @@ html, body {
   box-shadow: 0 2px 8px rgba(251, 133, 0, 0.4);
 }
 
-/* رسم الـ SVG للجهاز */
+/* شارة تصنيف مصدر الجهاز */
+.card-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 50px;
+  font-size: 0.73rem;
+  font-weight: 800;
+  margin-top: 2px;
+}
+.card-category-badge.cat-battery {
+  background: #FEF7E6;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+}
+.card-category-badge.cat-house {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1px solid #BFDBFE;
+}
+
+/* إطار دائري متناسق لأيقونة الجهاز */
 .card-visual-box {
-  flex: 1 1 auto;
-  min-height: 60px;
+  width: 90px;
+  height: 90px;
+  min-height: 90px;
+  border-radius: 50%;
+  background: #F4F8F5;
+  border: 2px solid #E2EBE6;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  margin: 10px 0 6px;
-  width: 100%;
+  margin: 4px auto;
+  box-shadow: inset 0 2px 6px rgba(47, 62, 54, 0.05);
+  transition: transform 0.3s ease, background 0.25s ease;
+}
+
+.card-face-front:hover .card-visual-box {
+  transform: scale(1.06);
+  background: #EBF3EE;
+  border-color: rgba(255, 183, 3, 0.5);
 }
 
 .card-visual-box svg {
-  width: 78px;
-  height: 78px;
+  width: 62px;
+  height: 62px;
   max-width: 85%;
-  max-height: 82px;
+  max-height: 85%;
   display: block;
   margin: 0 auto;
-  filter: drop-shadow(0 4px 6px rgba(47, 62, 54, 0.12));
-  transition: transform 0.3s ease;
-}
-
-.card-face-front:hover .card-visual-box svg {
-  transform: scale(1.08);
+  filter: drop-shadow(0 3px 6px rgba(47, 62, 54, 0.12));
 }
 
 .card-device-name {
@@ -406,8 +435,8 @@ html, body {
   font-weight: 900;
   color: var(--frog-dark);
   text-align: center;
-  line-height: 1.3;
-  margin-bottom: 8px;
+  line-height: 1.25;
+  margin: 2px 0 6px;
   white-space: normal;
   word-break: break-word;
 }
@@ -708,72 +737,108 @@ html, body {
 @media (max-width: 900px) {
   .static-cards-stage, main.static-cards-stage {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    max-height: calc(100vh - 190px) !important;
+    max-height: calc(100dvh - 190px) !important;
     gap: 12px !important;
     padding: 8px 12px !important;
   }
+  .card-visual-box {
+    width: 76px;
+    height: 76px;
+    min-height: 76px;
+  }
   .card-visual-box svg {
-    width: 65px;
-    height: 65px;
-    max-height: 70px;
+    width: 54px;
+    height: 54px;
+    max-height: 58px;
   }
   .card-device-name {
     font-size: 0.94rem;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
 }
 
 @media (max-width: 600px) {
   .static-header {
-    height: 50px;
-    min-height: 50px;
-    padding: 0 10px;
+    height: 48px;
+    min-height: 48px;
+    padding: 0 8px;
   }
   .static-brand-title span {
     display: none;
+  }
+  .static-brand-title h1 {
+    font-size: 1.05rem;
   }
   .static-nav-btn span {
     display: none;
   }
   .static-mission-hud {
-    padding: 6px 10px;
+    padding: 6px 8px;
     gap: 6px;
+    flex-wrap: wrap;
+  }
+  .static-mission-info {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .static-target-chip {
+    padding: 3px 10px;
+    font-size: 0.78rem;
   }
   .static-mission-instruction {
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     white-space: normal;
+    line-height: 1.3;
+  }
+  .static-mission-stats {
+    gap: 4px;
+  }
+  .static-stat-pill {
+    padding: 2px 7px;
+    font-size: 0.72rem;
   }
   .static-cards-stage, main.static-cards-stage {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    max-height: calc(100vh - 180px) !important;
+    max-height: calc(100dvh - 180px) !important;
     gap: 8px !important;
-    padding: 6px 8px !important;
+    padding: 4px 6px !important;
   }
   .card-face {
-    padding: 8px 8px 6px;
+    padding: 8px 6px 6px;
+  }
+  .card-category-badge {
+    font-size: 0.68rem;
+    padding: 2px 6px;
   }
   .card-visual-box {
-    min-height: 44px;
-    margin: 6px 0 4px;
+    width: 60px;
+    height: 60px;
+    min-height: 60px;
+    margin: 2px auto;
   }
   .card-visual-box svg {
-    width: 50px;
-    height: 50px;
-    max-height: 55px;
+    width: 44px;
+    height: 44px;
+    max-height: 46px;
   }
   .card-device-name {
-    font-size: 0.84rem;
-    margin-bottom: 4px;
+    font-size: 0.82rem;
+    margin-bottom: 3px;
   }
   .btn-flip-inspect {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     padding: 4px 6px;
+    border-radius: 8px;
   }
   .static-actions-bar {
-    height: 52px;
-    min-height: 52px;
-    padding: 0 10px;
+    height: 50px;
+    min-height: 50px;
+    padding: 0 8px;
   }
   .static-btn {
-    padding: 7px 14px;
-    font-size: 0.8rem;
+    padding: 6px 10px;
+    font-size: 0.76rem;
   }
 }

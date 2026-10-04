@@ -533,24 +533,27 @@ export async function launchArGateway(options = {}) {
   trackingCanvas = overlay.querySelector('#ar-tracking-canvas');
   trackingCtx = trackingCanvas?.getContext('2d', { willReadFrequently: true });
 
-  let currentFacingMode = 'environment';
+  const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  let currentFacingMode = isMobile ? 'environment' : 'user';
 
-  // دالة متقدمة متعددة المستويات لطلب الكاميرا تضمن التشغيل على الجوال واللابتوب والكمبيوتر
+  // دالة متقدمة لطلب الكاميرا تضمن التشغيل الفوري على اللابتوب والجوال بدون أخطاء القيود
   async function acquireCameraStream(facing) {
     if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
       throw new Error('الكاميرا غير مدعومة في هذا المتصفح');
     }
 
-    const attempts = [
-      // 1. الكاميرا المطلوبة بالدقة المفضلة
-      { video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } } },
-      // 2. الكاميرا المطلوبة دون شروط دقة
-      { video: { facingMode: { ideal: facing } } },
-      // 3. الكاميرا المعاكسة (مهمة لأجهزة اللابتوب والكمبيوتر التي تملك كاميرا أمامية/ويب فقط)
-      { video: { facingMode: facing === 'environment' ? 'user' : 'environment' } },
-      // 4. أي كاميرا متاحة بالجهاز على الإطلاق
-      { video: true }
-    ];
+    // على اللابتوب والكمبيوتر نبدأ بطلب الكاميرا المباشرة { video: true } لأنها تعمل فوراً مع كاميرات الويب
+    const attempts = isMobile
+      ? [
+          { video: { facingMode: { ideal: facing } } },
+          { video: { facingMode: facing === 'environment' ? 'user' : 'environment' } },
+          { video: true }
+        ]
+      : [
+          { video: true },
+          { video: { facingMode: 'user' } },
+          { video: { facingMode: { ideal: 'environment' } } }
+        ];
 
     let lastError = null;
     for (const c of attempts) {
@@ -561,13 +564,31 @@ export async function launchArGateway(options = {}) {
         }
       } catch (err) {
         lastError = err;
+        console.warn('Camera constraint attempt failed:', c, err);
       }
     }
+
+    // محاولة إضافية لأجهزة اللابتوب عبر فحص كاميرات الويب المتاحة مباشرة
+    try {
+      if (navigator.mediaDevices.enumerateDevices) {
+        const devs = await navigator.mediaDevices.enumerateDevices();
+        const vInputs = devs.filter(d => d.kind === 'videoinput');
+        for (const input of vInputs) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: { deviceId: { exact: input.deviceId } }
+            });
+            if (stream && stream.getVideoTracks().length > 0) return stream;
+          } catch {}
+        }
+      }
+    } catch {}
+
     throw lastError || new Error('تعذر الوصول لكاميرا الجهاز');
   }
 
   // 1. تشغيل الكاميرا الحقيقية للجهاز
-  async function startCamera(facing = 'environment') {
+  async function startCamera(facing = currentFacingMode) {
     if (enableCamBtn) enableCamBtn.style.display = 'none';
 
     try {
@@ -583,6 +604,8 @@ export async function launchArGateway(options = {}) {
       activeStream = stream;
 
       videoEl.style.display = 'block';
+      videoEl.style.visibility = 'visible';
+      videoEl.style.opacity = '1';
       videoEl.muted = true;
       videoEl.defaultMuted = true;
       videoEl.playsInline = true;
@@ -591,18 +614,17 @@ export async function launchArGateway(options = {}) {
       videoEl.setAttribute('autoplay', '');
       videoEl.srcObject = stream;
 
-      // تشغيل الفيديو بأمان عند تحميل البيانات الوصفية
-      await new Promise((resolve) => {
-        const playSafe = () => {
-          videoEl.play().catch(e => console.warn('Video play warning:', e)).finally(resolve);
-        };
-        if (videoEl.readyState >= 2) {
-          playSafe();
-        } else {
-          videoEl.onloadedmetadata = playSafe;
-          setTimeout(resolve, 1000);
-        }
-      });
+      try {
+        await videoEl.play();
+      } catch (playErr) {
+        console.warn('Play interrupted, waiting for metadata:', playErr);
+        await new Promise((resolve) => {
+          videoEl.onloadedmetadata = () => {
+            videoEl.play().catch(() => {}).finally(resolve);
+          };
+          setTimeout(resolve, 800);
+        });
+      }
 
       overlay.classList.remove('ar-simulated-mode');
       statusText.textContent = 'الكاميرا نشطة! وجّه نحو البطاقة أو سطح الطاولة';
@@ -610,9 +632,10 @@ export async function launchArGateway(options = {}) {
       startTrackingLoop();
     } catch (err) {
       console.warn('Camera access error in AR Gateway:', err);
-      // في حال تعذر فتح الكاميرا (تم رفض الإذن أو حاسوب بلا كاميرا):
-      // إظهار زر تفعيل الكاميرا للطفل بنقرة يد مباشرة لمنح الإذن
-      if (enableCamBtn) enableCamBtn.style.display = 'inline-flex';
+      if (enableCamBtn) {
+        enableCamBtn.style.display = 'inline-flex';
+        enableCamBtn.innerHTML = '📷 <span>اضغط هنا لتشغيل الكاميرا والسماح بالوصول</span>';
+      }
       videoEl.style.display = 'none';
       overlay.classList.add('ar-simulated-mode');
       statusText.textContent = 'انقر الزر الذهبي أعلاه للسماح بالكاميرا، أو استكشف المجسم في الفضاء التفاعلي';
@@ -622,9 +645,27 @@ export async function launchArGateway(options = {}) {
     }
   }
 
-  // ربط زر تفعيل الكاميرا المباشر
-  enableCamBtn?.addEventListener('click', async () => {
-    await startCamera(currentFacingMode);
+  // ربط زر تفعيل الكاميرا المباشر بنقرة يد تلزم المتصفح بإظهار إذن الكاميرا وتشغيلها فوراً
+  enableCamBtn?.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    enableCamBtn.innerHTML = '⏳ <span>جاري تشغيل الكاميرا...</span>';
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      activeStream = stream;
+      videoEl.style.display = 'block';
+      videoEl.muted = true;
+      videoEl.srcObject = stream;
+      await videoEl.play();
+      overlay.classList.remove('ar-simulated-mode');
+      enableCamBtn.style.display = 'none';
+      statusText.textContent = 'الكاميرا نشطة! وجّه نحو البطاقة أو سطح الطاولة';
+      statusIcon.textContent = '📷';
+      startTrackingLoop();
+    } catch (err) {
+      console.error('Explicit camera permission error:', err);
+      enableCamBtn.innerHTML = '⚠️ <span>يرجى السماح بالكاميرا من رمز القفل 🔒 ثم الضغط هنا</span>';
+      speak('يرجى السماح باستخدام الكاميرا من إعدادات المتصفح لمشاهدة المجسم في غرفتك.', 'ar');
+    }
   });
 
   // 2. حلقة التعرف البصري على البطاقة والسطح (Vision Tracking Loop)
@@ -856,15 +897,16 @@ export async function launchArGateway(options = {}) {
   continueBtn.addEventListener('click', closeAndContinue);
   skipBtn.addEventListener('click', closeAndContinue);
 
-  // تشغيل الكاميرا و Three.js والترحيب الصوتي الأولي
-  await startCamera(currentFacingMode);
+  // تشغيل Three.js فوراً لظهور المجسم 3D بلا أي انتظار
   initThreeAR();
+  // تشغيل الكاميرا في الخلفية بسلاسة
+  startCamera(currentFacingMode).catch(() => {});
 
-  // ترحيب وتوجيه صوتي باللغة العربية مخصص للصف الرابع
+  // ترحيب وتوجيه صوتي باللغة العربية الفصحى السليمة مخصص للصف الرابع
   setTimeout(() => {
     const welcomeMsg = mode === 'static'
-      ? 'مرحباً بك يا بطل العلوم! هذه مرحلة التعلم بالواقع المعزز. وجّه الكاميرا نحو بطاقة التتبع أو سطح الطاولة لاستكشاف الأدوات في عالمك الحقيقي، ثم اضغط على انتقل للنشاط التقويمي لبدء التحدي!'
-      : 'مرحباً بك يا بطل العلوم في مختبر الواقع المعزز! استكشف أدوات المختبر والدوائر الكهربائية بالكاميرا، ثم اضغط على انتقل للنشاط التقويمي لبدء التجربة بالسحب والإفلات!';
+      ? 'مَرْحَبًا بِكَ يَا بَطَلَ العُلُومِ! هَذِهِ مَرْحَلَةُ التَّعَلُّمِ بِالوَاقِعِ المـُعَزَّز. وَجِّهِ الكَامِيرَا نَحْوَ بِطَاقَةِ التَّتَبُّعِ أَوْ سَطْحِ الطَّاوِلَةِ لِاسْتِكْشَافِ الأَدَوَاتِ، ثُمَّ اضْغَطْ عَلَى انْتَقِلْ لِلنَّشَاطِ التَّقْوِيمِيّ!'
+      : 'مَرْحَبًا بِكَ يَا بَطَلَ العُلُومِ فِي مُخْتَبَرِ الوَاقِعِ المـُعَزَّز! اسْتَكْشِفْ أَدَوَاتِ المـُخْتَبَرِ وَالدَّوَائِرَ الكَهْرَبَائِيَّةَ بِالكَامِيرَا، ثُمَّ اضْغَطْ عَلَى انْتَقِلْ لِلنَّشَاطِ التَّقْوِيمِيِّ لِبَدْءِ التَّجْرِبَة!';
     speak(welcomeMsg, 'ar');
   }, 450);
 }

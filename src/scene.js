@@ -134,10 +134,28 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
   const robotArm = box(robot, 0.18, 0.59, 0.2, palette.mint, -0.5, 0.81, 0, 0.06);
   robotArm.rotation.z = -0.25;
 
-  // ─── كابل الكهرباء الرئيسي ثلاثي الأبعاد الديناميكي (Dynamic 3D Flexible Cable) ───
+  // ─── كابل الكهرباء الرئيسي ومقبس الجدار ثلاثي الأبعاد الواقعي 220V ───
   const mainsWire = new THREE.Group();
   scene.add(mainsWire);
-  const socketPos = new THREE.Vector3(-4.5, 1.9, -2.0);
+  const socketPos = new THREE.Vector3(-4.5, 2.15, -2.0);
+
+  // مجسم مقبس الجدار الكهربائي المزدوج (Realistic 3D Wall Socket 220V)
+  const wallSocketGroup = new THREE.Group();
+  scene.add(wallSocketGroup);
+  wallSocketGroup.position.copy(socketPos);
+  box(wallSocketGroup, 0.74, 0.78, 0.12, 0xf8fafc, 0, 0, 0, 0.05);
+  box(wallSocketGroup, 0.66, 0.70, 0.14, 0xe2e8f0, 0, 0, 0.01, 0.03);
+  for (const yo of [-0.17, 0.17]) {
+    const cav = cyl(wallSocketGroup, 0.16, 0.04, 0xcdd7d4, 0, yo, 0.08);
+    cav.rotation.x = Math.PI / 2;
+    for (const xo of [-0.065, 0.065]) {
+      const pin = cyl(wallSocketGroup, 0.022, 0.06, 0x0f172a, xo, yo, 0.09);
+      pin.rotation.x = Math.PI / 2;
+    }
+  }
+  ball(wallSocketGroup, 0.035, 0xef4444, 0.22, 0.28, 0.08, 0.9);
+  label(wallSocketGroup, '220V مقبس كهرباء', 0, -0.45, 0.08, 0.78, 0.22, '#254a61', '#ffcf57');
+
   const initialCurve = new THREE.CatmullRomCurve3([
     socketPos,
     new THREE.Vector3(-3.8, 1.85, -1.3),
@@ -273,6 +291,17 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
         box(g, 1.6, 0.38, 0.95, palette.yellow, 0, 0.45, 0, 0.15);
         box(g, 0.95, 0.48, 0.82, palette.yellow, -0.1, 0.78, 0, 0.14);
         box(g, 0.75, 0.32, 0.84, 0x7db8ca, -0.12, 0.84, 0, 0.08);
+
+        // حجرة البطارية الغائرة المخصصة للسيارة مع الأقطاب والزنبرك
+        const carBay = new THREE.Group(); g.add(carBay);
+        carBay.position.set(-0.46, 0.62, 0);
+        box(carBay, 0.94, 0.22, 0.36, 0x1e293b, 0, 0, 0, 0.03);
+        box(carBay, 0.88, 0.16, 0.30, 0x0f172a, 0, 0.02, 0, 0.02);
+        box(carBay, 0.04, 0.12, 0.12, 0xf59e0b, 0.40, 0.04, 0);
+        const cSpring = cyl(carBay, 0.05, 0.08, 0xcfd8dc, -0.38, 0.04, 0);
+        cSpring.rotation.z = Math.PI / 2;
+        label(carBay, '- 1.5V +', 0, 0.14, 0, 0.46, 0.15, '#0f172a', '#facc15');
+
         fx.wheels = [];
         for (const x of [-0.55, 0.55]) for (const z of [-0.48, 0.48]) {
           const w = cyl(g, 0.25, 0.16, palette.dark, x, 0.22, z);
@@ -290,6 +319,17 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
         box(g, 1.4, 1.1, 0.6, palette.blue, 0, 0.75, 0, 0.15);
         cyl(g, 0.35, 0.08, palette.navy, -0.28, 0.78, 0.32).rotation.x = Math.PI / 2;
         cyl(g, 0.1, 0.09, palette.white, 0.38, 0.7, 0.33).rotation.x = Math.PI / 2;
+
+        // حجرة البطارية بالراديو
+        const rBay = new THREE.Group(); g.add(rBay);
+        rBay.position.set(0, 0.32, 0.31);
+        box(rBay, 0.94, 0.28, 0.14, 0x1e293b, 0, 0, 0, 0.03);
+        box(rBay, 0.88, 0.22, 0.10, 0x0f172a, 0, 0, 0.02, 0.02);
+        box(rBay, 0.04, 0.12, 0.08, 0xf59e0b, 0.40, 0, 0.02);
+        const rSp = cyl(rBay, 0.05, 0.08, 0xcfd8dc, -0.38, 0, 0.02);
+        rSp.rotation.z = Math.PI / 2;
+        label(rBay, '- 1.5V +', 0, 0.15, 0.07, 0.44, 0.14, '#0f172a', '#facc15');
+
         fx.radioLight = ball(g, 0.055, 0x6b7b78, 0.48, 1.1, 0.32);
         fx.waves = new THREE.Group(); g.add(fx.waves);
         fx.waves.position.set(-0.8, 0.85, 0);
@@ -303,6 +343,12 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
       case 'flashlight':
         const fb = cyl(g, 0.15, 1.1, palette.orange, 0, 0.55, 0); fb.rotation.z = Math.PI / 2;
         const fh = cyl(g, 0.3, 0.35, palette.navy, 0.62, 0.55, 0); fh.rotation.z = Math.PI / 2;
+        // حجرة البطارية بالمصباح اليدوي
+        box(g, 0.88, 0.24, 0.24, 0x1e293b, -0.05, 0.55, 0, 0.03);
+        box(g, 0.82, 0.18, 0.18, 0x0f172a, -0.05, 0.55, 0, 0.02);
+        box(g, 0.04, 0.10, 0.10, 0xf59e0b, 0.32, 0.55, 0);
+        const flSp = cyl(g, 0.045, 0.06, 0xcfd8dc, -0.42, 0.55, 0); flSp.rotation.z = Math.PI / 2;
+        label(g, '- 1.5V +', -0.05, 0.72, 0, 0.38, 0.12, '#0f172a', '#facc15');
         const cone = new THREE.ConeGeometry(0.8, 2.0, 16, 1, true);
         fx.beam = mesh(g, cone, palette.yellow, [1.9, 0.55, 0], 0.8);
         fx.beam.rotation.z = -Math.PI / 2;
@@ -398,6 +444,9 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
       case 'fridge':
         box(g, 1.3, 2.3, 1.05, palette.mint, 0, 1.25, 0, 0.12);
         box(g, 1.16, 2.1, 0.04, 0xe5f3e7, 0, 1.25, 0.54);
+        // مدخل سلك الكهرباء الخلفي 220V
+        cyl(g, 0.06, 0.12, 0x111827, 0, 0.35, -0.54).rotation.x = Math.PI / 2;
+        label(g, '⚡ 220V', 0, 0.65, -0.54, 0.42, 0.15, '#1e293b', '#facc15');
         fx.door = new THREE.Group(); fx.door.position.set(-0.6, 0.1, 0.56); g.add(fx.door);
         box(fx.door, 1.24, 1.55, 0.12, 0xc4eadc, 0.6, 0.85, 0, 0.08);
         box(fx.door, 1.24, 0.68, 0.12, 0xc4eadc, 0.6, 1.95, 0, 0.08);
@@ -409,6 +458,8 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
       case 'microwave':
         box(g, 1.4, 0.88, 0.9, palette.silver, 0, 0.52, 0, 0.09);
         box(g, 0.85, 0.6, 0.05, 0x1e293b, -0.18, 0.52, 0.46);
+        cyl(g, 0.05, 0.10, 0x111827, 0.45, 0.25, -0.46).rotation.x = Math.PI / 2;
+        label(g, '⚡ 220V', 0.45, 0.45, -0.46, 0.36, 0.14, '#1e293b', '#facc15');
         fx.microGlow = box(g, 0.82, 0.56, 0.02, 0x1e293b, -0.18, 0.52, 0.44);
         fx.microPlate = cyl(g, 0.28, 0.02, 0xf1f5f9, -0.18, 0.26, 0.22);
         fx.microFood = cyl(g, 0.14, 0.06, 0xf97316, -0.18, 0.30, 0.22);
@@ -420,6 +471,8 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
       case 'washer':
         box(g, 1.25, 1.5, 1.15, palette.white, 0, 0.8, 0, 0.1);
         box(g, 1.15, 0.22, 0.05, palette.navy, 0, 1.38, 0.58);
+        cyl(g, 0.06, 0.12, 0x111827, 0, 0.35, -0.59).rotation.x = Math.PI / 2;
+        label(g, '⚡ 220V', 0, 0.65, -0.59, 0.42, 0.15, '#1e293b', '#facc15');
         mesh(g, new THREE.TorusGeometry(0.4, 0.06, 10, 24), palette.silver, [0, 0.72, 0.58]);
         fx.drumGroup = new THREE.Group(); fx.drumGroup.position.set(0, 0.72, 0.57); g.add(fx.drumGroup);
         fx.drum = cyl(fx.drumGroup, 0.36, 0.04, palette.navy, 0, 0, 0);
@@ -840,7 +893,19 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
 
     if (objects[s.batteryLocation]) {
       objects[s.batteryLocation].getWorldPosition(batteryPos);
-      batteryPos.y += 0.15; batteryPos.z += 0.2;
+      if (s.batteryLocation === 'car' || s.batteryLocation === 'toyCar') {
+        batteryPos.x -= 0.46;
+        batteryPos.y += 0.64;
+      } else if (s.batteryLocation === 'radio') {
+        batteryPos.y += 0.32;
+        batteryPos.z += 0.32;
+      } else if (s.batteryLocation === 'flashlight') {
+        batteryPos.x -= 0.05;
+        batteryPos.y += 0.55;
+      } else {
+        batteryPos.y += 0.15;
+        batteryPos.z += 0.2;
+      }
     } else {
       batteryPos.set(0.65, 2.24, 1.15);
     }

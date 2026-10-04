@@ -397,6 +397,9 @@ function renderCards(devices) {
         <!-- الوجه الأمامي -->
         <div class="card-face card-face-front" data-id="${dev.id}">
           <div class="card-select-badge" id="badge-${dev.id}">○</div>
+          <div class="card-category-badge ${dev.type === 'battery' ? 'cat-battery' : 'cat-house'}">
+            ${dev.type === 'battery' ? '🔋 بطارية 1.5V' : '⚡ مقبس 220V'}
+          </div>
           <div class="card-visual-box">
             ${svgIcon}
           </div>
