@@ -122,3 +122,34 @@ export function speak(text, lang) {
     return false;
   }
 }
+
+// ─── توجيهات صوتية تعليمية مساندة (Educational Voice Feedback Helpers) ───
+
+export function speakIntro(mode = 'dynamic') {
+  const msg = mode === 'dynamic'
+    ? 'مرحباً يا بطل! اسحب البطارية الجافة أو فيشة الكهرباء لتشغيل الجهاز واكتشاف مصدر طاقته المناسب.'
+    : 'مرحباً بك يا متحرّي العلوم! اختر الأجهزة التي تعمل بالمصدر المطلوب، وتجنب الفخاخ!';
+  return speak(msg, 'ar');
+}
+
+export function speakToolPick(tool) {
+  const msg = tool === 'battery'
+    ? 'أحسنت! أنت تمسك البطارية الجافة، اسحبها إلى أي جهاز أو انقر عليه لتجربتها.'
+    : 'ممتاز! أنت تمسك فيشة كهرباء المنزل، اسحبها إلى أي جهاز أو انقر عليه لتشغيله.';
+  return speak(msg, 'ar');
+}
+
+export function speakDropSuccess(deviceName, reason = '') {
+  const msg = `رائع! أحسنت عملاً يا بطل! تم تشغيل ${deviceName} بنجاح. ${reason}`;
+  return speak(msg, 'ar');
+}
+
+export function speakDropIncompatible(deviceName, wrongReason = '') {
+  const msg = `حاول مرة أخرى يا بطل! ${deviceName} لا يعمل بهذا المصدر. ${wrongReason}`;
+  return speak(msg, 'ar');
+}
+
+export function speakHint(hintText) {
+  const msg = `تلميح ذكي: ${hintText}`;
+  return speak(msg, 'ar');
+}

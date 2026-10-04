@@ -1065,10 +1065,107 @@
       color: #2F3E36;
       border-color: #FFB703;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 183, 3, 0.35);
+    /* ─── بطاقات تفاعلية رقمية ثلاثية الأبعاد (Interactive 3D Digital Cards) ─── */
+    .cards-grid {
+      perspective: 1000px;
+    }
+
+    .item-card {
+      transform-style: preserve-3d;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+      position: relative;
+    }
+
+    .item-card:hover {
+      transform: translateY(-8px) rotateX(4deg) rotateY(-4deg) scale(1.03);
+      box-shadow: 0 16px 36px rgba(47, 62, 54, 0.16), 0 0 20px rgba(255, 183, 3, 0.35);
+      border-color: rgba(255, 183, 3, 0.65);
+    }
+
+    .card-flipper-btn {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(91, 112, 101, 0.12);
+      border: 1px solid rgba(91, 112, 101, 0.3);
+      color: var(--frog-dark);
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.2s ease;
+      z-index: 5;
+    }
+    .card-flipper-btn:hover {
+      background: var(--gold-gradient);
+      border-color: #E29600;
+      color: #2F3E36;
+      transform: scale(1.05);
+    }
+
+    .card-back-details {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #FFFFFF 0%, #F5F9F6 100%);
+      border-radius: var(--card-radius);
+      padding: 14px 12px;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 10;
+      animation: flipIn 0.32s ease-out;
+      text-align: center;
+      box-shadow: inset 0 0 12px rgba(47, 62, 54, 0.06);
+    }
+    @keyframes flipIn {
+      from { opacity: 0; transform: rotateY(90deg); }
+      to { opacity: 1; transform: rotateY(0deg); }
+    }
+    .item-card.is-flipped .card-back-details {
+      display: flex;
+    }
+
+    .card-back-title {
+      font-size: 0.92rem;
+      font-weight: 900;
+      color: var(--frog-dark);
+    }
+    .card-back-circuit {
+      background: #EBF1ED;
+      border: 1.5px dashed var(--gold);
+      border-radius: 12px;
+      padding: 6px 8px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: var(--frog-dark);
+      margin: 4px 0;
+    }
+    .card-back-reason {
+      font-size: 0.72rem;
+      line-height: 1.4;
+      color: var(--frog);
+      font-weight: 700;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .card-back-close {
+      align-self: center;
+      background: var(--gold-gradient);
+      color: #2F3E36;
+      border: none;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.74rem;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 4px;
     }
   </style>
-  <link rel="stylesheet" href="../src/styles/theme.css" />
+  <link rel="stylesheet" href="./src/styles/theme.css" />
 </head>
 <body>
 
@@ -1083,7 +1180,7 @@
     </div>
   </div>
   <script>
-    // ضمان عمل الروابط سواء فُتح الملف من المجلد الرئيسي أو من داخل public
+    // ضمان عمل الروابط وتحميل Three.js سواء فُتح الملف من المجلد الرئيسي أو من داخل public
     (function() {
       var isInsidePublic = window.location.pathname.indexOf('/public/') !== -1;
       var homeBtn = document.getElementById('nav-home-btn');
@@ -1093,6 +1190,13 @@
       }
       if (dynamicBtn) {
         dynamicBtn.href = isInsidePublic ? './dynamic-lab.html' : './dynamic-lab.html';
+      }
+
+      // تحميل مكتبة Three.js ثلاثية الأبعاد للواقع المعزز
+      if (!window.THREE) {
+        var s = document.createElement('script');
+        s.src = isInsidePublic ? '../vendor/three.global.min.js' : './vendor/three.global.min.js';
+        document.head.appendChild(s);
       }
     })();
   </script>
@@ -1111,6 +1215,12 @@
         </div>
       </div>
       <div class="header-controls">
+        <button class="header-ar-launch-btn" id="header-ar-btn" onclick="openArGateway('static')" title="فتح كاميرا الواقع المعزز الحقيقي">
+          📷 <span>الواقع المعزز AR</span>
+        </button>
+        <button class="sound-btn" id="speech-toggle" onclick="toggleSpeech()" title="قراءة التعليمات صوتياً">
+          🗣️
+        </button>
         <button class="sound-btn" id="sound-toggle" onclick="toggleSound()" title="تشغيل/كتم المؤثرات الصوتية">
           🔊
         </button>
@@ -1364,7 +1474,35 @@
     function toggleSound() {
       soundEnabled = !soundEnabled;
       document.getElementById("sound-toggle").textContent = soundEnabled ? "🔊" : "🔇";
-      showToastAlert(soundEnabled ? "🔊 تم تشغيل الصوت" : "🔇 تم كتم الصوت");
+      showToastAlert(soundEnabled ? "🔊 تم تشغيل المؤثرات الصوتية" : "🔇 تم كتم المؤثرات الصوتية");
+    }
+
+    /* ════ 1.1 نظام التوجيه الصوتي باللغة العربية (Web Speech API) ════ */
+    let speechEnabled = true;
+
+    function speakArabic(text) {
+      if (!speechEnabled || !window.speechSynthesis) return;
+      try {
+        window.speechSynthesis.cancel();
+        const cleaned = text.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, ' ').trim();
+        if (!cleaned) return;
+        const utterance = new SpeechSynthesisUtterance(cleaned);
+        utterance.lang = 'ar-SA';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.08;
+        const voices = window.speechSynthesis.getVoices();
+        const arVoice = voices.find(v => v.lang && v.lang.startsWith('ar') && (v.name.includes('Natural') || v.name.includes('Online') || v.name.includes('Google') || v.name.includes('Shakir') || v.name.includes('Salma') || v.name.includes('Hamed'))) || voices.find(v => v.lang && v.lang.startsWith('ar'));
+        if (arVoice) utterance.voice = arVoice;
+        window.speechSynthesis.speak(utterance);
+      } catch {}
+    }
+
+    function toggleSpeech() {
+      speechEnabled = !speechEnabled;
+      const btn = document.getElementById("speech-toggle");
+      if (btn) btn.textContent = speechEnabled ? "🗣️" : "🔇";
+      showToastAlert(speechEnabled ? "🗣️ تم تفعيل التوجيه الصوتي" : "🔇 تم إيقاف التوجيه الصوتي");
+      if (!speechEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
     }
 
     /* ════ 2. إدارة وتحديث كلام وتلميح المحقق الذكي ════ */
@@ -1647,7 +1785,7 @@
       }
     }
 
-    /* ════ 6. عرض البطاقات ════ */
+    /* ════ 6. عرض البطاقات الرقمية التفاعلية ثلاثية الأبعاد ════ */
     function displayCards() {
       const container = document.getElementById("cards-container");
       container.innerHTML = "";
@@ -1670,10 +1808,43 @@
           </div>
           <div class="card-title">${device.name}</div>
           <div class="card-status-pill" id="pill-${index}"></div>
+          <button type="button" class="card-flipper-btn" onclick="event.stopPropagation(); flipCard(${index})" title="فحص الدارة ثلاثية الأبعاد">🔍 فحص 3D</button>
+          
+          <div class="card-back-details" id="back-${index}">
+            <strong class="card-back-title">⚡ فحص ${device.name}</strong>
+            <div class="card-back-circuit">
+              ${device.type === 'battery' ? '🔋 دارة بطارية جافة آمنة (1.5V - 9V)' : '🔌 تيار كهرباء رئيسية مستمرة (220V)'}
+            </div>
+            <p class="card-back-reason">${device.reason}</p>
+            <button type="button" class="card-back-close" onclick="event.stopPropagation(); flipCard(${index})">↩ عودة للبطاقة</button>
+          </div>
         `;
+
+        // حركة تفاعلية ثلاثية الأبعاد عند تحريك الماوس أو اللمس
+        cardEl.addEventListener('mousemove', e => {
+          const r = cardEl.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width - 0.5;
+          const y = (e.clientY - r.top) / r.height - 0.5;
+          cardEl.style.transform = `perspective(700px) rotateY(${x * 14}deg) rotateX(${-y * 14}deg) translateY(-8px) scale3d(1.02, 1.02, 1.02)`;
+        });
+        cardEl.addEventListener('mouseleave', () => {
+          cardEl.style.transform = '';
+        });
 
         container.appendChild(cardEl);
       });
+    }
+
+    function flipCard(idx) {
+      const card = document.getElementById(`card-${idx}`);
+      if (card) {
+        card.classList.toggle('is-flipped');
+        playSound('click');
+        if (card.classList.contains('is-flipped')) {
+          const dev = currentCards[idx];
+          speakArabic(`فحص ${dev.name}. ${dev.reason}`);
+        }
+      }
     }
 
     function toggleSelect(index) {
@@ -1987,9 +2158,248 @@
       }, 2600);
     }
 
+    /* ════ 13. مدخل الواقع المعزز الحقيقي (True AR Gateway) ════ */
+    let arActiveStream = null;
+    let arAnimFrame = null;
+    let arModelGroup = null;
+
+    function openArGateway() {
+      const existing = document.getElementById('ar-gateway-overlay');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.id = 'ar-gateway-overlay';
+      overlay.className = 'ar-gateway-overlay';
+      overlay.innerHTML = `
+        <video id="ar-camera-feed" class="ar-camera-feed" autoplay playsinline muted></video>
+        <div id="ar-canvas-container" class="ar-canvas-container"></div>
+        <header class="ar-top-bar">
+          <div class="ar-brand-badge">
+            <span class="ar-pulse-dot"></span>
+            <span class="ar-logo-spark">✨</span>
+            <div class="ar-title-group">
+              <strong>الواقع المعزز الحقيقي (True AR)</strong>
+              <small>نشاط متحري مصادر الكهرباء</small>
+            </div>
+          </div>
+          <div class="ar-top-actions">
+            <button type="button" id="ar-view-card-btn" class="ar-icon-btn">📄 <span>البطاقة</span></button>
+            <button type="button" id="ar-voice-btn" class="ar-icon-btn">🔊 <span>توجيه صوتي</span></button>
+          </div>
+        </header>
+        <div class="ar-tracking-status-pill detected" id="ar-tracking-pill">
+          <span class="ar-status-icon">🎯</span>
+          <span class="ar-status-text">تم التعرف على الهدف! المجسم يطفو في عالمك الحقيقي</span>
+        </div>
+        <div class="ar-detective-floating-card">
+          <div class="ar-detective-avatar">⚡</div>
+          <div class="ar-detective-bubble">
+            <strong>مرحباً بك يا متحرّي العلوم! 🌟</strong>
+            <p>شاهد الأجهزة والمصادر ثلاثية الأبعاد تطفو في غرفتك، ثم اضغط الزر الذهبي لبدء التحدي التقويمي وكشف الفخاخ!</p>
+          </div>
+        </div>
+        <div class="ar-model-switcher">
+          <button type="button" class="ar-model-chip active" data-m="car">🚗 <span>سيارة ألعاب</span></button>
+          <button type="button" class="ar-model-chip" data-m="battery">🔋 <span>بطارية</span></button>
+          <button type="button" class="ar-model-chip" data-m="lamp">💡 <span>مصباح</span></button>
+        </div>
+        <footer class="ar-bottom-controls">
+          <button type="button" id="ar-skip-btn" class="ar-btn-secondary">تخطي الكاميرا</button>
+          <button type="button" id="ar-continue-btn" class="ar-btn-primary-golden">
+            <span>انتقل للنشاط التقويمي</span>
+            <span class="ar-btn-arrow">➔</span>
+          </button>
+        </footer>
+        <div id="ar-marker-modal" class="ar-marker-modal" style="display:none;">
+          <div class="ar-marker-card">
+            <div class="ar-marker-head">
+              <h3>📄 بطاقة الواقع المعزز (AR Marker Card)</h3>
+              <button type="button" id="ar-marker-close-btn" class="ar-modal-close">✕</button>
+            </div>
+            <p class="ar-marker-hint">وجّه كاميرا هاتفك نحو هذه البطاقة أو على سطح الطاولة أمامك لرؤية المجسم يطفو فوقها:</p>
+            <div class="ar-marker-preview-box">
+              <svg viewBox="0 0 240 240" class="ar-svg-marker">
+                <rect width="240" height="240" fill="#000000" />
+                <rect x="36" y="36" width="168" height="168" fill="#FFFFFF" rx="10" />
+                <circle cx="120" cy="120" r="48" fill="#FFB703" />
+                <path d="M 120 85 L 128 112 L 155 120 L 128 128 L 120 155 L 112 128 L 85 120 L 112 112 Z" fill="#2F3E36" />
+                <circle cx="120" cy="120" r="10" fill="#FFFFFF" />
+              </svg>
+            </div>
+            <div class="ar-marker-actions">
+              <button type="button" class="ar-btn-print" onclick="window.print()">🖨️ طباعة</button>
+              <button type="button" id="ar-marker-ok-btn" class="ar-btn-ok">فهمت، وجّه الكاميرا الآن</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const video = overlay.querySelector('#ar-camera-feed');
+      const container = overlay.querySelector('#ar-canvas-container');
+      const continueBtn = overlay.querySelector('#ar-continue-btn');
+      const skipBtn = overlay.querySelector('#ar-skip-btn');
+      const viewCard = overlay.querySelector('#ar-view-card-btn');
+      const markerModal = overlay.querySelector('#ar-marker-modal');
+      const closeMarker = overlay.querySelector('#ar-marker-close-btn');
+      const okMarker = overlay.querySelector('#ar-marker-ok-btn');
+      const voiceBtn = overlay.querySelector('#ar-voice-btn');
+      const chips = overlay.querySelectorAll('.ar-model-chip');
+
+      if (navigator.mediaDevices?.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } })
+          .then(stream => {
+            arActiveStream = stream;
+            video.srcObject = stream;
+            video.play();
+          })
+          .catch(() => {
+            video.style.display = 'none';
+            overlay.classList.add('ar-simulated-mode');
+          });
+      } else {
+        video.style.display = 'none';
+        overlay.classList.add('ar-simulated-mode');
+      }
+
+      let threeAttempts = 0;
+      function tryInitThree() {
+        if (window.THREE) {
+          initThreeArInContainer(container);
+        } else if (threeAttempts < 50) {
+          threeAttempts++;
+          setTimeout(tryInitThree, 60);
+        }
+      }
+      tryInitThree();
+
+      function closeAr() {
+        if (arAnimFrame) cancelAnimationFrame(arAnimFrame);
+        if (arActiveStream) {
+          arActiveStream.getTracks().forEach(t => t.stop());
+          arActiveStream = null;
+        }
+        overlay.classList.add('fade-out');
+        setTimeout(() => {
+          overlay.remove();
+          speakArabic("مرحباً بك يا متحرّي العلوم! اختر الأجهزة التي تعمل بالمصدر المطلوب وتجنب الفخاخ!");
+        }, 350);
+      }
+
+      continueBtn.onclick = closeAr;
+      skipBtn.onclick = closeAr;
+      viewCard.onclick = () => { markerModal.style.display = 'flex'; };
+      closeMarker.onclick = () => { markerModal.style.display = 'none'; };
+      okMarker.onclick = () => { markerModal.style.display = 'none'; };
+      voiceBtn.onclick = () => {
+        speakArabic("مرحباً بك في مدخل الواقع المعزز! وجّه الكاميرا نحو بطاقة التتبع أو سطح الطاولة لمشاهدة المجسم ثلاثي الأبعاد. ثم اضغط على انتقل للنشاط التقويمي.");
+      };
+
+      chips.forEach(btn => {
+        btn.onclick = () => {
+          chips.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          if (window.switchStaticArModel) window.switchStaticArModel(btn.dataset.m);
+        };
+      });
+
+      speakArabic("أهلاً بك في مدخل الواقع المعزز! وجّه الكاميرا نحو بطاقة التتبع أو سطح الطاولة لمشاهدة المجسم ثلاثي الأبعاد.");
+    }
+
+    function initThreeArInContainer(container) {
+      const THREE = window.THREE;
+      if (!THREE) return;
+      const w = container.clientWidth || window.innerWidth;
+      const h = container.clientHeight || window.innerHeight;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
+      camera.position.set(0, 1.6, 3.2);
+      camera.lookAt(0, 0.6, 0);
+
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(w, h);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      const ambient = new THREE.AmbientLight(0xffffff, 1.4);
+      scene.add(ambient);
+      const dir = new THREE.DirectionalLight(0xffffff, 1.2);
+      dir.position.set(2, 4, 3);
+      scene.add(dir);
+
+      const reticleGeo = new THREE.RingGeometry(0.8, 0.9, 32);
+      const reticleMat = new THREE.MeshBasicMaterial({ color: 0xFFB703, side: THREE.DoubleSide });
+      const reticle = new THREE.Mesh(reticleGeo, reticleMat);
+      reticle.rotation.x = -Math.PI / 2;
+      scene.add(reticle);
+
+      function makeModel(type) {
+        const g = new THREE.Group();
+        if (type === 'car') {
+          const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.5, 0.8), new THREE.MeshStandardMaterial({ color: 0xFFB703, metalness: 0.3 }));
+          body.position.y = 0.4;
+          g.add(body);
+          const cab = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 0.7), new THREE.MeshStandardMaterial({ color: 0x2F3E36 }));
+          cab.position.set(-0.1, 0.75, 0);
+          g.add(cab);
+        } else if (type === 'battery') {
+          const b = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.1, 24), new THREE.MeshStandardMaterial({ color: 0xFFB703, metalness: 0.8 }));
+          b.position.y = 0.6;
+          g.add(b);
+          const p = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.15, 16), new THREE.MeshStandardMaterial({ color: 0xE0E0E0 }));
+          p.position.y = 1.2;
+          g.add(p);
+        } else {
+          const base = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 0.1, 20), new THREE.MeshStandardMaterial({ color: 0x2F3E36 }));
+          g.add(base);
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.9, 12), new THREE.MeshStandardMaterial({ color: 0xFFB703 }));
+          pole.position.y = 0.5;
+          g.add(pole);
+          const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), new THREE.MeshBasicMaterial({ color: 0xFFFF88 }));
+          bulb.position.y = 0.95;
+          g.add(bulb);
+        }
+        return g;
+      }
+
+      let curM = makeModel('car');
+      scene.add(curM);
+
+      window.switchStaticArModel = function(type) {
+        scene.remove(curM);
+        curM = makeModel(type);
+        scene.add(curM);
+      };
+
+      let drag = false, px = 0;
+      renderer.domElement.addEventListener('pointerdown', e => { drag = true; px = e.clientX; });
+      window.addEventListener('pointermove', e => {
+        if (!drag || !curM) return;
+        curM.rotation.y += (e.clientX - px) * 0.015;
+        px = e.clientX;
+      });
+      window.addEventListener('pointerup', () => { drag = false; });
+
+      function tick() {
+        arAnimFrame = requestAnimationFrame(tick);
+        if (!drag && curM) curM.rotation.y += 0.008;
+        reticle.rotation.z += 0.01;
+        renderer.render(scene, camera);
+      }
+      tick();
+    }
+
     // تهيئة البداية
     currentTargetType = "house-electricity";
     startNewChallenge();
+
+    // تشغيل مدخل الواقع المعزز تلقائياً عند البدء
+    if (typeof window !== 'undefined' && !window.location.hash.includes('skip-ar')) {
+      setTimeout(() => {
+        openArGateway();
+      }, 150);
+    }
   </script>
 </body>
 </html>

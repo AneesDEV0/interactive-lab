@@ -552,12 +552,11 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
   function at(x, y) {
     const hit = pick(x, y);
     if (hit?.device) return hit.device;
-    if (hit?.battery && previousLocation && objects[previousLocation]) return previousLocation;
 
     const rect = host.getBoundingClientRect();
     if (!rect.width || !rect.height) return null;
 
-    let nearest = null, min = Math.max(160, rect.width * 0.45);
+    let nearest = null, min = Math.max(220, rect.width * 0.55);
     for (const id in objects) {
       const v = new THREE.Vector3();
       objects[id].getWorldPosition(v);
@@ -570,7 +569,9 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
       const dist = Math.hypot(dx, dy);
       if (dist < min) { min = dist; nearest = id; }
     }
-    return nearest;
+    if (nearest) return nearest;
+    if (hit?.battery && previousLocation && objects[previousLocation]) return previousLocation;
+    return null;
   }
 
   let down = null, isRotating = false, rotateDevice = null, lastPointerX = 0, lastPointerY = 0;

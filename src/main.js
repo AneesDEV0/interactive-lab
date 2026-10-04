@@ -2,7 +2,8 @@ import {config,copy,deviceNames,msg,DEVICE_MAP} from './config.js';
 import {initialState,reducer,explorationDone,quizDone,validAction,nextActions} from './state.js';
 import {answerQuestion,normalize} from './knowledge.js';
 import {icon,robotSvg} from './icons.js';
-import {stopAudio,radioTune,speak} from './audio.js';
+import {stopAudio,radioTune,speak,speakIntro,speakToolPick,speakDropSuccess,speakDropIncompatible,speakHint} from './audio.js';
+import {launchArGateway} from './ar.js';
 
 // التأكد من استرجاع التفضيلات العامة فقط (الصوت، تقليل الحركة، اللغة) دون حفظ حالة الأجهزة أو التوصيل
 let rawPrefs = {};
@@ -187,6 +188,7 @@ function shell() {
      <nav class="top-actions" aria-label="${c.settings}">
        <a href="${navBase}index.html" class="nav-link-btn" title="الرئيسية">🏠 <span>الرئيسية</span></a>
        <a href="${navBase}static-lab.html" class="nav-link-btn" title="النشاط الثابت">🔍 <span>الثابت</span></a>
+       <button type="button" class="header-ar-launch-btn" data-action="launchAR" title="فتح كاميرا الواقع المعزز الحقيقي">📷 <span>الواقع المعزز AR</span></button>
        ${button('sound', state.muted ? c.muted : c.sound, state.muted ? 'muted' : 'volume', 'quiet', 'id="sound-button"')}
        ${button('compare', c.compare, 'book', 'quiet', 'id="comparison-button" title="جدول الاكتشافات"')}
        ${button('chat', c.chat, 'chat', 'quiet', 'id="chat-toggle" aria-expanded="false" title="تحدث مع شرارة"')}
@@ -338,9 +340,8 @@ function shell() {
   $('#dialog').addEventListener('close', () => { modalOpener?.focus?.(); });
   $('#chat-form').addEventListener('submit', e => { e.preventDefault(); ask($('#question').value); $('#question').value = ''; });
   
-  // تفعيل سحب البطاريات وسحب الفيشات
-  $('#battery-button')?.addEventListener('pointerdown', e => toolDown('battery', e));
-  $('#mains-button')?.addEventListener('pointerdown', e => toolDown('mains', e));
+  // تفعيل سحب وإفلات البطاريات والفيشات باللمس الحقيقي للجوالات والماوس للديسكتوب
+  initTouchDragSupport();
 
   // إغلاق نافذة التغذية الراجعة المركزية
   $('#feedback-confirm-btn')?.addEventListener('click', hideCentralFeedback);
@@ -383,6 +384,13 @@ function dispatch(event) {
     const isSuccess = state.devices[d]?.status === 'running';
     const tool = state.devices[d]?.source || event.tool || 'battery';
     showCentralFeedback(d, tool, isSuccess, state.message);
+    if (!state.muted) {
+      if (isSuccess) {
+        speakDropSuccess(name(d), DEVICE_MAP[d]?.reason);
+      } else {
+        speakDropIncompatible(name(d), DEVICE_MAP[d]?.wrongReason);
+      }
+    }
   }
   if (!['IDLE', 'CHAT_RESPONSE'].includes(event.type)) resetIdle();
 }
@@ -720,41 +728,169 @@ async function playRadio() {
 
 let lastToolDownTime = 0;
 
-// السحب والإفلات للبطارية والفيشة
+// محرك السحب والإفلات المزدوج المتطور لشاشات اللمس (Mobile/Tablet Touch) والماوس (Desktop)
+function initTouchDragSupport() {
+  const batBtn = $('#battery-button');
+  const mainsBtn = $('#mains-button');
+
+  const setupBtn = (btn, tool) => {
+    if (!btn) return;
+    btn.style.touchAction = 'none';
+
+    // 1. معالجة أحداث اللمس الأصلية المتجاوبة (Mobile Touch Events)
+    btn.addEventListener('touchstart', e => {
+      if (['intro', 'loading', 'recoverable_error'].includes(state.phase)) return;
+      lastToolDownTime = Date.now();
+      playClickSound();
+
+      const touch = e.touches[0];
+      if (!touch) return;
+
+      if (tool === 'battery') dispatch({type: 'PICK_BATTERY', mode: 'touch'});
+      else dispatch({type: 'PICK_MAINS', mode: 'touch'});
+
+      drag = {
+        tool,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        x: touch.clientX,
+        y: touch.clientY,
+        moved: false,
+        isTouch: true
+      };
+
+      const g = $('#drag-ghost');
+      if (g) {
+        g.innerHTML = tool === 'battery' ? icon('battery') : '<span style="font-size:36px;">🔌</span>';
+        g.style.left = touch.clientX + 'px';
+        g.style.top = touch.clientY + 'px';
+        g.hidden = false;
+      }
+    }, { passive: false });
+
+    // 2. أحداث المؤشر والماوس لأجهزة الديسكتوب
+    btn.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'touch') return; // تم التعامل معه مسبقاً عبر touchstart
+      toolDown(tool, e);
+    });
+  };
+
+  setupBtn(batBtn, 'battery');
+  setupBtn(mainsBtn, 'mains');
+}
+
+// السحب والإفلات للماوس على الديسكتوب
 function toolDown(tool, e) {
   if (['intro', 'loading', 'recoverable_error'].includes(state.phase)) return;
   lastToolDownTime = Date.now();
   playClickSound();
-  if (tool === 'battery') dispatch({type: 'PICK_BATTERY', mode: e.pointerType === 'touch' ? 'touch' : 'drag'});
-  else dispatch({type: 'PICK_MAINS', mode: e.pointerType === 'touch' ? 'touch' : 'drag'});
+  if (tool === 'battery') dispatch({type: 'PICK_BATTERY', mode: 'drag'});
+  else dispatch({type: 'PICK_MAINS', mode: 'drag'});
 
-  drag = {tool, x: e.clientX, y: e.clientY, moved: false, pointerId: e.pointerId};
+  drag = {tool, x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY, moved: false, isTouch: false, pointerId: e.pointerId};
   const g = $('#drag-ghost');
-  g.innerHTML = tool === 'battery' ? icon('battery') : '<span style="font-size:36px;">🔌</span>';
+  if (g) {
+    g.innerHTML = tool === 'battery' ? icon('battery') : '<span style="font-size:36px;">🔌</span>';
+    g.style.left = e.clientX + 'px';
+    g.style.top = e.clientY + 'px';
+    g.hidden = false;
+  }
 }
 
+// حركة اللمس المباشرة للجوالات (تمنع التمرير وتحدث موقع الشبح بسلاسة 100%)
+window.addEventListener('touchmove', e => {
+  if (!drag || !drag.isTouch) return;
+  const touch = e.touches[0];
+  if (!touch) return;
+
+  // منع تمرير الصفحة أثناء سحب المصدر لمنع التقطيع أو الإلغاء
+  e.preventDefault();
+
+  if (Math.hypot(touch.clientX - drag.startX, touch.clientY - drag.startY) > 6) {
+    drag.moved = true;
+  }
+
+  drag.x = touch.clientX;
+  drag.y = touch.clientY;
+
+  const g = $('#drag-ghost');
+  if (g && drag.moved) {
+    g.hidden = false;
+    g.style.left = touch.clientX + 'px';
+    g.style.top = touch.clientY + 'px';
+  }
+}, { passive: false });
+
+// نهاية اللمس على شاشات الجوال والتابلت
+window.addEventListener('touchend', e => {
+  if (!drag || !drag.isTouch) return;
+  const touch = e.changedTouches[0] || e.touches[0];
+  const dropX = touch ? touch.clientX : drag.x;
+  const dropY = touch ? touch.clientY : drag.y;
+  const tool = drag.tool;
+  const moved = drag.moved;
+
+  drag = null;
+  const g = $('#drag-ghost');
+  if (g) g.hidden = true;
+
+  if (!moved) {
+    // لمسة سريعة بدون سحب: نطق التوجيه الصوتي للطفل
+    if (!state.muted) speakToolPick(tool);
+    return;
+  }
+
+  // فحص الهدف المسقط عليه الجهاز
+  const el = document.elementFromPoint(dropX, dropY);
+  let id = el?.closest('[data-target]')?.dataset.target;
+  if (!id && el?.closest('#scene')) id = scene?.at(dropX, dropY);
+  if (!id) id = scene?.at(dropX, dropY);
+
+  const currentIds = Object.keys(state.devices);
+  if (currentIds.includes(id)) {
+    dispatch({type: 'DROP_ON_DEVICE', device: id, tool});
+  } else {
+    dispatch({type: 'DROP_OUTSIDE'});
+  }
+}, { passive: false });
+
+window.addEventListener('touchcancel', () => {
+  if (drag && drag.isTouch) {
+    drag = null;
+    const g = $('#drag-ghost');
+    if (g) g.hidden = true;
+    dispatch({type: 'CANCEL_DRAG'});
+  }
+});
+
+// أحداث الماوس على أجهزة الكمبيوتر والمؤشر
 document.addEventListener('pointermove', e => {
-  if (!drag) return;
+  if (!drag || drag.isTouch) return;
   if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 8) drag.moved = true;
   if (drag.moved) {
     const g = $('#drag-ghost');
-    g.hidden = false;
-    g.style.left = e.clientX + 'px';
-    g.style.top = e.clientY + 'px';
+    if (g) {
+      g.hidden = false;
+      g.style.left = e.clientX + 'px';
+      g.style.top = e.clientY + 'px';
+    }
   }
 });
 
 document.addEventListener('pointerup', e => {
-  if (!drag) return;
+  if (!drag || drag.isTouch) return;
   const tool = drag.tool;
   const moved = drag.moved;
   drag = null;
-  $('#drag-ghost').hidden = true;
-  if (!moved) return;
+  const g = $('#drag-ghost');
+  if (g) g.hidden = true;
+  if (!moved) {
+    if (!state.muted) speakToolPick(tool);
+    return;
+  }
 
   const el = document.elementFromPoint(e.clientX, e.clientY);
-  const target = el?.closest('[data-target]')?.dataset.target;
-  let id = target;
+  let id = el?.closest('[data-target]')?.dataset.target;
   if (!id && el?.closest('#scene')) id = scene?.at(e.clientX, e.clientY);
   if (!id) id = scene?.at(e.clientX, e.clientY);
 
@@ -767,9 +903,10 @@ document.addEventListener('pointerup', e => {
 }, true);
 
 document.addEventListener('pointercancel', () => {
-  if (drag) {
+  if (drag && !drag.isTouch) {
     drag = null;
-    $('#drag-ghost').hidden = true;
+    const g = $('#drag-ghost');
+    if (g) g.hidden = true;
     dispatch({type: 'CANCEL_DRAG'});
   }
 });
@@ -795,18 +932,33 @@ app.addEventListener('click', e => {
   const a = b.dataset.action, c = t();
 
   switch (a) {
+    case 'launchAR':
+      launchArGateway({
+        title: 'مختبر شرارة المتحرك 3D',
+        mode: 'dynamic',
+        onContinue: () => {
+          speakIntro('dynamic');
+        }
+      });
+      break;
     case 'start': dispatch({type: 'START'}); tutorial = true; render(); break;
     case 'doneTutorial': tutorial = false; render(); $('#battery-button').focus(); break;
     case 'help': tutorial = true; render(); break;
     case 'pick':
       if (Date.now() - lastToolDownTime < 450) break;
       if (state.batteryLocation === 'held') dispatch({type: 'CANCEL_DRAG'});
-      else dispatch({type: 'PICK_BATTERY', mode: e.detail === 0 ? 'keyboard' : 'click'});
+      else {
+        dispatch({type: 'PICK_BATTERY', mode: e.detail === 0 ? 'keyboard' : 'click'});
+        if (!state.muted) speakToolPick('battery');
+      }
       break;
     case 'pickMains':
       if (Date.now() - lastToolDownTime < 450) break;
       if (state.mainsLocation === 'held') dispatch({type: 'CANCEL_DRAG'});
-      else dispatch({type: 'PICK_MAINS', mode: e.detail === 0 ? 'keyboard' : 'click'});
+      else {
+        dispatch({type: 'PICK_MAINS', mode: e.detail === 0 ? 'keyboard' : 'click'});
+        if (!state.muted) speakToolPick('mains');
+      }
       break;
     case 'chooseBattery': testWithBattery(b.dataset.device); break;
     case 'chooseMains': testWithMains(b.dataset.device); break;
@@ -831,7 +983,7 @@ app.addEventListener('click', e => {
       break;
     case 'stopAudio': stopAudio(); break;
     case 'chat': dispatch({type: 'TOGGLE_CHAT'}); if (!state.chatOpen) $('#chat-toggle').focus(); break;
-    case 'hint': showHint(); break;
+    case 'hint': showHint(); if (!state.muted && state.message) speakHint(state.message); break;
     case 'dismissHint': dispatch({type: 'DISMISS_IDLE'}); break;
     case 'settings': settings(); break;
     case 'reset': resetRequest(); break;
@@ -886,5 +1038,17 @@ async function loadScene() {
 shell();
 loadScene();
 resetIdle();
+
+if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && !window.location.hash.includes('skip-ar') && !window.location.search.includes('skip-ar')) {
+  setTimeout(() => {
+    launchArGateway({
+      title: 'مختبر شرارة المتحرك 3D',
+      mode: 'dynamic',
+      onContinue: () => {
+        speakIntro('dynamic');
+      }
+    });
+  }, 120);
+}
 
 Object.defineProperty(window, 'labDiagnostics', {value: () => ({state: structuredClone(state), render: scene?.stats() || null}), writable: false});
