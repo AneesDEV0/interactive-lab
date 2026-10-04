@@ -506,6 +506,15 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
         break;
     }
 
+    // صندوق تفاعل افتراضي موسع لضمان التقاط أي نقرة أو لمسة لمسية مهما كان حجم الجهاز أو نحافته
+    const hitBox = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6, 2.0, 1.6),
+      new THREE.MeshBasicMaterial({transparent: true, opacity: 0, depthWrite: false})
+    );
+    hitBox.position.set(0, 0.8, 0);
+    hitBox.userData.device = id;
+    g.add(hitBox);
+
     return {mesh: g, fx};
   }
 
@@ -544,7 +553,7 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
     const hit = pick(x, y);
     if (hit?.device) return hit.device;
     const rect = host.getBoundingClientRect();
-    let nearest = null, min = 110;
+    let nearest = null, min = Math.max(180, rect.width / 4);
     for (const id in objects) {
       const v = new THREE.Vector3();
       objects[id].getWorldPosition(v);
@@ -559,25 +568,29 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
   }
 
   let down = null, isRotating = false, rotateDevice = null, lastPointerX = 0, lastPointerY = 0;
+  let didRotate = false;
 
   renderer.domElement.addEventListener('pointerdown', e => {
-    const hit = pick(e.clientX, e.clientY);
-    down = {x: e.clientX, y: e.clientY, hit};
+    const hitDevice = pick(e.clientX, e.clientY)?.device || at(e.clientX, e.clientY);
+    const hitBattery = pick(e.clientX, e.clientY)?.battery;
+    down = {x: e.clientX, y: e.clientY, hitDevice, hitBattery, time: Date.now()};
     lastPointerX = e.clientX;
     lastPointerY = e.clientY;
+    didRotate = false;
 
-    if (hit?.battery) {
+    if (hitBattery) {
       onBattery(e);
-    } else if (hit?.device) {
-      // تمكين الطالب من تدوير الجهاز 3D بسلاسة
-      isRotating = true;
-      rotateDevice = hit.device;
-      renderer.domElement.setPointerCapture?.(e.pointerId);
+    } else if (hitDevice) {
+      rotateDevice = hitDevice;
     }
   });
 
   renderer.domElement.addEventListener('pointermove', e => {
-    if (isRotating && rotateDevice && objects[rotateDevice]) {
+    if (!down) return;
+    const dist = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+    if (dist > 16 && rotateDevice && objects[rotateDevice]) {
+      didRotate = true;
+      isRotating = true;
       const dx = e.clientX - lastPointerX;
       const dy = e.clientY - lastPointerY;
       lastPointerX = e.clientX;
@@ -591,18 +604,26 @@ export async function createLabScene(host, {getState, dispatch, onDevice, onBatt
   renderer.domElement.addEventListener('pointerup', e => {
     if (isRotating) {
       isRotating = false;
-      rotateDevice = null;
     }
-    if (down && !down.hit?.battery && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 14) {
-      const h = pick(e.clientX, e.clientY);
-      if (h?.device) onDevice(h.device);
+    // نقرة أو لمسة لمسية دقيقة وسريعة على الجهاز
+    if (down && !down.hitBattery && !didRotate) {
+      const dist = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+      if (dist < 34) {
+        const targetId = down.hitDevice || pick(e.clientX, e.clientY)?.device || at(e.clientX, e.clientY);
+        if (targetId && objects[targetId]) {
+          onDevice(targetId);
+        }
+      }
     }
     down = null;
+    rotateDevice = null;
+    didRotate = false;
   });
 
   renderer.domElement.addEventListener('pointercancel', () => {
     isRotating = false;
     rotateDevice = null;
+    didRotate = false;
     down = null;
   });
 

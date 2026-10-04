@@ -525,13 +525,62 @@ function dialogHeader(title) {
   return `<div class="dialog-heading"><h2>${title}</h2>${button('closeDialog', t().close, 'close', 'icon-only')}</div>`;
 }
 
+function testWithBattery(id) {
+  closeDialog();
+  if (state.attemptsByDevice[id] === 0 && state.predictionByDevice[id] === null) {
+    showPrediction(id, true);
+    return;
+  }
+  if (state.batteryLocation !== 'held') dispatch({type: 'PICK_BATTERY'});
+  dispatch({type: 'DROP_ON_DEVICE', device: id, tool: 'battery'});
+}
+
+function testWithMains(id) {
+  closeDialog();
+  if (state.mainsLocation !== 'held') dispatch({type: 'PICK_MAINS'});
+  dispatch({type: 'DROP_ON_DEVICE', device: id, tool: 'mains'});
+}
+
+function showDevicePowerChoice(id) {
+  const dIcon = DEVICE_MAP[id]?.icon || 'bolt';
+  openDialog(`
+    ${dialogHeader(name(id))}
+    <div class="prediction-icon ${id}">${icon(dIcon)}</div>
+    <h3 style="text-align:center;margin:10px 0 6px;">بماذا تريد تجربة ${name(id)}؟</h3>
+    <p style="text-align:center;color:var(--frog);margin-bottom:18px;font-size:14px;">اختر مصدر الطاقة لاختبار الجهاز واكتشاف عمله العلمي:</p>
+    <div class="dialog-actions" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button type="button" class="primary" data-action="chooseBattery" data-device="${id}" style="font-size:15px;padding:12px 20px;min-width:180px;">
+        🔋 تجربة بالبطارية الجافة
+      </button>
+      <button type="button" class="secondary" data-action="chooseMains" data-device="${id}" style="font-size:15px;padding:12px 20px;min-width:180px;background:#2F3E36;color:#FFB703;border-color:#2F3E36;">
+        🔌 توصيل بفيشة الكهرباء
+      </button>
+    </div>
+  `);
+}
+
 function tryDevice(id) {
+  // إذا كان الجهاز يعمل بالفعل، نقرة عليه تقوم بإيقافه وفصله بأمان
+  if (state.devices[id]?.status === 'running') {
+    if (state.devices[id].source === 'battery') {
+      dispatch({type: 'REMOVE_BATTERY'});
+    } else {
+      dispatch({type: 'REMOVE_MAINS'});
+    }
+    return;
+  }
+
   const isHeld = state.batteryLocation === 'held' || state.mainsLocation === 'held';
   if (!isHeld) {
     dispatch({type: 'SELECT_DEVICE', device: id});
-    if (state.attemptsByDevice[id] === 0) showPrediction(id, false);
+    if (state.attemptsByDevice[id] === 0 && state.predictionByDevice[id] === null) {
+      showPrediction(id, true);
+    } else {
+      showDevicePowerChoice(id);
+    }
     return;
   }
+
   const tool = state.mainsLocation === 'held' ? 'mains' : 'battery';
   if (tool === 'battery' && state.attemptsByDevice[id] === 0 && state.predictionByDevice[id] === null) {
     showPrediction(id, true);
@@ -552,7 +601,10 @@ function prediction(value) {
   if (!p) return;
   if (value !== null) dispatch({type: 'PREDICT', device: p.id, value});
   closeDialog();
-  if (p.drop) dispatch({type: 'DROP_ON_DEVICE', device: p.id, tool: 'battery'});
+  if (p.drop) {
+    if (state.batteryLocation !== 'held') dispatch({type: 'PICK_BATTERY'});
+    dispatch({type: 'DROP_ON_DEVICE', device: p.id, tool: 'battery'});
+  }
 }
 
 function compare() {
@@ -742,8 +794,16 @@ app.addEventListener('click', e => {
     case 'start': dispatch({type: 'START'}); tutorial = true; render(); break;
     case 'doneTutorial': tutorial = false; render(); $('#battery-button').focus(); break;
     case 'help': tutorial = true; render(); break;
-    case 'pick': if (state.batteryLocation !== 'held') dispatch({type: 'PICK_BATTERY', mode: e.detail === 0 ? 'keyboard' : 'click'}); break;
-    case 'pickMains': if (state.mainsLocation !== 'held') dispatch({type: 'PICK_MAINS', mode: e.detail === 0 ? 'keyboard' : 'click'}); break;
+    case 'pick':
+      if (state.batteryLocation === 'held') dispatch({type: 'CANCEL_DRAG'});
+      else dispatch({type: 'PICK_BATTERY', mode: e.detail === 0 ? 'keyboard' : 'click'});
+      break;
+    case 'pickMains':
+      if (state.mainsLocation === 'held') dispatch({type: 'CANCEL_DRAG'});
+      else dispatch({type: 'PICK_MAINS', mode: e.detail === 0 ? 'keyboard' : 'click'});
+      break;
+    case 'chooseBattery': testWithBattery(b.dataset.device); break;
+    case 'chooseMains': testWithMains(b.dataset.device); break;
     case 'remove': dispatch({type: 'REMOVE_BATTERY'}); break;
     case 'stopMains': dispatch({type: 'REMOVE_MAINS'}); break;
     case 'device': tryDevice(b.dataset.device); break;
