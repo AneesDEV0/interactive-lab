@@ -1,0 +1,717 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   static-lab.css — تنسيق المختبر التقويمي الثابت الموحد (100vh Responsive Layout)
+   متطابق 100% مع الهوية البصرية ونَسَق المنصة: الأصفر الذهبي والسكني الضفدعي الدافئ
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --gold: #FFB703;
+  --gold-dark: #FB8500;
+  --gold-light: #FFE8A3;
+  --gold-gradient: linear-gradient(135deg, #FFB703 0%, #FB8500 100%);
+  
+  --frog-dark: #2F3E36;
+  --frog: #5B7065;
+  --frog-soft: #859B8E;
+  --frog-light: #EBF1ED;
+  
+  --bg-cream: #F8FAF7;
+  --white: #FFFFFF;
+  --success: #2EC4B6;
+  --error: #E63946;
+  --accent: #3A86FF;
+  --line: #D9E5DF;
+  
+  --shadow-sm: 0 3px 10px rgba(47, 62, 54, 0.06);
+  --shadow-md: 0 8px 20px rgba(47, 62, 54, 0.1);
+  --shadow-lg: 0 16px 36px rgba(47, 62, 54, 0.15);
+  --radius-card: 20px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: 'Tajawal', sans-serif;
+  background-color: var(--bg-cream);
+  color: var(--frog-dark);
+  position: fixed;
+}
+
+/* ─── الحاوية الرئيسية (100vh ثابتة ومتجاوبة) ─── */
+.static-app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+  background-image: 
+    radial-gradient(circle at 10% 15%, rgba(255, 183, 3, 0.08) 0%, transparent 35%),
+    radial-gradient(circle at 90% 85%, rgba(91, 112, 101, 0.1) 0%, transparent 40%),
+    radial-gradient(#5B7065 0.75px, transparent 0.75px);
+  background-size: 100% 100%, 100% 100%, 28px 28px;
+}
+
+/* ─── 1. الترويسة الموحدة (Header) ─── */
+.static-header {
+  height: 56px;
+  min-height: 56px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 2px solid rgba(255, 183, 3, 0.3);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  z-index: 40;
+  box-shadow: var(--shadow-sm);
+}
+
+.static-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--frog-dark);
+}
+
+.static-brand-icon {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  background: var(--gold-gradient);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+  box-shadow: 0 3px 10px rgba(251, 133, 0, 0.35);
+  transform: rotate(-3deg);
+}
+
+.static-brand-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.static-brand-title h1 {
+  font-size: 1.02rem;
+  font-weight: 900;
+  color: var(--frog-dark);
+  line-height: 1.2;
+}
+
+.static-brand-title span {
+  font-size: 0.72rem;
+  color: var(--frog);
+  font-weight: 700;
+}
+
+.static-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.static-nav-btn {
+  background: #FFFFFF;
+  border: 1.5px solid var(--line);
+  color: var(--frog-dark);
+  border-radius: 50px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.static-nav-btn:hover {
+  border-color: var(--gold);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.static-nav-btn.btn-ar {
+  background: var(--gold-gradient);
+  color: var(--frog-dark);
+  border-color: #FFFFFF;
+  box-shadow: 0 3px 10px rgba(251, 133, 0, 0.3);
+}
+
+.static-nav-btn.icon-only {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: 50%;
+  justify-content: center;
+}
+
+/* ─── 2. شريط التحدي والمهمة (Mission HUD) ─── */
+.static-mission-hud {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom: 1.5px solid var(--line);
+  flex-shrink: 0;
+}
+
+.static-mission-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.static-target-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.static-target-chip.chip-battery {
+  background: #FEF7E6;
+  color: #B45309;
+  border: 1.5px solid #FDE68A;
+}
+
+.static-target-chip.chip-house {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1.5px solid #BFDBFE;
+}
+
+.static-mission-instruction {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--frog-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.static-mission-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.static-stat-pill {
+  background: #FFFFFF;
+  border: 1.5px solid var(--line);
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.static-stat-pill .val {
+  color: #B45309;
+  font-weight: 900;
+}
+
+/* ─── 3. ساحة البطاقات التفاعلية 3D (Interactive 3D Stage) ─── */
+.static-cards-stage {
+  flex: 1;
+  min-height: 0;
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.card-3d-wrap {
+  perspective: 1000px;
+  height: 100%;
+  width: 100%;
+}
+
+.card-3d-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+  border-radius: var(--radius-card);
+}
+
+.card-3d-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+/* واجهة البطاقة (الأمامية والخلفية) */
+.card-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--radius-card);
+  border: 2px solid var(--line);
+  background: #FFFFFF;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+.card-face-front {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAFCFB 100%);
+}
+
+.card-face-front:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(255, 183, 3, 0.6);
+}
+
+/* حالة التحديد باللمس أو النقر */
+.card-face-front.is-selected {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, #FFFDF5 0%, #FEF8E7 100%);
+  box-shadow: 0 0 0 3.5px var(--gold), 0 8px 24px rgba(251, 133, 0, 0.35);
+  transform: translateY(-4px);
+}
+
+/* شارة التحديد العلوية */
+.card-select-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #F0F4F2;
+  border: 1.5px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  font-weight: 900;
+  transition: all 0.2s ease;
+}
+
+.card-face-front.is-selected .card-select-badge {
+  background: var(--gold-gradient);
+  border-color: #FFFFFF;
+  color: var(--frog-dark);
+  box-shadow: 0 2px 8px rgba(251, 133, 0, 0.4);
+}
+
+/* رسم الـ SVG للجهاز */
+.card-visual-box {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  margin: 18px 0 6px;
+}
+
+.card-visual-box svg {
+  max-width: 100%;
+  max-height: 90px;
+  width: auto;
+  height: auto;
+  filter: drop-shadow(0 4px 6px rgba(47, 62, 54, 0.12));
+  transition: transform 0.3s ease;
+}
+
+.card-face-front:hover .card-visual-box svg {
+  transform: scale(1.08);
+}
+
+.card-device-name {
+  font-size: 0.96rem;
+  font-weight: 900;
+  color: var(--frog-dark);
+  text-align: center;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+
+/* زر الفحص ثلاثي الأبعاد والقلب */
+.btn-flip-inspect {
+  width: 100%;
+  background: var(--frog-light);
+  border: 1.5px solid rgba(91, 112, 101, 0.25);
+  color: var(--frog-dark);
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-flip-inspect:hover {
+  background: var(--gold-light);
+  border-color: var(--gold);
+  color: #8C4E00;
+}
+
+/* الوجه الخلفي للبطاقة (الفحص 3D ومصدر الطاقة) */
+.card-face-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(180deg, #F9FBFA 0%, #FFFFFF 100%);
+  border-color: var(--frog-soft);
+  text-align: center;
+  justify-content: space-between;
+}
+
+.back-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border-bottom: 1px dashed var(--line);
+  padding-bottom: 6px;
+}
+
+.back-voltage-chip {
+  background: var(--frog-dark);
+  color: #FFFFFF;
+  padding: 3px 8px;
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.back-reason-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 4px;
+}
+
+.back-reason-title {
+  font-size: 0.84rem;
+  font-weight: 900;
+  color: var(--frog-dark);
+}
+
+.back-reason-text {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--frog);
+  font-weight: 700;
+}
+
+.btn-flip-back {
+  background: var(--frog-dark);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s ease;
+}
+
+.btn-flip-back:hover {
+  background: #1C2721;
+}
+
+/* ─── 4. شريط الأوامر التقويمية السفلي (Actions Toolbar) ─── */
+.static-actions-bar {
+  height: 58px;
+  min-height: 58px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(14px);
+  border-top: 1.5px solid var(--line);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 30;
+  flex-shrink: 0;
+}
+
+.static-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.static-btn {
+  border-radius: 14px;
+  padding: 9px 20px;
+  font-size: 0.88rem;
+  font-weight: 900;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.static-btn.btn-verify {
+  background: var(--gold-gradient);
+  color: var(--frog-dark);
+  border-color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(251, 133, 0, 0.35);
+}
+
+.static-btn.btn-verify:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(251, 133, 0, 0.45);
+}
+
+.static-btn.btn-secondary {
+  background: #FFFFFF;
+  border-color: var(--line);
+  color: var(--frog-dark);
+}
+
+.static-btn.btn-secondary:hover {
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+
+/* ─── 5. لافتة الاحتفال المدمجة والفورية ─── */
+.static-victory-overlay {
+  position: absolute;
+  top: 56px;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #FFFDF0 0%, #FFF8E1 100%);
+  border-bottom: 3px solid var(--gold);
+  padding: 10px 18px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  z-index: 35;
+  box-shadow: var(--shadow-md);
+  animation: slideDown 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.victory-text-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.victory-trophy {
+  font-size: 1.8rem;
+}
+
+.victory-title {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--frog-dark);
+}
+
+.victory-sub {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #925C00;
+}
+
+/* ─── 6. النوافذ المنبثقة الموحدة (Modal Dialogs) ─── */
+.static-dialog {
+  border: 1.5px solid var(--line);
+  border-radius: 22px;
+  background: #FFFFFF;
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+  max-width: 650px;
+  width: 90vw;
+  max-height: 85vh;
+  margin: auto;
+  font-family: inherit;
+  color: var(--frog-dark);
+  box-sizing: border-box;
+}
+
+.static-dialog::backdrop {
+  background: rgba(47, 62, 54, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--gold-light);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.dialog-header h3 {
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.dialog-close-btn {
+  background: var(--frog-light);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+/* جدول كشف المقارنة العلمي */
+.summary-table-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.summary-col {
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+  background: #FDFEFC;
+}
+
+.summary-col.battery-col { border-top: 5px solid var(--gold); }
+.summary-col.house-col { border-top: 5px solid #3A86FF; }
+
+.summary-col h4 {
+  font-size: 0.92rem;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.summary-device-item {
+  background: #FFFFFF;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+}
+
+.summary-device-item strong {
+  display: block;
+  font-size: 0.84rem;
+  margin-bottom: 3px;
+  color: var(--frog-dark);
+}
+
+.summary-device-item p {
+  color: var(--frog);
+  line-height: 1.35;
+}
+
+/* ─── 7. شاشة الجوال والتابلت المتجاوبة ─── */
+@media (max-width: 900px) {
+  .static-cards-stage {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 8px 12px;
+  }
+  .card-visual-box svg {
+    max-height: 65px;
+  }
+}
+
+@media (max-width: 600px) {
+  .static-header {
+    height: 50px;
+    min-height: 50px;
+    padding: 0 10px;
+  }
+  .static-brand-title span {
+    display: none;
+  }
+  .static-nav-btn span {
+    display: none;
+  }
+  .static-mission-hud {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+  .static-mission-instruction {
+    font-size: 0.8rem;
+  }
+  .static-cards-stage {
+    gap: 8px;
+    padding: 6px 10px;
+  }
+  .card-face {
+    padding: 8px 10px;
+  }
+  .card-device-name {
+    font-size: 0.86rem;
+    margin-bottom: 4px;
+  }
+  .btn-flip-inspect {
+    font-size: 0.72rem;
+    padding: 4px 6px;
+  }
+  .static-actions-bar {
+    height: 52px;
+    min-height: 52px;
+    padding: 0 10px;
+  }
+  .static-btn {
+    padding: 7px 14px;
+    font-size: 0.8rem;
+  }
+}
