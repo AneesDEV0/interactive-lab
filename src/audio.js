@@ -514,3 +514,34 @@ export async function radioTune() {
     return false;
   }
 }
+
+// ─── دوال التوجيه الصوتي التفاعلية للمختبر المتحرك (Dynamic Lab Helpers) ───
+export function speakIntro(mode = 'dynamic') {
+  const msg = mode === 'dynamic'
+    ? 'أَهْلًا بِكَ يَا بَطَلَ العُلُومِ فِي مُخْتَبَرِ شَرَارَةَ المُتَحَرِّك! اسْحَبِ البَطَّارِيَّةَ أَوِ القَابِسَ وَجَرِّبْ تَشْغِيلَ الأَجْهِزَةِ ثُلَاثِيَّةِ الأَبْعَاد!'
+    : 'أَهْلًا بِكَ فِي النَّشَاطِ التَّقْوِيمِيِّ الثَّابِت!';
+  return speak(msg, 'ar');
+}
+
+export function speakToolPick(tool) {
+  const msg = tool === 'battery'
+    ? 'اخْتَرْتَ البَطَّارِيَّةَ الجَافَّة! اسْحَبْهَا وَأَفْلِتْهَا فَوْقَ أَحَدِ الأَجْهِزَةِ لِتَجْرِبَةِ تَشْغِيلِه!'
+    : 'اخْتَرْتَ قَابِسَ الكَهْرَبَاءِ 220 فُولْت! اسْحَبْهُ وَصِلْهُ بِالجِهَازِ لِمُشَاهَدَةِ مَا سَيَحْدُث!';
+  return speak(msg, 'ar');
+}
+
+export function speakDropSuccess(deviceName, reason = '') {
+  const msg = `رَائِعٌ جِدًّا! أَحْسَنْتَ عَمَلًا مُمَيَّزًا! اكْتَمَلَتِ الدَّائِرَةُ الكَهْرَبَائِيَّةُ وَتَمَّ تَشْغِيلُ ${deviceName} بِنَجَاح! ${reason}`;
+  return speak(msg, 'ar');
+}
+
+export function speakDropIncompatible(deviceName, wrongReason = '') {
+  const msg = `حَاوِلْ مَرَّةً أُخْرَى يَا بَطَل! جِهَازُ ${deviceName} لَا يَعْمَلُ بِهَذَا المَصْدَرِ. ${wrongReason}`;
+  return speak(msg, 'ar');
+}
+
+export function speakHint(hintText) {
+  const msg = `تَلْمِيحٌ ذَكِيّ: ${hintText}`;
+  return speak(msg, 'ar');
+}
+

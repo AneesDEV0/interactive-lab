@@ -15,6 +15,8 @@ const types = {
   '.woff2': 'font/woff2',
   '.glb': 'model/gltf-binary',
   '.png': 'image/png',
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav',
   '.md': 'text/plain; charset=utf-8'
 };
 

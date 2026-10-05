@@ -1051,16 +1051,4 @@ shell();
 loadScene();
 resetIdle();
 
-if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && !window.location.hash.includes('skip-ar') && !window.location.search.includes('skip-ar')) {
-  setTimeout(() => {
-    launchArGateway({
-      title: 'مختبر شرارة المتحرك 3D',
-      mode: 'dynamic',
-      onContinue: () => {
-        speakIntro('dynamic');
-      }
-    });
-  }, 120);
-}
-
 Object.defineProperty(window, 'labDiagnostics', {value: () => ({state: structuredClone(state), render: scene?.stats() || null}), writable: false});
