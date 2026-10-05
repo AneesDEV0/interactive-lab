@@ -1,25 +1,511 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#2F3E36" />
-    <meta name="description" content="النشاط التقويمي الثابت: كشف وتمييز مصادر الكهرباء والأجهزة المنزلية لطلاب الصف الرابع الابتدائي." />
-    <title>متحري مصادر الكهرباء | النشاط التقويمي الثابت 3D</title>
-    
-    <!-- خط تجوال العربي المعتمد للمنصة -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
-    
-    <link rel="icon" href="./public/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./src/styles.css" />
-    <link rel="stylesheet" href="./src/styles/theme.css" />
-    <link rel="stylesheet" href="./src/styles/static-lab.css" />
-    <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="./src/static-main.js"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<title>متحري مصادر الكهرباء – النشاط الثابت</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* ────────────────── القيم المتغيّرة ────────────────── */
+:root {
+  --bg-dark: #0F172A;
+  --bg-light: #F8FAFC;
+  --gold: #F59E0B;
+  --gold-light: #FCD34D;
+  --frog: #38BDF8;
+  --frog-dark: #0284C7;
+  --green-sweet: #4ADE80;
+  --orange-warm: #F97316;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,.12);
+}
+
+/* ────────────────── الهيكل العام ────────────────── */
+body {margin:0; font-family:"Segoe UI",Arial,sans-serif; background:#f5f8ff; color:#111;}
+a {color:inherit; text-decoration:none;}
+button {cursor:pointer;}
+
+/* ────────────────── الترويسة ────────────────── */
+.static-header {
+  display:flex; align-items:center; justify-content:space-between;
+  background:#111; color:#fff; padding:8px 12px;
+  height:56px; flex-wrap:wrap;
+}
+.static-brand {display:flex; align-items:center; gap:6px; color:#fff;}
+.static-brand-icon {font-size:1.6rem;}
+.static-brand-title h1 {margin:0; font-size:1.2rem;}
+.static-brand-title span {font-size:0.8rem;}
+.static-header-nav {display:flex; gap:6px; flex-wrap:wrap;}
+.static-nav-btn {
+  background:transparent; border:none; color:#fff; font-size:1.2rem; padding:4px;
+}
+.static-nav-btn.icon-only {font-size:1.4rem;}
+.static-nav-btn:hover {opacity:.8;}
+
+/* ────────────────── HUD ────────────────── */
+.static-mission-hud {
+  background:#fff; padding:10px 12px; margin:4px;
+  border-radius:8px; box-shadow:var(--shadow-sm);
+}
+.static-mission-top-row,
+.static-mission-instruction-row {display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;}
+.static-target-chip {display:flex; align-items:center; gap:4px; font-weight:600;}
+.static-target-chip.chip-battery {color:#0284C7;}
+.static-target-chip.chip-house   {color:#F59E0B;}
+.static-mission-stats {display:flex; gap:6px; flex-wrap:wrap;}
+.static-stat-pill {display:flex; align-items:center; gap:4px; background:#eee; padding:4px 8px; border-radius:6px;}
+.static-stat-pill span {font-size:0.9rem;}
+.static-mission-instruction {font-weight:600;}
+
+/* ────────────────── صندوق التوجيه الديناميكي ────────────────── */
+.static-guidance-box {
+  margin:8px auto; max-width:100%;
+  background:var(--gold-light); color:#111;
+  padding:8px 12px; border-radius:10px; text-align:center;
+  font-size:0.9rem; line-height:1.4;
+  box-shadow:var(--shadow-sm);
+}
+
+/* ────────────────── مساحة البطاقات ────────────────── */
+.static-cards-stage {
+  display:grid; gap:12px; padding:8px;
+  grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+}
+
+/* ────────────────── بطاقة 3D ────────────────── */
+.card-3d-wrap {perspective:800px; position:relative;}
+.card-3d-inner {
+  width:100%; height:100%; transition:transform .4s;
+  transform-style:preserve-3d; position:relative;
+}
+.card-3d-inner.is-flipped {transform:rotateY(180deg);}
+.card-face {
+  backface-visibility:hidden; border-radius:10px;
+  overflow:hidden; position:absolute; inset:0;
+}
+.card-face-front {background:#fff; box-shadow:var(--shadow-sm);}
+.card-face-back  {background:#fafafa; transform:rotateY(180deg);}
+
+/* بطاقة – رأس */
+.card-header-bar {
+  display:flex; justify-content:space-between; align-items:center;
+  background:#f0f4ff; padding:4px 6px; font-size:0.85rem;
+}
+.card-tag-pill {background:var(--frog); color:#fff; border-radius:6px; padding:2px 6px;}
+.card-select-badge {
+  width:20px; height:20px; border:2px solid var(--frog);
+  border-radius:50%; text-align:center; line-height:16px; font-size:0.9rem;
+  color:var(--frog); cursor:pointer;
+}
+
+/* بطاقة – تجسيم */
+.card-visual-box {display:flex; justify-content:center; align-items:center; padding:6px;}
+.card-device-name {text-align:center; font-weight:600; padding:4px;}
+.btn-flip-inspect {
+  width:100%; border:none; background:var(--frog-dark);
+  color:#fff; padding:6px; font-size:0.85rem;
+}
+
+/* صندوق السبب الخلفي */
+.back-header {background:#e5e7eb; padding:4px 6px; text-align:center;}
+.back-reason-box {
+  background:#fff; margin:8px; padding:8px; border-radius:8px;
+  display:flex; flex-direction:column; gap:4px;
+}
+.back-reason-title {font-weight:600; font-size:0.9rem; text-align:center;}
+.back-reason-text {font-size:0.8rem; line-height:1.3;}
+.static-btn-listen {border:none; background:#0284C7; color:#fff; padding:4px 8px; font-size:0.8rem; border-radius:6px;}
+
+/* عودة للبطاقة */
+.btn-flip-back {
+  position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
+  background:#555; color:#fff; border:none; padding:4px 8px; border-radius:6px;
+}
+
+/* ────────────────── أزرار الإجراءات السفلية ────────────────── */
+.static-actions-bar {
+  background:#fff; padding:10px 12px; margin-top:4px;
+  box-shadow:var(--shadow-sm); display:flex; justify-content:center;
+}
+.static-btn {
+  background:#0284C7; color:#fff; border:none;
+  padding:8px 12px; margin:0 4px; border-radius:6px;
+  font-size:0.9rem; display:flex; align-items:center; gap:4px;
+}
+.static-btn.btn-secondary {background:#555;}
+
+/* ────────────────── ردود الفعل (صحيح/خطأ) ────────────────── */
+.feedback-correct {background:#e0f7e9; color:#166534;}
+.feedback-wrong   {background:#fff4e5; color:#92400e;}
+
+/* ────────────────── استجابة للهواتف الصغيرة ────────────────── */
+@media (max-width:380px) {
+  .static-header {height:auto; padding:6px;}
+  .static-brand-title h1 {font-size:1rem;}
+  .static-nav-btn {font-size:1rem;}
+  .static-guidance-box {font-size:0.78rem; padding:6px 8px;}
+  .static-actions-bar {flex-direction:column; gap:6px;}
+}
+
+/* ────────────────── تحسين توافق المتصفحات (WebKit) ────────────────── */
+button, .static-btn {appearance:none; -webkit-appearance:none;}
+</style>
+</head>
+<body>
+<div class="static-app-root">
+  <!-- 1️⃣ الترويسة -->
+  <header class="static-header">
+    <a href="./index.html" class="static-brand" id="brand-link">
+      <div class="static-brand-icon">⚡</div>
+      <div class="static-brand-title">
+        <h1>متحري مصادر الكهرباء</h1>
+        <span>مادة العلوم — الصف الرابع الابتدائي</span>
+      </div>
+    </a>
+    <nav class="static-header-nav">
+      <a href="./index.html" class="static-nav-btn btn-home" id="home-link" title="العودة للبوابة الرئيسية">
+        🏠 <span class="nav-text">الرئيسية</span>
+      </a>
+      <button type="button" id="btn-voice-toggle" class="static-nav-btn icon-only" title="تفعيل/تعطيل التوجيه الصوتي">
+        🗣️
+      </button>
+      <button type="button" id="btn-sound-toggle" class="static-nav-btn icon-only" title="تفعيل/تعطيل المؤثرات الصوتية">
+        🔊
+      </button>
+      <button type="button" class="static-nav-btn" id="btn-cert-open" title="شهادة الإنجاز">
+        🎓 <span class="nav-text">الشهادة</span>
+      </button>
+      <a href="./dynamic-lab.html" class="static-nav-btn btn-dynamic" id="dynamic-link" title="الانتقال للمختبر المتحرك">
+        🧪 <span class="nav-text">المتحرك</span>
+      </a>
+    </nav>
+  </header>
+
+  <!-- 2️⃣ HUD -->
+  <section class="static-mission-hud">
+    <div class="static-mission-top-row">
+      <div class="static-target-chip" id="target-chip">
+        <span id="target-icon">🔋</span>
+        <span id="target-title">تحدي البطاريات الجافة</span>
+      </div>
+      <div class="static-mission-stats">
+        <div class="static-stat-pill"><span>🏆</span><span class="stat-label">النقاط:</span><span class="val" id="stat-score">0</span></div>
+        <div class="static-stat-pill"><span>🎯</span><span class="stat-label">التحديات:</span><span class="val" id="stat-challenges">0</span></div>
+        <div class="static-stat-pill"><span>✔️</span><span class="stat-label">المحددة:</span><span class="val" id="stat-selected">0 / 2</span></div>
+      </div>
+    </div>
+    <div class="static-mission-instruction-row">
+      <div class="static-mission-instruction" id="mission-instruction">
+        حَدِّدْ جهازين يعملان بهذا المصدر، واضغط فحص 3D لكشف الدليل!
+      </div>
+      <button type="button" class="static-btn-listen" id="btn-listen-mission" title="استمع للتعليمات صوتياً">
+        📢 <span class="listen-text">استمع للتوجيه</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- 3️⃣ صندوق التوجيه الديناميكي -->
+  <div id="guidance-box" class="static-guidance-box"></div>
+
+  <!-- 4️⃣ ساحة البطاقات -->
+  <main class="static-cards-stage" id="cards-stage"></main>
+
+  <!-- 5️⃣ شريط الأوامر السفلي -->
+  <footer class="static-actions-bar">
+    <div class="static-actions-center">
+      <button type="button" class="static-btn btn-verify" id="btn-validate"><span>🔍 تحقق من إجابتي</span></button>
+      <button type="button" class="static-btn btn-secondary" id="btn-hint"><span>💡 تلميح المحقق</span></button>
+      <button type="button" class="static-btn btn-secondary" id="btn-refresh"><span>🔄 أجهزة أخرى</span></button>
+    </div>
+  </footer>
+
+  <!-- 6️⃣ نافذة كشف المقارنة (المُلخص) -->
+  <dialog class="static-dialog" id="summary-dialog">
+    <div class="dialog-header">
+      <h3>📋 كشف التحقيق: المقارنة العلمية لمصادر الطاقة</h3>
+      <button type="button" class="dialog-close-btn" id="summary-close-btn">✕</button>
+    </div>
+    <div class="summary-table-container">
+      <div class="summary-col battery-col"><h4>🔋 أجهزة تعمل بالبطارية الجافة:</h4><div id="battery-summary-list"></div></div>
+      <div class="summary-col house-col"><h4>⚡ أجهزة تعمل بكهرباء المنزل 220V:</h4><div id="house-summary-list"></div></div>
+    </div>
+  </dialog>
+
+  <!-- 7️⃣ نافذة شهادة الإنجاز -->
+  <dialog class="static-dialog" id="cert-dialog">
+    <div class="dialog-header"><h3>🎓 شهادة تميّز متحرّي العلوم</h3><button type="button" class="dialog-close-btn" id="cert-close-btn">✕</button></div>
+    <div style="text-align:center;padding:10px 0;">
+      <div style="font-size:2.5rem;margin-bottom:6px;">🎖️📜🎖️</div>
+      <h2 style="font-size:1.25rem;font-weight:900;color:var(--frog-dark);margin-bottom:4px;">مبارك اجتياز تحديات مصادر الكهرباء!</h2>
+      <p style="font-size:0.88rem;color:var(--frog);margin-bottom:14px;">مادة العلوم — الصف الرابع الابتدائي</p>
+      <label style="display:block;font-size:0.82rem;font-weight:800;margin-bottom:6px;">ادخل اسمك يا بطل العلوم:</label>
+      <input type="text" id="cert-name-input" value="البطل الصغير"
+        style="border:2px solid var(--gold);border-radius:12px;padding:8px 16px;font-size:1rem;font-weight:900;text-align:center;width:80%;max-width:280px;">
+      <div style="display:flex;justify-content:center;gap:16px;margin:20px 0;">
+        <div class="static-stat-pill">🏆 مجموع النقاط: <strong class="val" id="cert-score-val">0</strong></div>
+        <div class="static-stat-pill">🎯 التحديات: <strong class="val" id="cert-challenges-val">0</strong></div>
+      </div>
+      <button type="button" class="static-btn btn-verify" onclick="window.print()" style="margin:0 auto;">
+        <span>🖨️ طباعة الشهادة</span>
+      </button>
+    </div>
+  </dialog>
+</div>
+
+<script type="module">
+/* ────────────────── بيانات الأجهزة (اختصار) ────────────────── */
+import { ALL_DEVICES } from './config.js';   // يجب أن يحتوي ملف config.js على المصفوفة الكاملة
+
+/* ────────────────── خريطة SVGs (مقتطف) ────────────────── */
+import { SVG_MAP } from './svg-map.js';     // ملف مستقل يحتوى على الخريطة الكاملة (مُستورد لتقليل حجم هذا الملف)
+
+/* ────────────────── صوتيات ────────────────── */
+let speechEnabled = true;
+let soundEnabled  = true;
+let audioCtx = null;
+
+function speakArabic(text){
+  if (!speechEnabled) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ar-SA';
+  utter.pitch = 1.0;
+  utter.rate  = 0.92;
+  if (!window.speechSynthesis.speaking) window.speechSynthesis.speak(utter);
+}
+
+function playTone(freq, type='sine', dur=0.12){
+  if (!soundEnabled) return;
+  if (!audioCtx){
+    const A = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new A();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + dur);
+}
+function playSelectSound(){ playTone(587.33,'triangle',0.1); }
+function playFlipSound(){   playTone(440,'sine',0.14); }
+function playWinSound(){
+  [523.25,659.25,783.99,1046.5].forEach((f,i)=>setTimeout(()=>playTone(f,'triangle',0.22),i*110));
+}
+function playErrorSound(){ playTone(220,'sawtooth',0.25); }
+
+/* ────────────────── الحالة العامة ────────────────── */
+let totalScore = 0, totalChallenges = 0;
+let currentTargetType = 'battery'; // أو 'mains'
+let currentDevices = [];
+let selectedIds = new Set();
+let isAnswerChecked = false;
+
+/* توجيه متغيّر حسب الجهاز */
+const GUIDANCE_MAP = {
+  remote: {
+    prompt: 'افتح الباب الخلفي للريموت وتحقق من بطاريته. هل تسمع صوتاً خفيفاً؟',
+    correct: 'صحيح! الريموت يعمل بالبطاريات.',
+    wrong:   'قريباً! تذكر أن الريموت يحتاج بطاريات جافة صغيرة.',
+    audioPrompt: 'هيا يا بطل! افحص الريموت وابحث عن دليل بطارية.'
+  },
+  flashlight: {
+    prompt: 'ابحث عن مصباح يدوي وتأكد من وجود فتحة بطارية مستديرة.',
+    correct: 'ممتاز! المصباح يستخدم بطاريات جافة.',
+    wrong:   'ليس بعد! المصباح يحتاج بطاريات، لا كهرباء منزلية.',
+    audioPrompt: 'افحص المصباح وابحث عن بطارية داخل القاع.'
+  }
+  // … أضف باقي الأجهزة بالمثل …
+};
+
+function updateGuidance(deviceId){
+  const box = document.getElementById('guidance-box');
+  const data = GUIDANCE_MAP[deviceId] || {prompt:'حاول استكشاف الجهاز وابحث عن دليل بصري.',correct:'',wrong:''};
+  box.textContent = data.prompt;
+  speakArabic(data.audioPrompt);
+}
+
+function showFeedback(message, type){
+  const box = document.getElementById('guidance-box');
+  box.textContent = message;
+  box.classList.remove('feedback-correct','feedback-wrong');
+  box.classList.add(type==='correct' ? 'feedback-correct' : 'feedback-wrong');
+}
+
+function updateSelectionCounter(){
+  document.getElementById('stat-selected').textContent = `${selectedIds.size} / 2`;
+}
+
+function toggleDeviceSelection(id){
+  if (selectedIds.has(id)){
+    selectedIds.delete(id);
+    document.getElementById(`badge-${id}`).textContent = '○';
+  }else{
+    if (selectedIds.size < 2){
+      selectedIds.add(id);
+      document.getElementById(`badge-${id}`).textContent = '✔';
+      playSelectSound();
+    }
+  }
+  updateSelectionCounter();
+}
+
+function validateSelection(){
+  if (isAnswerChecked) return;
+  isAnswerChecked = true;
+  const correctIds = currentDevices.filter(d=>d.type===currentTargetType).map(d=>d.id);
+  const isCorrect = [...selectedIds].every(id=>correctIds.includes(id)) && selectedIds.size===2;
+  const deviceId = [...selectedIds][0] || currentDevices[0].id;
+  if (isCorrect){
+    totalScore += 10; totalChallenges++;
+    document.getElementById('stat-score').textContent = totalScore;
+    document.getElementById('stat-challenges').textContent = totalChallenges;
+    showFeedback(GUIDANCE_MAP[deviceId]?.correct || 'إجابة صحيحة! أحسنت.', 'correct');
+    playWinSound();
+    document.getElementById('victory-banner').style.display = 'flex';
+  }else{
+    showFeedback(GUIDANCE_MAP[deviceId]?.wrong || 'إجابة غير صحيحة، حاول مرة أخرى.', 'wrong');
+    playErrorSound();
+  }
+}
+
+function giveDetectiveHint(){
+  alert('تلميحات: \n' + currentDevices.map(d=>d.name+': '+(d.type==='battery'?'بطارية':'كبل')).join('\n'));
+}
+
+function startNewChallenge(){
+  isAnswerChecked = false;
+  selectedIds.clear();
+  document.getElementById('victory-banner').style.display='none';
+  updateSelectionCounter();
+  currentTargetType = Math.random()>0.5 ? 'battery' : 'mains';
+  const chip = document.getElementById('target-chip');
+  const icon = document.getElementById('target-icon');
+  const title = document.getElementById('target-title');
+  if (currentTargetType==='battery'){
+    chip.className='static-target-chip chip-battery';
+    icon.textContent='🔋'; title.textContent='تحدي البطاريات الجافة';
+  }else{
+    chip.className='static-target-chip chip-house';
+    icon.textContent='⚡'; title.textContent='تحدي كهرباء المنزل 220V';
+  }
+  const batteries = ALL_DEVICES.filter(d=>d.type==='battery');
+  const mains = ALL_DEVICES.filter(d=>d.type==='mains');
+  const pick = [
+    batteries[Math.floor(Math.random()*batteries.length)],
+    batteries[Math.floor(Math.random()*batteries.length)],
+    mains[Math.floor(Math.random()*mains.length)],
+    mains[Math.floor(Math.random()*mains.length)]
+  ].sort(()=>Math.random()-0.5);
+  currentDevices = pick;
+  renderCards(pick);
+  speakCurrentMission();
+}
+
+function speakCurrentMission(){
+  const txt = currentTargetType==='battery' ?
+    'هيا يا بطل! ابحث عن جهازين يعملان بالبطاريات واضغط فحص 3D لاكتشاف الدليل.' :
+    'هيا يا ذكي! ابحث عن جهازين يعملان بالكهرباء المنزلية واضغط فحص 3D لاكتشاف الدليل.';
+  speakArabic(txt);
+}
+
+function renderCards(devices){
+  const stage = document.getElementById('cards-stage');
+  stage.innerHTML='';
+  devices.forEach((dev,idx)=>{
+    const wrap = document.createElement('div');
+    wrap.className='card-3d-wrap';
+    const svgIcon = SVG_MAP[dev.id] || `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="24" fill="#FFB703"/></svg>`;
+    wrap.innerHTML = `
+      <div class="card-3d-inner" id="card-inner-${dev.id}">
+        <div class="card-face card-face-front" data-id="${dev.id}">
+          <div class="card-header-bar">
+            <span class="card-tag-pill">🔎 جهاز ${idx+1}</span>
+            <div class="card-select-badge" id="badge-${dev.id}" title="حدد هذا الجهاز">○</div>
+          </div>
+          <div class="card-visual-box">${svgIcon}</div>
+          <div class="card-device-name">${dev.name}</div>
+          <button type="button" class="btn-flip-inspect" data-inspect="${dev.id}" title="فحص الجهاز ثلاثي الأبعاد والبحث عن الدليل">
+            🔍 <span>فحص 3D للمجسم</span>
+          </button>
+        </div>
+        <div class="card-face card-face-back">
+          <div class="back-header"><strong>🔍 دليل الفحص والملاحظة</strong></div>
+          <div class="back-reason-box">
+            <div class="back-reason-title">${dev.name}</div>
+            <div class="back-reason-text">${dev.reason}</div>
+            <button type="button" class="static-btn-listen" data-speak-reason="${dev.id}">📢 <span>استمع للتوجيه</span></button>
+          </div>
+          <button type="button" class="btn-flip-back" data-flipback="${dev.id}">↩️ عودة للبطاقة</button>
+        </div>
+      </div>
+    `;
+    const front = wrap.querySelector('.card-face-front');
+    front.addEventListener('click',e=>{ if (e.target.closest('.btn-flip-inspect')) return; toggleDeviceSelection(dev.id); });
+    const inspectBtn = wrap.querySelector(`[data-inspect="${dev.id}"]`);
+    inspectBtn.addEventListener('click',e=>{ e.stopPropagation(); openDeviceArInspector(dev); });
+    const backBtn = wrap.querySelector(`[data-flipback="${dev.id}"]`);
+    const inner = wrap.querySelector(`#card-inner-${dev.id}`);
+    backBtn?.addEventListener('click',e=>{ e.stopPropagation(); inner.classList.remove('is-flipped'); playFlipSound(); });
+    const speakBtn = wrap.querySelector(`[data-speak-reason="${dev.id}"]`);
+    speakBtn?.addEventListener('click',e=>{ e.stopPropagation(); speakArabic(`تفحص ${dev.name} جيداً! هل ترى حجرة بطاريات أم سلكاً متصلًا بفيشة؟`); });
+    wrap.addEventListener('pointermove',e=>{
+      const r = wrap.getBoundingClientRect();
+      const x = e.clientX - r.left - r.width/2;
+      const y = e.clientY - r.top - r.height/2;
+      const rotX = -(y/(r.height/2))*7;
+      const rotY =  (x/(r.width/2))*7;
+      if (!inner.classList.contains('is-flipped')){
+        inner.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.02,1.02,1.02)`;
+      }
+    });
+    wrap.addEventListener('pointerleave',()=>{ if (!inner.classList.contains('is-flipped')) inner.style.transform=''; });
+    stage.appendChild(wrap);
+  });
+}
+
+function openDeviceArInspector(dev){
+  playFlipSound();
+  speakArabic(`هيا يا محقق! استكشف ${dev.name} من جميع الجوانب؛ قد تجد حجرة بطاريات أو سلكاً كهربائياً.`);
+  alert(`(محاكاة) تم فتح فحص AR لجهاز ${dev.name}.`);
+}
+
+function bindEvents(){
+  const voiceBtn = document.getElementById('btn-voice-toggle');
+  voiceBtn?.addEventListener('click',()=>{ speechEnabled=!speechEnabled; voiceBtn.textContent = speechEnabled ? '🗣️' : '🔇'; if (!speechEnabled) speechSynthesis.cancel(); else speakArabic('تم تفعيل التوجيه الصوتي'); });
+  const soundBtn = document.getElementById('btn-sound-toggle');
+  soundBtn?.addEventListener('click',()=>{ soundEnabled=!soundEnabled; soundBtn.textContent = soundEnabled ? '🔊' : '🔈'; });
+  const certDialog = document.getElementById('cert-dialog');
+  document.getElementById('btn-cert-open')?.addEventListener('click',()=>{ document.getElementById('cert-score-val').textContent = totalScore; document.getElementById('cert-challenges-val').textContent = totalChallenges; certDialog?.showModal(); });
+  document.getElementById('cert-close-btn')?.addEventListener('click',()=>certDialog?.close());
+  const summaryDialog = document.getElementById('summary-dialog');
+  document.getElementById('btn-summary')?.addEventListener('click',()=>{ populateSummaryModal(); summaryDialog?.showModal(); });
+  document.getElementById('summary-close-btn')?.addEventListener('click',()=>summaryDialog?.close());
+  document.getElementById('btn-validate')?.addEventListener('click',validateSelection);
+  document.getElementById('btn-hint')?.addEventListener('click',giveDetectiveHint);
+  document.getElementById('btn-refresh')?.addEventListener('click',startNewChallenge);
+  document.getElementById('btn-listen-mission')?.addEventListener('click',()=>speakCurrentMission());
+  const isInPublic = window.location.pathname.includes('/public/');
+  const base = isInPublic ? '../' : './';
+  document.getElementById('brand-link').href = base+'index.html';
+  document.getElementById('home-link').href  = base+'index.html';
+  document.getElementById('dynamic-link').href = base+'dynamic-lab.html';
+}
+
+function populateSummaryModal(){
+  const batteryList = document.getElementById('battery-summary-list');
+  const houseList   = document.getElementById('house-summary-list');
+  batteryList.innerHTML=''; houseList.innerHTML='';
+  currentDevices.forEach(d=>{ const li=document.createElement('li'); li.textContent=d.name; (d.type==='battery'?batteryList:houseList).appendChild(li); });
+}
+
+function initStaticLab(){
+  const app = document.getElementById('app') || document.body;
+  app.innerHTML = document.querySelector('.static-app-root').outerHTML;
+  bindEvents();
+  startNewChallenge();
+}
+
+initStaticLab();
+</script>
+</body>
 </html>

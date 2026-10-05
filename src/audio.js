@@ -87,6 +87,40 @@ export function selectBestVoice(voices, lang) {
   return [...matching].sort((a, b) => scoreVoice(b) - scoreVoice(a))[0];
 }
 
+// ─── منع تجميد الصوت في الهواتف الذكية (iOS Safari & Android Chrome GC / Freeze Fix) ───
+const activeUtterances = new Set();
+let speechUnlockBound = false;
+
+function bindSpeechUnlock() {
+  if (typeof window === 'undefined' || !globalThis.speechSynthesis || speechUnlockBound) return;
+  speechUnlockBound = true;
+
+  const unlock = () => {
+    try {
+      if (globalThis.speechSynthesis.paused) {
+        globalThis.speechSynthesis.resume();
+      }
+      // تشغيل نغمة صامتة جداً لفتح قفل الصوت في نظام iOS
+      const u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0.01;
+      u.rate = 10;
+      globalThis.speechSynthesis.speak(u);
+    } catch {}
+    ['touchstart', 'touchend', 'pointerdown', 'click'].forEach(evt => {
+      window.removeEventListener(evt, unlock, { capture: true });
+    });
+  };
+
+  ['touchstart', 'touchend', 'pointerdown', 'click'].forEach(evt => {
+    window.addEventListener(evt, unlock, { capture: true, once: true, passive: true });
+  });
+}
+
+// تفعيل فتح قفل الصوت فور تحميل الملف
+if (typeof window !== 'undefined') {
+  bindSpeechUnlock();
+}
+
 // Pre-warm voices cache as soon as the browser loads them
 if (typeof window !== 'undefined' && globalThis.speechSynthesis) {
   try {
@@ -106,7 +140,17 @@ export function speak(text, lang = 'ar', options = {}) {
   const cleaned = cleanSpeechText(text);
   if (!cleaned) return false;
 
-  let voices = speechSynthesis.getVoices();
+  try {
+    // التأكد من استئناف محرّك الصوت إن كان في حالة pause
+    if (speechSynthesis.paused) {
+      speechSynthesis.resume();
+    }
+  } catch {}
+
+  let voices = [];
+  try {
+    voices = speechSynthesis.getVoices() || [];
+  } catch {}
   const voice = selectBestVoice(voices, lang);
 
   const utterance = new SpeechSynthesisUtterance(cleaned);
@@ -122,9 +166,38 @@ export function speak(text, lang = 'ar', options = {}) {
   utterance.pitch = options.pitch ?? 1.0;
   utterance.volume = options.volume ?? 1.0;
 
+  // الاحتفاظ بالمرجع لمنع محرك الـ Garbage Collector في iOS/Android من مسحه أثناء النطق
+  activeUtterances.add(utterance);
+  if (typeof window !== 'undefined') {
+    window.__currentSpeechUtterance = utterance;
+  }
+
+  utterance.onend = () => {
+    activeUtterances.delete(utterance);
+    if (typeof window !== 'undefined' && window.__currentSpeechUtterance === utterance) {
+      window.__currentSpeechUtterance = null;
+    }
+  };
+
+  utterance.onerror = () => {
+    activeUtterances.delete(utterance);
+    if (typeof window !== 'undefined' && window.__currentSpeechUtterance === utterance) {
+      window.__currentSpeechUtterance = null;
+    }
+  };
+
   speech = utterance;
+
   try {
-    speechSynthesis.speak(utterance);
+    // تشغيل الصوت بعد تأخير متناهي الصغر (Microtask) لضمان انتهاء cancel السابقة في WebKit
+    setTimeout(() => {
+      try {
+        if (speechSynthesis.paused) speechSynthesis.resume();
+        speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.warn('Speech speak retry failed:', err);
+      }
+    }, 15);
     return true;
   } catch {
     return false;
