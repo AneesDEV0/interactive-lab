@@ -39,9 +39,51 @@ try {
 let state = initialState(prefs);
 let scene = null, seq = 0, pendingDevice = null, drag = null, idleTimer = null, modalOpener = null, tutorial = false;
 let isCameraPassthroughActive = false;
+let activeVideoStream = null;
 let inQuizChallengeMode = false;
 let currentQuizDevIndex = 0;
 const history = [], counts = new Map(), app = document.querySelector('#app');
+
+async function toggleCameraPassthrough(btn) {
+  const videoEl = $('#camera-passthrough-video');
+  if (!videoEl) return;
+
+  if (isCameraPassthroughActive) {
+    if (activeVideoStream) {
+      activeVideoStream.getTracks().forEach(track => track.stop());
+      activeVideoStream = null;
+    }
+    videoEl.srcObject = null;
+    videoEl.style.display = 'none';
+    isCameraPassthroughActive = false;
+    scene?.setCameraPassthrough?.(false);
+    if (btn) btn.innerHTML = '📷 <span>كاميرا الجهاز</span>';
+  } else {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert(state.language === 'ar' ? 'كاميرا الجهاز غير مدعومة في هذا المتصفح' : 'Camera not supported');
+        return;
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } },
+        audio: false
+      });
+      activeVideoStream = stream;
+      videoEl.srcObject = stream;
+      videoEl.style.display = 'block';
+      await videoEl.play();
+      isCameraPassthroughActive = true;
+      scene?.setCameraPassthrough?.(true);
+      if (btn) btn.innerHTML = '🎨 <span>بيئة افتراضية</span>';
+    } catch (err) {
+      console.warn('Camera passthrough access failed:', err);
+      alert(state.language === 'ar' ? 'تعذر تشغيل كاميرا الجهاز. يُرجى السماح بالإذن أو التأكد من توفر الكاميرا.' : 'Could not access camera.');
+      isCameraPassthroughActive = false;
+      scene?.setCameraPassthrough?.(false);
+      if (btn) btn.innerHTML = '📷 <span>كاميرا الجهاز</span>';
+    }
+  }
+}
 
 const $ = s => document.querySelector(s);
 const t = () => copy[state.language];
@@ -217,6 +259,7 @@ function shell() {
    <main class="lab-main-100vh">
      <div class="workspace">
        <div class="scene-wrap">
+         <video id="camera-passthrough-video" autoplay playsinline muted style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; display:none; pointer-events:none;"></video>
          <div id="scene" role="img" aria-label="${c.lab}"></div>
 
          <!-- كاميرا الكشف الافتتاحية (Viewfinder HUD) -->
@@ -1237,9 +1280,7 @@ app.addEventListener('click', e => {
       });
       break;
     case 'togglePassthrough':
-      isCameraPassthroughActive = !isCameraPassthroughActive;
-      scene?.setCameraPassthrough?.(isCameraPassthroughActive);
-      b.innerHTML = isCameraPassthroughActive ? '🎨 <span>بيئة افتراضية</span>' : '📷 <span>كاميرا الجهاز</span>';
+      toggleCameraPassthrough(b);
       break;
     case 'skipIntro':
       scene?.skipRevealIntro?.();

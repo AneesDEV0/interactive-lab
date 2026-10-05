@@ -344,9 +344,15 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         attachBatteryBay(g, -0.46, 0.62, 0, 0.95);
         fx.wheels = [];
         for (const x of [-0.55, 0.55]) for (const z of [-0.48, 0.48]) {
-          const w = cyl(g, 0.25, 0.16, palette.dark, x, 0.22, z);
+          const wg = new THREE.Group();
+          wg.position.set(x, 0.22, z);
+          g.add(wg);
+          const w = cyl(wg, 0.25, 0.16, palette.dark, 0, 0, 0);
           w.rotation.x = Math.PI / 2;
-          fx.wheels.push(w);
+          // Spoke dots for visible rotation
+          ball(wg, 0.06, 0xfacc15, 0.13, 0, z > 0 ? 0.08 : -0.08);
+          ball(wg, 0.06, 0xfacc15, -0.13, 0, z > 0 ? 0.08 : -0.08);
+          fx.wheels.push(wg);
         }
         fx.headlights = [ball(g, 0.08, 0xfef08a, 0.78, 0.42, -0.32), ball(g, 0.08, 0xfef08a, 0.78, 0.42, 0.32)];
         fx.headlights.forEach(h => { h.visible = false; });
@@ -357,11 +363,11 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         cyl(g, 0.35, 0.08, palette.navy, -0.28, 0.78, 0.32).rotation.x = Math.PI / 2;
         cyl(g, 0.1, 0.09, palette.white, 0.38, 0.7, 0.33).rotation.x = Math.PI / 2;
         attachBatteryBay(g, 0, 0.32, 0.31, 0.9);
-        fx.radioLight = ball(g, 0.055, 0x6b7b78, 0.48, 1.1, 0.32);
+        fx.radioLight = ball(g, 0.06, 0x6b7b78, 0.48, 1.1, 0.32);
         fx.waves = new THREE.Group(); g.add(fx.waves);
         fx.waves.position.set(-0.8, 0.85, 0);
         for (let i = 0; i < 3; i++) {
-          const r = mesh(fx.waves, new THREE.TorusGeometry(0.18 + i * 0.12, 0.02, 6, 18, Math.PI), palette.mint);
+          const r = mesh(fx.waves, new THREE.TorusGeometry(0.18 + i * 0.12, 0.025, 6, 18, Math.PI), palette.mint);
           r.rotation.z = Math.PI / 2; r.position.x = -i * 0.08;
         }
         fx.waves.visible = false;
@@ -371,9 +377,9 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         const fb = cyl(g, 0.15, 1.1, palette.orange, 0, 0.55, 0); fb.rotation.z = Math.PI / 2;
         const fh = cyl(g, 0.3, 0.35, palette.navy, 0.62, 0.55, 0); fh.rotation.z = Math.PI / 2;
         attachBatteryBay(g, -0.05, 0.55, 0, 0.8);
-        fx.beam = mesh(g, new THREE.ConeGeometry(0.55, 1.2, 16), 0xfef08a, [1.35, 0.55, 0]);
+        fx.beam = mesh(g, new THREE.ConeGeometry(0.55, 1.4, 16), 0xfef08a, [1.45, 0.55, 0]);
         fx.beam.rotation.z = -Math.PI / 2;
-        fx.beam.material = new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: 0.65 });
+        fx.beam.material = new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: 0.7 });
         fx.beam.visible = false;
         break;
 
@@ -381,8 +387,8 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         const cf = cyl(g, 0.65, 0.14, palette.mint, 0, 0.75, 0); cf.rotation.x = Math.PI / 2;
         const cd = cyl(g, 0.56, 0.15, palette.white, 0, 0.75, 0.01); cd.rotation.x = Math.PI / 2;
         attachBatteryBay(g, 0, 0.75, -0.10, 0.75);
-        fx.handH = box(g, 0.04, 0.32, 0.02, palette.dark, 0, 0.85, 0.08);
-        fx.handM = box(g, 0.03, 0.44, 0.02, palette.red, 0, 0.88, 0.09);
+        fx.handH = box(g, 0.04, 0.30, 0.02, palette.dark, 0, 0.82, 0.08);
+        fx.handM = box(g, 0.03, 0.42, 0.02, palette.red, 0, 0.86, 0.09);
         break;
 
       case 'remote':
@@ -418,8 +424,8 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
       case 'laserPointer':
         const lp = cyl(g, 0.09, 1.2, palette.blue, 0, 0.6, 0); lp.rotation.z = Math.PI / 2;
         attachBatteryBay(g, -0.15, 0.6, 0, 0.55);
-        fx.laserBeam = cyl(g, 0.015, 1.4, palette.red, 1.3, 0.6, 0); fx.laserBeam.rotation.z = Math.PI / 2;
-        fx.laserDot = ball(g, 0.06, palette.red, 2.0, 0.6, 0);
+        fx.laserBeam = cyl(g, 0.02, 1.6, palette.red, 1.4, 0.6, 0); fx.laserBeam.rotation.z = Math.PI / 2;
+        fx.laserDot = ball(g, 0.07, palette.red, 2.2, 0.6, 0);
         fx.laserBeam.visible = false; fx.laserDot.visible = false;
         break;
 
@@ -454,27 +460,41 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
       case 'microwave':
         box(g, 1.6, 1.05, 1.0, palette.dark, 0, 0.75, 0, 0.08);
         box(g, 0.95, 0.65, 0.04, 0x0f172a, -0.25, 0.75, 0.51);
-        fx.plate = cyl(g, 0.35, 0.02, palette.silver, -0.25, 0.48, 0);
-        fx.microLight = ball(g, 0.06, 0xfef08a, -0.25, 0.9, 0.45);
+        const plateGroup = new THREE.Group();
+        plateGroup.position.set(-0.25, 0.48, 0);
+        g.add(plateGroup);
+        cyl(plateGroup, 0.35, 0.02, palette.silver, 0, 0, 0);
+        cyl(plateGroup, 0.1, 0.18, 0xf97316, 0.12, 0.09, 0);
+        fx.plate = plateGroup;
+        fx.microLight = ball(g, 0.08, 0xfef08a, -0.25, 0.9, 0.45);
         fx.microLight.visible = false;
         break;
 
       case 'washer':
         box(g, 1.4, 1.6, 1.3, palette.white, 0, 1.0, 0, 0.1);
-        fx.drum = cyl(g, 0.45, 0.08, palette.dark, 0, 0.95, 0.66);
-        fx.drum.rotation.x = Math.PI / 2;
+        const drumGroup = new THREE.Group();
+        drumGroup.position.set(0, 0.95, 0.66);
+        g.add(drumGroup);
+        const drumBase = cyl(drumGroup, 0.45, 0.08, 0x1e293b, 0, 0, 0);
+        drumBase.rotation.x = Math.PI / 2;
+        for (let i = 0; i < 3; i++) {
+          const angle = (i * Math.PI * 2) / 3;
+          const spoke = box(drumGroup, 0.08, 0.32, 0.06, [0xfacc15, 0xef4444, 0x3b82f6][i], Math.cos(angle) * 0.22, Math.sin(angle) * 0.22, 0.02, 0.02);
+          spoke.rotation.z = angle;
+        }
+        fx.drum = drumGroup;
         break;
 
       case 'airConditioner':
         box(g, 2.2, 0.85, 0.65, palette.white, 0, 0.75, 0, 0.06);
         fx.louver = box(g, 1.8, 0.08, 0.15, palette.mint, 0, 0.4, 0.28, 0.02);
-        fx.acLight = ball(g, 0.04, palette.mint, 0.75, 0.75, 0.34);
+        fx.acLight = ball(g, 0.05, palette.mint, 0.75, 0.75, 0.34);
         break;
 
       case 'vacuum':
         ball(g, 0.65, palette.orange, 0, 0.65, 0);
         for (let z of [-0.68, 0.68]) cyl(g, 0.35, 0.12, palette.dark, -0.15, 0.45, z).rotation.x = Math.PI / 2;
-        fx.vortex = mesh(g, new THREE.TorusGeometry(0.45, 0.03, 6, 16), 0x94a3b8, [0, 0.85, 0]);
+        fx.vortex = mesh(g, new THREE.TorusGeometry(0.45, 0.04, 6, 16), 0x94a3b8, [0, 0.85, 0]);
         fx.vortex.rotation.x = Math.PI / 2;
         fx.vortex.visible = false;
         break;
@@ -483,10 +503,10 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         cyl(g, 0.45, 0.1, palette.dark, 0, 0.28, 0);
         cyl(g, 0.05, 1.2, palette.silver, 0, 0.88, 0);
         mesh(g, new THREE.ConeGeometry(0.55, 0.65, 20, 1, true), palette.yellow, [0, 1.48, 0]).rotation.x = Math.PI;
-        fx.bulb = ball(g, 0.14, 0xfef08a, 0, 1.35, 0);
-        fx.spotlight = mesh(g, new THREE.CircleGeometry(0.85, 24), 0xfef08a, [0, 0.02, 0]);
+        fx.bulb = ball(g, 0.15, 0xfef08a, 0, 1.35, 0);
+        fx.spotlight = mesh(g, new THREE.CircleGeometry(0.95, 24), 0xfef08a, [0, 0.02, 0]);
         fx.spotlight.rotation.x = -Math.PI / 2;
-        fx.spotlight.material = new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: 0.45 });
+        fx.spotlight.material = new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: 0.5 });
         fx.spotlight.visible = false;
         break;
 
@@ -509,8 +529,19 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         cyl(g, 0.16, 0.85, palette.dark, 0.2, 0.35, 0);
         fx.airCone = mesh(g, new THREE.ConeGeometry(0.35, 0.8, 16), 0xfb923c, [1.0, 0.75, 0]);
         fx.airCone.rotation.z = -Math.PI / 2;
-        fx.airCone.material = new THREE.MeshBasicMaterial({ color: 0xfb923c, transparent: true, opacity: 0.55 });
+        fx.airCone.material = new THREE.MeshBasicMaterial({ color: 0xfb923c, transparent: true, opacity: 0.6 });
         fx.airCone.visible = false;
+        const windGroup = new THREE.Group();
+        windGroup.position.set(0.6, 0.75, 0);
+        g.add(windGroup);
+        fx.windRings = [];
+        for (let i = 0; i < 3; i++) {
+          const ring = mesh(windGroup, new THREE.RingGeometry(0.1 + i * 0.08, 0.14 + i * 0.08, 16), 0xffffff);
+          ring.rotation.y = Math.PI / 2;
+          ring.material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7, side: THREE.DoubleSide });
+          ring.visible = false;
+          fx.windRings.push(ring);
+        }
         break;
 
       case 'electricWaterHeater':
@@ -751,9 +782,10 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         case 'car':
         case 'toyCar':
           if (isRunning) {
-            fx.wheels?.forEach(w => { w.rotation.z += 0.28; });
+            fx.wheels?.forEach(w => { w.rotation.x += 0.35; });
             fx.headlights?.forEach(h => { h.visible = true; });
-            objects[id].position.z = Math.sin(t * 8) * 0.08;
+            objects[id].position.z = Math.sin(t * 10) * 0.12;
+            objects[id].position.y = 1.98 + Math.abs(Math.sin(t * 20)) * 0.02;
           } else {
             fx.headlights?.forEach(h => { h.visible = false; });
           }
@@ -762,9 +794,9 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         case 'radio':
           if (isRunning) {
             if (fx.waves) fx.waves.visible = true;
-            if (fx.radioLight) fx.radioLight.material = mat(palette.mint, 1);
+            if (fx.radioLight) fx.radioLight.material = mat(Math.sin(t * 8) > 0 ? palette.mint : palette.yellow, 1);
             fx.waves?.children.forEach((c, idx) => {
-              c.scale.setScalar(1 + Math.sin(t * 10 + idx) * 0.2);
+              c.scale.setScalar(1 + Math.sin(t * 12 + idx * 1.5) * 0.3);
             });
           } else {
             if (fx.waves) fx.waves.visible = false;
@@ -778,15 +810,18 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
 
         case 'wallClock':
           if (isRunning) {
-            if (fx.handM) fx.handM.rotation.z += 0.12;
-            if (fx.handH) fx.handH.rotation.z += 0.01;
+            if (fx.handM) fx.handM.rotation.z -= 0.18;
+            if (fx.handH) fx.handH.rotation.z -= 0.03;
           }
           break;
 
         case 'remote':
           if (isRunning) {
             if (fx.irLed) fx.irLed.material = mat(Math.sin(t * 15) > 0 ? 0xff0000 : 0x475569, Math.sin(t * 15) > 0 ? 1 : 0);
-            if (fx.irWave) fx.irWave.visible = true;
+            if (fx.irWave) {
+              fx.irWave.visible = true;
+              fx.irWave.scale.setScalar(1 + Math.sin(t * 20) * 0.4);
+            }
           } else {
             if (fx.irLed) fx.irLed.material = mat(0x475569, 0);
             if (fx.irWave) fx.irWave.visible = false;
@@ -796,14 +831,17 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         case 'calculator':
         case 'digitalScale':
           if (fx.screen) {
-            fx.screen.material = mat(isRunning ? 0x86efac : 0x0f172a, isRunning ? 1 : 0);
+            fx.screen.material = mat(isRunning ? (Math.sin(t * 4) > 0 ? 0x86efac : 0x4ade80) : 0x0f172a, isRunning ? 1 : 0);
           }
           break;
 
         case 'smokeDetector':
           if (isRunning) {
-            if (fx.alarmLight) fx.alarmLight.material = mat(Math.sin(t * 12) > 0 ? 0xef4444 : 0x334155, Math.sin(t * 12) > 0 ? 1 : 0);
-            if (fx.alarmRing) fx.alarmRing.visible = true;
+            if (fx.alarmLight) fx.alarmLight.material = mat(Math.sin(t * 14) > 0 ? 0xef4444 : 0x334155, Math.sin(t * 14) > 0 ? 1 : 0);
+            if (fx.alarmRing) {
+              fx.alarmRing.visible = true;
+              fx.alarmRing.scale.setScalar(1 + Math.sin(t * 16) * 0.5);
+            }
           } else {
             if (fx.alarmLight) fx.alarmLight.material = mat(0x334155, 0);
             if (fx.alarmRing) fx.alarmRing.visible = false;
@@ -812,54 +850,70 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
 
         case 'laserPointer':
           if (fx.laserBeam) fx.laserBeam.visible = isRunning;
-          if (fx.laserDot) fx.laserDot.visible = isRunning;
+          if (fx.laserDot) {
+            fx.laserDot.visible = isRunning;
+            if (isRunning) fx.laserDot.scale.setScalar(1 + Math.sin(t * 25) * 0.3);
+          }
           break;
 
         case 'hearingAid':
-          if (fx.aidWaves) fx.aidWaves.visible = isRunning;
+          if (fx.aidWaves) {
+            fx.aidWaves.visible = isRunning;
+            if (isRunning) fx.aidWaves.scale.setScalar(1 + Math.sin(t * 10) * 0.25);
+          }
           break;
 
         case 'robotToy':
           if (isRunning) {
-            fx.robotEyes?.forEach(e => { e.material = mat(palette.yellow, 1); });
-            objects[id].rotation.y = Math.sin(t * 6) * 0.15;
+            fx.robotEyes?.forEach(e => { e.material = mat(Math.sin(t * 8) > 0 ? palette.yellow : palette.mint, 1); });
+            objects[id].rotation.y = Math.sin(t * 6) * 0.25;
+            objects[id].position.y = 1.98 + Math.abs(Math.sin(t * 12)) * 0.04;
           } else {
             fx.robotEyes?.forEach(e => { e.material = mat(palette.yellow, 0); });
             objects[id].rotation.y = 0;
+            objects[id].position.y = 1.98;
           }
           break;
 
         case 'electricToothbrush':
           if (isRunning && fx.brushHead) {
-            fx.brushHead.position.x = Math.sin(t * 35) * 0.04;
+            fx.brushHead.position.x = Math.sin(t * 40) * 0.06;
+            objects[id].position.y = 1.98 + Math.sin(t * 30) * 0.01;
           }
           break;
 
         case 'fridge':
           if (fx.fridgeLight) fx.fridgeLight.material = mat(isRunning ? 0x38bdf8 : 0x475569, isRunning ? 1 : 0);
+          if (isRunning) {
+            objects[id].position.y = 1.98 + Math.sin(t * 50) * 0.004;
+          }
           break;
 
         case 'microwave':
-          if (fx.plate && isRunning) fx.plate.rotation.y += 0.08;
+          if (fx.plate && isRunning) fx.plate.rotation.y += 0.15;
           if (fx.microLight) fx.microLight.visible = isRunning;
           break;
 
         case 'washer':
           if (fx.drum && isRunning) {
-            fx.drum.rotation.z += 0.2;
-            objects[id].position.x = (SLOT_X_LANDSCAPE[Object.keys(objects).indexOf(id)] || 0) + Math.sin(t * 40) * 0.015;
+            fx.drum.rotation.z += 0.35;
+            objects[id].position.x = (SLOT_X_LANDSCAPE[Object.keys(objects).indexOf(id)] || 0) + Math.sin(t * 40) * 0.02;
+            objects[id].position.y = 1.98 + Math.abs(Math.sin(t * 40)) * 0.015;
+          } else if (fx.drum) {
+            objects[id].position.x = (SLOT_X_LANDSCAPE[Object.keys(objects).indexOf(id)] || 0);
+            objects[id].position.y = 1.98;
           }
           break;
 
         case 'airConditioner':
           if (fx.acLight) fx.acLight.material = mat(isRunning ? palette.mint : 0x475569, isRunning ? 1 : 0);
-          if (fx.louver && isRunning) fx.louver.rotation.x = Math.sin(t * 4) * 0.25;
+          if (fx.louver && isRunning) fx.louver.rotation.x = Math.sin(t * 4) * 0.35;
           break;
 
         case 'vacuum':
           if (isRunning) {
-            if (fx.vortex) { fx.vortex.visible = true; fx.vortex.rotation.z += 0.25; }
-            objects[id].position.y = 1.98 + Math.sin(t * 30) * 0.015;
+            if (fx.vortex) { fx.vortex.visible = true; fx.vortex.rotation.z += 0.35; }
+            objects[id].position.y = 1.98 + Math.sin(t * 40) * 0.02;
           } else {
             if (fx.vortex) fx.vortex.visible = false;
           }
@@ -877,16 +931,30 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         case 'iron':
           if (fx.steam) fx.steam.forEach((s, idx) => {
             s.visible = isRunning;
-            if (isRunning) s.position.y = 0.8 + Math.sin(t * 6 + idx) * 0.15;
+            if (isRunning) s.position.y = 0.8 + ((t * 2 + idx * 0.4) % 0.6);
           });
           break;
 
         case 'hairDryer':
           if (fx.airCone) fx.airCone.visible = isRunning;
+          if (fx.windRings) {
+            fx.windRings.forEach((r, idx) => {
+              r.visible = isRunning;
+              if (isRunning) {
+                const phase = ((t * 4 + idx * 0.4) % 1.2);
+                r.position.x = phase * 0.9;
+                r.scale.setScalar(0.6 + phase * 0.7);
+                r.material.opacity = Math.max(0, 0.8 * (1 - phase / 1.2));
+              }
+            });
+          }
+          if (isRunning) {
+            objects[id].position.y = 1.98 + Math.sin(t * 40) * 0.015;
+          }
           break;
 
         case 'electricWaterHeater':
-          if (fx.gauge) fx.gauge.material = mat(isRunning ? 0xf97316 : 0x64748b, isRunning ? 1 : 0);
+          if (fx.gauge) fx.gauge.material = mat(isRunning ? (Math.sin(t * 6) > 0 ? 0xf97316 : 0xef4444) : 0x64748b, isRunning ? 1 : 0);
           break;
 
         case 'electricHeater':
@@ -895,8 +963,9 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
 
         case 'blender':
           if (isRunning) {
-            if (fx.blades) fx.blades.rotation.y += 0.45;
+            if (fx.blades) fx.blades.rotation.y += 0.6;
             if (fx.juice) fx.juice.visible = true;
+            objects[id].position.y = 1.98 + Math.sin(t * 45) * 0.015;
           } else {
             if (fx.juice) fx.juice.visible = false;
           }
