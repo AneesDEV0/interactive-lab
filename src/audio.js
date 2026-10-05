@@ -344,16 +344,21 @@ export async function radioTune() {
 }
 
 // ─── لوحة تشخيص الصوت (?debugAudio=1) ───
-if (typeof window !== 'undefined' && window.location.search.includes('debugAudio=1')) {
-  window.audioDiagnostics = () => ({
-    unlocked: isAudioUnlocked,
+export function getAudioDiagnostics() {
+  return {
+    isUnlocked: isAudioUnlocked,
     inApp: detectInAppBrowser(),
-    userAgent: navigator.userAgent,
-    hasSpeechSynthesis: Boolean(window.speechSynthesis),
-    voicesCount: window.speechSynthesis ? window.speechSynthesis.getVoices().length : 0,
-    arabicVoices: window.speechSynthesis ? window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('ar')).map(v => v.name) : [],
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+    hasSpeechSynthesis: typeof window !== 'undefined' && Boolean(window.speechSynthesis),
+    voicesCount: typeof window !== 'undefined' && window.speechSynthesis ? window.speechSynthesis.getVoices().length : 0,
+    arabicVoices: typeof window !== 'undefined' && window.speechSynthesis ? window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('ar')).map(v => v.name) : [],
     lastError: lastAudioError,
     registryKeys: Object.keys(AUDIO_REGISTRY).length
-  });
+  };
+}
+
+if (typeof window !== 'undefined' && window.location.search.includes('debugAudio=1')) {
+  window.audioDiagnostics = getAudioDiagnostics;
   console.table(window.audioDiagnostics());
 }
+
