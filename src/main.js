@@ -64,10 +64,27 @@ async function toggleCameraPassthrough(btn) {
         alert(state.language === 'ar' ? 'كاميرا الجهاز غير مدعومة في هذا المتصفح' : 'Camera not supported');
         return;
       }
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
-        audio: false
-      });
+      
+      let stream = null;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { exact: 'environment' } },
+          audio: false
+        });
+      } catch {
+        const idealStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false
+        });
+        const track = idealStream.getVideoTracks()[0];
+        const settings = track.getSettings ? track.getSettings() : {};
+        if (settings.facingMode === 'user') {
+          track.stop();
+          throw new Error('Rear camera not available');
+        }
+        stream = idealStream;
+      }
+
       activeVideoStream = stream;
       videoEl.srcObject = stream;
       videoEl.style.display = 'block';
@@ -76,8 +93,8 @@ async function toggleCameraPassthrough(btn) {
       scene?.setCameraPassthrough?.(true);
       if (btn) btn.innerHTML = '🎨 <span>بيئة افتراضية</span>';
     } catch (err) {
-      console.warn('Camera passthrough access failed:', err);
-      alert(state.language === 'ar' ? 'تعذر تشغيل كاميرا الجهاز. يُرجى السماح بالإذن أو التأكد من توفر الكاميرا.' : 'Could not access camera.');
+      console.warn('Rear camera access failed:', err);
+      alert(state.language === 'ar' ? 'الكاميرا الخلفية غير متاحة أو تم رفض الإذن. سيبقى المشهد في البيئة الافتراضية.' : 'Rear camera not available.');
       isCameraPassthroughActive = false;
       scene?.setCameraPassthrough?.(false);
       if (btn) btn.innerHTML = '📷 <span>كاميرا الجهاز</span>';
@@ -791,15 +808,18 @@ function renderSceneLabels() {
     const dotText = isRunning ? '⚡' : '○';
 
     return `
-      <div class="scene-label-stack-item ${isRunning ? 'running' : ''}" id="label-${id}">
-        <button class="label-main-tap" data-action="device" data-device="${id}" data-target="${id}">
+      <div class="scene-label-plinth-chip ${isRunning ? 'running' : ''}" id="label-${id}">
+        <div class="label-chip-header">
           <span class="label-status-dot" id="dot-${id}">${dotText}</span>
           <strong class="label-name">#${index + 1} ${shortName(id)}</strong>
           <span class="${badgeClass}" id="badge-${id}">${badgeText}</span>
-        </button>
-        <div class="label-prediction-btns">
-          <button type="button" class="label-pred-btn ${pred === true ? 'active-battery' : ''}" data-action="quickPredict" data-device="${id}" data-val="battery" title="أتوقع: بطارية جافة">🔋</button>
-          <button type="button" class="label-pred-btn ${pred === false ? 'active-mains' : ''}" data-action="quickPredict" data-device="${id}" data-val="mains" title="أتوقع: كهرباء المنزل">🔌</button>
+        </div>
+        <div class="label-chip-actions">
+          <button type="button" class="label-inspect-btn" data-action="inspect" data-device="${id}" title="فحص 3D في الاستوديو">🔍 فحص 3D</button>
+          <div class="label-prediction-btns">
+            <button type="button" class="label-pred-btn ${pred === true ? 'active-battery' : ''}" data-action="quickPredict" data-device="${id}" data-val="battery" title="أتوقع: بطارية جافة">🔋</button>
+            <button type="button" class="label-pred-btn ${pred === false ? 'active-mains' : ''}" data-action="quickPredict" data-device="${id}" data-val="mains" title="أتوقع: كهرباء المنزل">🔌</button>
+          </div>
         </div>
       </div>
     `;
@@ -1386,7 +1406,13 @@ async function loadScene() {
       onBattery: e => toolDown('battery', e),
       onMains: e => toolDown('mains', e),
       onDevice: tryDevice,
-      projectLabel: () => {}
+      projectLabel: (id, x, y) => {
+        const el = document.getElementById('label-' + id);
+        if (el) {
+          el.style.left = `${x}px`;
+          el.style.top = `${y}px`;
+        }
+      }
     });
     if (scene) {
       dispatch({type: 'READY', sessionRevision: rev});
