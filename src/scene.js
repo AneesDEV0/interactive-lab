@@ -5,6 +5,7 @@
 
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { ALL_DEVICES } from './config.js';
 
 const defaults = {
   blue: 0x3093d7,
@@ -42,7 +43,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-6.5, 6.5, 4.3, -4.3, 0.1, 80);
   let view = 0, zoom = 1, focus = null, dead = false, frame = 0, renderCount = 0;
-  let isIntroPlaying = false, introProgress = 0, introStartTime = 0;
+  let isIntroPlaying = false, introStartTime = 0;
   let targetCamPos = new THREE.Vector3(-1.8, 12, 14);
   let currentCamPos = new THREE.Vector3(-1.8, 12, 14);
   let targetLookAt = new THREE.Vector3(0, 1.8, 0);
@@ -79,7 +80,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         color,
         roughness: 0.65,
         emissive: isEmissive ? new THREE.Color(color) : new THREE.Color(0x000000),
-        emissiveIntensity: isEmissive ? 0.85 : 0
+        emissiveIntensity: isEmissive ? 0.95 : 0
       }));
     }
     return mats.get(key);
@@ -133,7 +134,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     box(bgGroup, 0.23, 0.65 + (i % 2) * 0.12, 0.33, [palette.blue, palette.yellow, palette.mint, palette.orange, palette.white][i], 2 + i * 0.28, 3.62, -5.35, 0.015);
   }
 
-  // طاولة المختبر الرئيسية (تتسع بدقة للأجهزة الـ 4)
+  // طاولة المختبر الرئيسية
   const cart = new THREE.Group();
   scene.add(cart);
   box(cart, 9.8, 0.25, 3.2, 0xf7e5b1, 0, 1.75, 0, 0.1);
@@ -161,7 +162,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
   const robotArmPivot = new THREE.Group();
   robotArmPivot.position.set(-0.45, 1.15, 0);
   robot.add(robotArmPivot);
-  const robotArm = box(robotArmPivot, 0.18, 0.65, 0.18, palette.mint, 0, -0.32, 0, 0.06);
+  box(robotArmPivot, 0.18, 0.65, 0.18, palette.mint, 0, -0.32, 0, 0.06);
   robotArmPivot.rotation.z = 0.2;
 
   // ─── لوحة الجدار المثبتة وعمود مقبس 220V ───
@@ -323,7 +324,6 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     });
   }
 
-  // ─── بناء حجرة البطارية مع أقطاب (+ / -) لجميع أجهزة البطارية الـ 12 ───
   function attachBatteryBay(parent, x = 0, y = 0.35, z = 0.35, scale = 1) {
     const bay = new THREE.Group();
     bay.position.set(x, y, z);
@@ -338,7 +338,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     return bay;
   }
 
-  // ─── مصنع مجسمات الأجهزة الـ 24 ───
+  // ─── مصنع مجسمات الأجهزة الـ 24 مع مؤثراتها البصرية التفاعلية ───
   function createDeviceMesh(id) {
     const g = new THREE.Group();
     g.name = id;
@@ -399,35 +399,44 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         for (let y = 0.4; y <= 1.0; y += 0.2) for (let x of [-0.12, 0.12]) box(g, 0.1, 0.1, 0.06, palette.silver, x, y, 0.12, 0.02);
         attachBatteryBay(g, 0, 0.65, -0.12, 0.65);
         fx.irLed = ball(g, 0.04, palette.red, 0, 1.32, 0);
+        fx.irWave = mesh(g, new THREE.RingGeometry(0.1, 0.2, 16), palette.red, [0, 1.4, 0]);
+        fx.irWave.rotation.x = -Math.PI / 2;
+        fx.irWave.visible = false;
         break;
 
       case 'calculator':
         box(g, 0.75, 1.1, 0.16, 0x334155, 0, 0.62, 0, 0.05);
-        box(g, 0.58, 0.24, 0.04, 0x86efac, 0, 0.95, 0.09);
+        fx.screen = box(g, 0.58, 0.24, 0.04, 0x86efac, 0, 0.95, 0.09);
         attachBatteryBay(g, 0, 0.42, -0.10, 0.65);
         break;
 
       case 'digitalScale':
         box(g, 1.2, 0.12, 1.2, 0xe2e8f0, 0, 0.2, 0, 0.06);
-        box(g, 0.48, 0.18, 0.04, 0x0f172a, 0, 0.27, -0.32);
+        fx.screen = box(g, 0.48, 0.18, 0.04, 0x0f172a, 0, 0.27, -0.32);
         attachBatteryBay(g, 0, 0.06, 0, 0.75);
         break;
 
       case 'smokeDetector':
         const sdb = cyl(g, 0.62, 0.22, palette.white, 0, 0.55, 0); sdb.rotation.x = Math.PI / 2;
         attachBatteryBay(g, 0, 0.55, -0.12, 0.7);
-        fx.alarmLight = ball(g, 0.05, palette.red, 0, 0.55, 0.14);
+        fx.alarmLight = ball(g, 0.06, palette.red, 0, 0.55, 0.14);
+        fx.alarmRing = mesh(g, new THREE.RingGeometry(0.3, 0.45, 16), palette.red, [0, 0.55, 0.15]);
+        fx.alarmRing.visible = false;
         break;
 
       case 'laserPointer':
         const lp = cyl(g, 0.09, 1.2, palette.blue, 0, 0.6, 0); lp.rotation.z = Math.PI / 2;
         attachBatteryBay(g, -0.15, 0.6, 0, 0.55);
-        fx.laserDot = ball(g, 0.05, palette.red, 0.7, 0.6, 0);
+        fx.laserBeam = cyl(g, 0.015, 1.4, palette.red, 1.3, 0.6, 0); fx.laserBeam.rotation.z = Math.PI / 2;
+        fx.laserDot = ball(g, 0.06, palette.red, 2.0, 0.6, 0);
+        fx.laserBeam.visible = false; fx.laserDot.visible = false;
         break;
 
       case 'hearingAid':
         mesh(g, new THREE.TorusGeometry(0.38, 0.1, 12, 20, Math.PI * 0.8), palette.orange, [0, 0.55, 0]);
         attachBatteryBay(g, 0, 0.55, 0, 0.45);
+        fx.aidWaves = mesh(g, new THREE.TorusGeometry(0.5, 0.02, 6, 16, Math.PI), palette.mint, [0, 0.55, 0]);
+        fx.aidWaves.visible = false;
         break;
 
       case 'robotToy':
@@ -454,21 +463,29 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
       case 'microwave':
         box(g, 1.6, 1.05, 1.0, palette.dark, 0, 0.75, 0, 0.08);
         box(g, 0.95, 0.65, 0.04, 0x0f172a, -0.25, 0.75, 0.51);
+        fx.plate = cyl(g, 0.35, 0.02, palette.silver, -0.25, 0.48, 0);
+        fx.microLight = ball(g, 0.06, 0xfef08a, -0.25, 0.9, 0.45);
+        fx.microLight.visible = false;
         break;
 
       case 'washer':
         box(g, 1.4, 1.6, 1.3, palette.white, 0, 1.0, 0, 0.1);
-        cyl(g, 0.45, 0.08, palette.dark, 0, 0.95, 0.66).rotation.x = Math.PI / 2;
+        fx.drum = cyl(g, 0.45, 0.08, palette.dark, 0, 0.95, 0.66);
+        fx.drum.rotation.x = Math.PI / 2;
         break;
 
       case 'airConditioner':
         box(g, 2.2, 0.85, 0.65, palette.white, 0, 0.75, 0, 0.06);
+        fx.louver = box(g, 1.8, 0.08, 0.15, palette.mint, 0, 0.4, 0.28, 0.02);
         fx.acLight = ball(g, 0.04, palette.mint, 0.75, 0.75, 0.34);
         break;
 
       case 'vacuum':
         ball(g, 0.65, palette.orange, 0, 0.65, 0);
         for (let z of [-0.68, 0.68]) cyl(g, 0.35, 0.12, palette.dark, -0.15, 0.45, z).rotation.x = Math.PI / 2;
+        fx.vortex = mesh(g, new THREE.TorusGeometry(0.45, 0.03, 6, 16), 0x94a3b8, [0, 0.85, 0]);
+        fx.vortex.rotation.x = Math.PI / 2;
+        fx.vortex.visible = false;
         break;
 
       case 'lamp':
@@ -476,34 +493,52 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         cyl(g, 0.05, 1.2, palette.silver, 0, 0.88, 0);
         mesh(g, new THREE.ConeGeometry(0.55, 0.65, 20, 1, true), palette.yellow, [0, 1.48, 0]).rotation.x = Math.PI;
         fx.bulb = ball(g, 0.14, 0xfef08a, 0, 1.35, 0);
+        fx.spotlight = mesh(g, new THREE.CircleGeometry(0.85, 24), 0xfef08a, [0, 0.02, 0]);
+        fx.spotlight.rotation.x = -Math.PI / 2;
+        fx.spotlight.material = new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: 0.45 });
+        fx.spotlight.visible = false;
         break;
 
       case 'electricOven':
         box(g, 1.5, 1.4, 1.1, palette.dark, 0, 0.9, 0, 0.08);
         box(g, 1.1, 0.8, 0.04, 0x0f172a, 0, 0.8, 0.56);
+        fx.coils = [box(g, 0.9, 0.06, 0.04, 0xef4444, 0, 1.1, 0.57), box(g, 0.9, 0.06, 0.04, 0xef4444, 0, 0.55, 0.57)];
+        fx.coils.forEach(c => { c.visible = false; });
         break;
 
       case 'iron':
         box(g, 1.2, 0.2, 0.65, palette.silver, 0, 0.35, 0, 0.05);
         box(g, 1.0, 0.4, 0.55, palette.blue, 0, 0.55, 0, 0.08);
+        fx.steam = [ball(g, 0.08, 0xffffff, 0, 0.8, 0), ball(g, 0.11, 0xffffff, 0.2, 1.0, 0)];
+        fx.steam.forEach(s => { s.visible = false; });
         break;
 
       case 'hairDryer':
         const hdb = cyl(g, 0.25, 1.1, palette.red, 0, 0.75, 0); hdb.rotation.z = Math.PI / 2;
         cyl(g, 0.16, 0.85, palette.dark, 0.2, 0.35, 0);
+        fx.airCone = mesh(g, new THREE.ConeGeometry(0.35, 0.8, 16), 0xfb923c, [1.0, 0.75, 0]);
+        fx.airCone.rotation.z = -Math.PI / 2;
+        fx.airCone.material = new THREE.MeshBasicMaterial({ color: 0xfb923c, transparent: true, opacity: 0.55 });
+        fx.airCone.visible = false;
         break;
 
       case 'electricWaterHeater':
         cyl(g, 0.65, 1.8, palette.white, 0, 1.1, 0);
+        fx.gauge = ball(g, 0.08, 0xf97316, 0, 1.3, 0.66);
         break;
 
       case 'electricHeater':
         box(g, 1.7, 1.2, 0.55, palette.red, 0, 0.8, 0, 0.06);
+        fx.rods = [cyl(g, 0.04, 1.3, 0xf97316, 0, 0.85, 0.28), cyl(g, 0.04, 1.3, 0xf97316, 0, 0.65, 0.28)];
+        fx.rods.forEach(r => { r.rotation.z = Math.PI / 2; r.visible = false; });
         break;
 
       case 'blender':
         cyl(g, 0.5, 0.7, palette.blue, 0, 0.55, 0);
         cyl(g, 0.42, 0.95, 0xdbeafe, 0, 1.25, 0);
+        fx.blades = cyl(g, 0.25, 0.03, palette.silver, 0, 0.95, 0);
+        fx.juice = cyl(g, 0.38, 0.6, 0xf59e0b, 0, 1.2, 0);
+        fx.juice.visible = false;
         break;
 
       default:
@@ -553,7 +588,6 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
 
   // ─── تركيب أجهزة الجولة ───
   function mountDevices(devIds) {
-    // تنظيف الأجهزة السابقة
     for (const id in objects) {
       scene.remove(objects[id]);
       objects[id].traverse(o => {
@@ -588,11 +622,9 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
       return;
     }
     isIntroPlaying = true;
-    introProgress = 0;
     introStartTime = performance.now();
   }
 
-  // ─── تمرير الكاميرا الشفاف للواقع المعزز ───
   function setCameraPassthrough(stream) {
     isPassthrough = Boolean(stream);
     if (isPassthrough) {
@@ -604,7 +636,6 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     }
   }
 
-  // ─── إشارة شرارة وحلقة التوهج للجهاز ───
   function pointTo(deviceId) {
     if (!deviceId || !objects[deviceId]) {
       robotArmPivot.rotation.z = 0.2;
@@ -617,7 +648,6 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     targetRing.visible = true;
   }
 
-  // ─── التحقق الدقيق من موضع النقر (Raycast with tuned radius) ───
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
 
@@ -672,7 +702,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
   observer.observe(host);
   cameraUpdate();
 
-  // ─── حلقة التصيير والأنيميشن التفاعلي ───
+  // ─── حلقة التصيير والأنيميشن التفاعلي لجميع الأجهزة الـ 24 ───
   let prevRoundRevision = -1;
 
   function tick(now) {
@@ -683,13 +713,11 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     const s = getState();
     const t = now * 0.001;
 
-    // تحديث الأجهزة عند تغير الجولة
     if (s.sessionRevision !== prevRoundRevision) {
       prevRoundRevision = s.sessionRevision;
       mountDevices(Object.keys(s.devices || {}));
     }
 
-    // حركة كاميرا الكشف الافتتاحية (Intro Sweep)
     if (isIntroPlaying) {
       const elapsed = (now - introStartTime) / 1000;
       if (elapsed > 3.0) {
@@ -697,27 +725,22 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         fitToDevices({ animate: true });
       } else {
         const p = elapsed / 3.0;
-        // مسح واسع عبر الأجهزة
         targetLookAt.set(Math.sin(p * Math.PI) * 2.0, 1.8, 0);
         targetCamPos.set(Math.sin(p * Math.PI) * 2.0 - 1.2, 12, 14);
       }
     }
 
-    // تنعيم حركة الكاميرا (Smooth Lerp)
     currentCamPos.lerp(targetCamPos, 0.08);
     currentLookAt.lerp(targetLookAt, 0.08);
     camera.position.copy(currentCamPos);
     camera.lookAt(currentLookAt);
 
-    // وميض حلقة التوجيه
     if (targetRing.visible) {
       targetRing.scale.setScalar(1 + Math.sin(t * 8) * 0.06);
     }
 
-    // تحديث الشرارات
     updateSparks(now);
 
-    // تحديث كابل الكهرباء
     if (s.mainsLocation && s.mainsLocation !== 'socket' && objects[s.mainsLocation]) {
       const devPos = objects[s.mainsLocation].position.clone();
       devPos.y += 0.25;
@@ -728,7 +751,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
       lastTargetPlugPos = null;
     }
 
-    // تحديث أنيميشن الأجهزة النشطة الـ 24
+    // أنيميشن ومؤثرات الأجهزة الـ 24 المستمرة
     for (const id in objects) {
       const isRunning = s.devices[id]?.status === 'running';
       const fx = activeEffects[id] || {};
@@ -736,9 +759,10 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
       switch (id) {
         case 'car':
         case 'toyCar':
-          if (isRunning && fx.wheels) {
-            fx.wheels.forEach(w => { w.rotation.z += 0.28; });
+          if (isRunning) {
+            fx.wheels?.forEach(w => { w.rotation.z += 0.28; });
             fx.headlights?.forEach(h => { h.visible = true; });
+            objects[id].position.z = Math.sin(t * 8) * 0.08;
           } else {
             fx.headlights?.forEach(h => { h.visible = false; });
           }
@@ -748,6 +772,9 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
           if (isRunning) {
             if (fx.waves) fx.waves.visible = true;
             if (fx.radioLight) fx.radioLight.material = mat(palette.mint, 1);
+            fx.waves?.children.forEach((c, idx) => {
+              c.scale.setScalar(1 + Math.sin(t * 10 + idx) * 0.2);
+            });
           } else {
             if (fx.waves) fx.waves.visible = false;
             if (fx.radioLight) fx.radioLight.material = mat(0x6b7b78, 0);
@@ -759,9 +786,61 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
           break;
 
         case 'wallClock':
-          if (isRunning && fx.handM) {
-            fx.handM.rotation.z += 0.12;
-            fx.handH.rotation.z += 0.01;
+          if (isRunning) {
+            if (fx.handM) fx.handM.rotation.z += 0.12;
+            if (fx.handH) fx.handH.rotation.z += 0.01;
+          }
+          break;
+
+        case 'remote':
+          if (isRunning) {
+            if (fx.irLed) fx.irLed.material = mat(Math.sin(t * 15) > 0 ? 0xff0000 : 0x475569, Math.sin(t * 15) > 0 ? 1 : 0);
+            if (fx.irWave) fx.irWave.visible = true;
+          } else {
+            if (fx.irLed) fx.irLed.material = mat(0x475569, 0);
+            if (fx.irWave) fx.irWave.visible = false;
+          }
+          break;
+
+        case 'calculator':
+        case 'digitalScale':
+          if (fx.screen) {
+            fx.screen.material = mat(isRunning ? 0x86efac : 0x0f172a, isRunning ? 1 : 0);
+          }
+          break;
+
+        case 'smokeDetector':
+          if (isRunning) {
+            if (fx.alarmLight) fx.alarmLight.material = mat(Math.sin(t * 12) > 0 ? 0xef4444 : 0x334155, Math.sin(t * 12) > 0 ? 1 : 0);
+            if (fx.alarmRing) fx.alarmRing.visible = true;
+          } else {
+            if (fx.alarmLight) fx.alarmLight.material = mat(0x334155, 0);
+            if (fx.alarmRing) fx.alarmRing.visible = false;
+          }
+          break;
+
+        case 'laserPointer':
+          if (fx.laserBeam) fx.laserBeam.visible = isRunning;
+          if (fx.laserDot) fx.laserDot.visible = isRunning;
+          break;
+
+        case 'hearingAid':
+          if (fx.aidWaves) fx.aidWaves.visible = isRunning;
+          break;
+
+        case 'robotToy':
+          if (isRunning) {
+            fx.robotEyes?.forEach(e => { e.material = mat(palette.yellow, 1); });
+            objects[id].rotation.y = Math.sin(t * 6) * 0.15;
+          } else {
+            fx.robotEyes?.forEach(e => { e.material = mat(palette.yellow, 0); });
+            objects[id].rotation.y = 0;
+          }
+          break;
+
+        case 'electricToothbrush':
+          if (isRunning && fx.brushHead) {
+            fx.brushHead.position.x = Math.sin(t * 35) * 0.04;
           }
           break;
 
@@ -769,16 +848,70 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
           if (fx.fridgeLight) fx.fridgeLight.material = mat(isRunning ? 0x38bdf8 : 0x475569, isRunning ? 1 : 0);
           break;
 
+        case 'microwave':
+          if (fx.plate && isRunning) fx.plate.rotation.y += 0.08;
+          if (fx.microLight) fx.microLight.visible = isRunning;
+          break;
+
+        case 'washer':
+          if (fx.drum && isRunning) {
+            fx.drum.rotation.z += 0.2;
+            objects[id].position.x = (SLOT_X_LANDSCAPE[Object.keys(objects).indexOf(id)] || 0) + Math.sin(t * 40) * 0.015;
+          }
+          break;
+
         case 'airConditioner':
           if (fx.acLight) fx.acLight.material = mat(isRunning ? palette.mint : 0x475569, isRunning ? 1 : 0);
+          if (fx.louver && isRunning) fx.louver.rotation.x = Math.sin(t * 4) * 0.25;
+          break;
+
+        case 'vacuum':
+          if (isRunning) {
+            if (fx.vortex) { fx.vortex.visible = true; fx.vortex.rotation.z += 0.25; }
+            objects[id].position.y = 1.98 + Math.sin(t * 30) * 0.015;
+          } else {
+            if (fx.vortex) fx.vortex.visible = false;
+          }
           break;
 
         case 'lamp':
           if (fx.bulb) fx.bulb.material = mat(isRunning ? 0xfef08a : 0x475569, isRunning ? 1 : 0);
+          if (fx.spotlight) fx.spotlight.visible = isRunning;
+          break;
+
+        case 'electricOven':
+          if (fx.coils) fx.coils.forEach(c => { c.visible = isRunning; });
+          break;
+
+        case 'iron':
+          if (fx.steam) fx.steam.forEach((s, idx) => {
+            s.visible = isRunning;
+            if (isRunning) s.position.y = 0.8 + Math.sin(t * 6 + idx) * 0.15;
+          });
+          break;
+
+        case 'hairDryer':
+          if (fx.airCone) fx.airCone.visible = isRunning;
+          break;
+
+        case 'electricWaterHeater':
+          if (fx.gauge) fx.gauge.material = mat(isRunning ? 0xf97316 : 0x64748b, isRunning ? 1 : 0);
+          break;
+
+        case 'electricHeater':
+          if (fx.rods) fx.rods.forEach(r => { r.visible = isRunning; });
+          break;
+
+        case 'blender':
+          if (isRunning) {
+            if (fx.blades) fx.blades.rotation.y += 0.45;
+            if (fx.juice) fx.juice.visible = true;
+          } else {
+            if (fx.juice) fx.juice.visible = false;
+          }
           break;
       }
 
-      // تحديث إحداثيات الشارات
       const v = objects[id].position.clone();
       v.y += id === 'fridge' ? 3.1 : 1.7;
       v.project(camera);
@@ -790,6 +923,32 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
 
   frame = requestAnimationFrame(tick);
 
+  // ─── اختبار القياس التلقائي لجميع الأجهزة (?selftest=1) ───
+  function runSelfTest() {
+    const results = [];
+    console.log('🧪 Starting 24-Device Self-Test...');
+    for (const dev of ALL_DEVICES) {
+      const meshObj = createDeviceMesh(dev.id);
+      const fx = activeEffects[dev.id] || {};
+      const hasFX = Object.keys(fx).length > 0;
+      results.push({
+        id: dev.id,
+        name: dev.name,
+        type: dev.type,
+        meshCreated: Boolean(meshObj),
+        hasVisualEffects: hasFX
+      });
+      meshObj.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+    }
+    console.table(results);
+    if (typeof window !== 'undefined') window.selfTestResults = results;
+    return results;
+  }
+
+  if (typeof window !== 'undefined' && window.location.search.includes('selftest=1')) {
+    setTimeout(runSelfTest, 500);
+  }
+
   return {
     at,
     setDragWorld,
@@ -797,6 +956,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     triggerSparks,
     fitToDevices,
     playRevealIntro,
+    skipRevealIntro() { isIntroPlaying = false; fitToDevices({ animate: true }); },
     setCameraPassthrough,
     pointTo,
     showTargetRing(deviceId) {
@@ -827,6 +987,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     rotateDevice(id, angleY) {
       if (objects[id]) objects[id].rotation.y += angleY;
     },
+    runSelfTest,
     dispose() {
       dead = true;
       cancelAnimationFrame(frame);

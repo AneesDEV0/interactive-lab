@@ -343,6 +343,139 @@ export async function radioTune() {
   }
 }
 
+// ─── المؤثرات الصوتية التركيبية لجميع الأجهزة الـ 24 (Web Audio API Synthesizer) ───
+export function playDeviceSynthSound(deviceId) {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    if (!webAudioCtx) webAudioCtx = new AudioContextClass();
+    if (webAudioCtx.state === 'suspended') webAudioCtx.resume();
+
+    const t = webAudioCtx.currentTime;
+    const osc = webAudioCtx.createOscillator();
+    const gain = webAudioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(webAudioCtx.destination);
+
+    switch (deviceId) {
+      case 'car':
+      case 'toyCar':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(110, t);
+        osc.frequency.linearRampToValueAtTime(240, t + 0.28);
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+        osc.start(t); osc.stop(t + 0.35);
+        break;
+
+      case 'radio':
+        radioTune();
+        break;
+
+      case 'flashlight':
+      case 'lamp':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, t);
+        osc.frequency.exponentialRampToValueAtTime(440, t + 0.15);
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+        osc.start(t); osc.stop(t + 0.18);
+        break;
+
+      case 'wallClock':
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1200, t);
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+        osc.start(t); osc.stop(t + 0.05);
+        break;
+
+      case 'remote':
+      case 'laserPointer':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1400, t);
+        osc.frequency.exponentialRampToValueAtTime(700, t + 0.12);
+        gain.gain.setValueAtTime(0.1, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        osc.start(t); osc.stop(t + 0.12);
+        break;
+
+      case 'calculator':
+      case 'digitalScale':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(659.25, t);
+        osc.frequency.setValueAtTime(880, t + 0.08);
+        gain.gain.setValueAtTime(0.09, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+        osc.start(t); osc.stop(t + 0.2);
+        break;
+
+      case 'smokeDetector':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(2200, t);
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+        osc.start(t); osc.stop(t + 0.25);
+        break;
+
+      case 'robotToy':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(440, t);
+        osc.frequency.setValueAtTime(880, t + 0.08);
+        osc.frequency.setValueAtTime(587, t + 0.16);
+        gain.gain.setValueAtTime(0.07, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+        osc.start(t); osc.stop(t + 0.3);
+        break;
+
+      case 'electricToothbrush':
+      case 'vacuum':
+      case 'blender':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(90, t);
+        osc.frequency.linearRampToValueAtTime(180, t + 0.15);
+        gain.gain.setValueAtTime(0.07, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+        osc.start(t); osc.stop(t + 0.35);
+        break;
+
+      case 'fridge':
+      case 'airConditioner':
+      case 'washer':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(60, t);
+        osc.frequency.linearRampToValueAtTime(120, t + 0.25);
+        gain.gain.setValueAtTime(0.1, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+        osc.start(t); osc.stop(t + 0.38);
+        break;
+
+      case 'microwave':
+      case 'electricOven':
+      case 'iron':
+      case 'hairDryer':
+      case 'electricWaterHeater':
+      case 'electricHeater':
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, t);
+        osc.frequency.setValueAtTime(659.25, t + 0.1);
+        gain.gain.setValueAtTime(0.1, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+        osc.start(t); osc.stop(t + 0.3);
+        break;
+
+      default:
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, t);
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+        osc.start(t); osc.stop(t + 0.2);
+        break;
+    }
+  } catch {}
+}
+
 // ─── لوحة تشخيص الصوت (?debugAudio=1) ───
 export function getAudioDiagnostics() {
   return {
@@ -361,4 +494,5 @@ if (typeof window !== 'undefined' && window.location.search.includes('debugAudio
   window.audioDiagnostics = getAudioDiagnostics;
   console.table(window.audioDiagnostics());
 }
+
 

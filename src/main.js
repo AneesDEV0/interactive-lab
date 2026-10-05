@@ -1,19 +1,27 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // src/main.js — المتحكم الرئيسي لمختبر شرارة المتحرك 3D
-// كاميرا الكشف (Viewfinder HUD)، محرك التوجيه الذكي، مقياس القدرة، ولوحة تقرير المحقق
+// كاميرا الكشف (Viewfinder HUD)، الاختبار المباشر في المشهد، ومؤثرات الـ 24 جهازاً
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { config, copy, deviceNames, msg, DEVICE_MAP, ALL_DEVICES, pickRandomDevices } from './config.js';
+import { config, copy, deviceNames, msg, DEVICE_MAP, ALL_DEVICES } from './config.js';
 import { initialState, reducer, explorationDone, quizDone, validAction, nextActions } from './state.js';
 import { answerQuestion, normalize } from './knowledge.js';
 import { icon, robotSvg } from './icons.js';
-import { stopAudio, radioTune, speak, speakIntro, speakToolPick, speakDropSuccess, speakDropIncompatible, speakHint, speakKey, getAudioDiagnostics } from './audio.js';
+import {
+  stopAudio, radioTune, speak, speakIntro, speakToolPick, speakDropSuccess,
+  speakDropIncompatible, speakHint, speakKey, getAudioDiagnostics, playDeviceSynthSound
+} from './shared/audio.js';
 import { launchArGateway } from './ar.js';
 import { coach } from './coach.js';
 
-// استرجاع التفضيلات العامة فقط
+// استرجاع التفضيلات العامة الموحدة المشتركة بين الثابت والمتحرك
 let rawPrefs = {};
-try { rawPrefs = JSON.parse(localStorage.getItem('sharara-preferences') || '{}'); } catch {}
+try {
+  rawPrefs = JSON.parse(localStorage.getItem('sharara-preferences') || '{}');
+  const sharedSound = localStorage.getItem('sharara_sound_enabled');
+  if (sharedSound !== null) rawPrefs.muted = (sharedSound === 'false');
+} catch {}
+
 const prefs = {
   muted: typeof rawPrefs.muted === 'boolean' ? rawPrefs.muted : false,
   reducedMotion: typeof rawPrefs.reducedMotion === 'boolean' ? rawPrefs.reducedMotion : (typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)').matches : false),
@@ -21,7 +29,6 @@ const prefs = {
   ageRange: Array.isArray(rawPrefs.ageRange) ? rawPrefs.ageRange : [6, 9]
 };
 
-// تفريغ أي تخزين مؤقت قديم لضمان بدء تجربة نظيفة تماماً
 try {
   sessionStorage.removeItem('sharara-session');
   sessionStorage.removeItem('sharara-state');
@@ -32,8 +39,8 @@ try {
 let state = initialState(prefs);
 let scene = null, seq = 0, pendingDevice = null, drag = null, idleTimer = null, modalOpener = null, tutorial = false;
 let isCameraPassthroughActive = false;
-let showPowerMeterManual = false;
-let powerMeterTargetDev = null;
+let inQuizChallengeMode = false;
+let currentQuizDevIndex = 0;
 const history = [], counts = new Map(), app = document.querySelector('#app');
 
 const $ = s => document.querySelector(s);
@@ -144,6 +151,7 @@ function updateLiveFeedback(d, tool, isSuccess, message) {
 
   if (isSuccess) {
     playSuccessSound();
+    playDeviceSynthSound(d);
     if (pill) {
       pill.textContent = tool === 'battery' ? '🎉 تم التشغيل بالبطارية 🔋' : '⚡ تم التشغيل بالكهرباء 🔌';
       pill.className = 'feedback-status-pill pill-success';
@@ -200,7 +208,7 @@ function shell() {
        <a href="${navBase}static-lab.html" class="nav-link-btn" title="النشاط الثابت">🔍 <span>الثابت</span></a>
        <button type="button" class="header-ar-launch-btn" data-action="launchAR" title="فتح كاميرا الواقع المعزز الحقيقي">📷 <span>الواقع المعزز AR</span></button>
        ${button('sound', state.muted ? c.muted : c.sound, state.muted ? 'muted' : 'volume', 'quiet', 'id="sound-button"')}
-       ${button('compare', c.compare, 'book', 'quiet', 'id="comparison-button" title="جدول الاكتشافات"')}
+       ${button('compare', c.compare, 'book', 'quiet', 'id="comparison-button" title="جدول الاكتشافات والتحدي"')}
        ${button('chat', c.chat, 'chat', 'quiet', 'id="chat-toggle" aria-expanded="false" title="تحدث مع شرارة"')}
        ${button('settings', c.settings, 'settings', 'icon-only', 'title="الإعدادات"')}
      </nav>
@@ -222,7 +230,7 @@ function shell() {
            <div class="viewfinder-top-bar">
              <span class="viewfinder-status-tag">
                <i class="hud-pulse-dot"></i>
-               <span>كاميرا الكشف الذكية: ${currentIds.length} أجهزة</span>
+               <span id="viewfinder-status-text">كاميرا الكشف: ${currentIds.length} أجهزة</span>
              </span>
              <div class="viewfinder-actions">
                <button type="button" class="viewfinder-btn" data-action="togglePassthrough" id="camera-passthrough-btn" title="تبديل بين كاميرا الجوال والخلفية الافتراضية">
@@ -244,11 +252,10 @@ function shell() {
            </div>
          </div>
 
-         <!-- شريط بطاقات الأجهزة للتصنيف والتوقع السريع -->
+         <!-- بطاقات الأجهزة في المشهد لتأطير 1-4 والتوقع السريع -->
          <div id="scene-labels" class="scene-labels-stack">
            ${currentIds.map((id, index) => {
              const pred = state.predictionByDevice?.[id];
-             const predIcon = pred === true ? '🔋' : pred === false ? '🔌' : '❓';
              return `
                <div class="scene-label-stack-item" id="label-${id}">
                  <button class="label-main-tap" data-action="device" data-device="${id}" data-target="${id}">
@@ -293,7 +300,7 @@ function shell() {
            </div>
          </div>
 
-         <!-- أدوات الطاقة المباشرة المبسطة بملصقات واضحة وإيموجي للأطفال -->
+         <!-- أدوات الطاقة المباشرة -->
          <div class="table-power-dock" id="table-power-dock">
            <button id="battery-button" data-action="pick" class="dock-power-btn battery-dock-btn" aria-pressed="false" title="اسحب البطارية لأي جهاز لتجربتها">
              <span class="power-emoji">🔋</span>
@@ -336,6 +343,9 @@ function shell() {
              </div>
            </div>
            <p class="live-feedback-text" id="live-feedback-text">${state.message || c.intro}</p>
+
+           <!-- عناصر أسئلة الاختبار المباشرة داخل المشهد -->
+           <div id="in-scene-quiz-bar" style="display:none; margin-top:8px; gap:8px; align-items:center; flex-wrap:wrap;"></div>
          </div>
          <div class="feedback-bar-actions">
            <button type="button" class="bar-report-btn" data-action="openDetectiveReport" title="عرض لوحة تقرير المحقق">
@@ -347,7 +357,6 @@ function shell() {
          </div>
        </section>
 
-       <!-- عناصر التوافق مع الاختبارات وقارئات الشاشة -->
        <div class="sr-only">
          <span id="progress-count">0 / 4</span>
          <i id="progress-fill"></i>
@@ -384,13 +393,13 @@ function shell() {
        </div>
        <div id="detective-report-table-wrap"></div>
        <div class="detective-report-actions">
+         <button type="button" class="primary" data-action="startChallengeQuiz">🎯 خوض تحدي الاختبار في الكاميرا</button>
          <button type="button" class="primary" data-action="newRoundFromReport">🔄 جولة جديدة بأجهزة أخرى</button>
          <button type="button" class="secondary" data-action="closeDetectiveReport">متابعة الاستكشاف</button>
        </div>
      </div>
    </div>
 
-   <!-- النافذة المركزية المنبثقة للتغذية الراجعة المباشرة -->
    <div id="central-feedback" class="central-feedback-overlay" hidden style="display: none;">
      <div class="central-feedback-card" id="central-feedback-card">
        <div class="feedback-badge" id="feedback-badge">🎉 أحسنت بطلنا الصغير!</div>
@@ -440,6 +449,94 @@ function shell() {
   $('#central-feedback')?.addEventListener('click', e => { if (e.target.id === 'central-feedback') hideCentralFeedback(); });
   
   render();
+}
+
+function renderInSceneQuiz() {
+  const quizBar = $('#in-scene-quiz-bar');
+  if (!quizBar) return;
+
+  const currentIds = Object.keys(state.devices || {});
+  if (!inQuizChallengeMode) {
+    quizBar.style.display = 'none';
+    return;
+  }
+
+  quizBar.style.display = 'flex';
+
+  if (currentQuizDevIndex < currentIds.length) {
+    const targetDevId = currentIds[currentQuizDevIndex];
+    const devMeta = DEVICE_MAP[targetDevId];
+    scene?.showTargetRing?.(targetDevId);
+    scene?.pointTo?.(targetDevId);
+
+    quizBar.innerHTML = `
+      <div style="background:#EBF1ED; border-radius:12px; padding:6px 12px; font-size:0.85rem; font-weight:800; color:#2F3E36; width:100%; display:flex; justify-content:space-between; align-items:center;">
+        <span>🎯 السؤال (${currentQuizDevIndex + 1} من ${currentIds.length}): ما مصدر طاقة <strong>${devMeta?.name || targetDevId}</strong>؟</span>
+        <div style="display:flex; gap:6px;">
+          <button type="button" class="primary" data-action="inSceneQuizAnswer" data-device="${targetDevId}" data-ans="battery" style="font-size:0.8rem; padding:6px 14px;">🔋 بطارية جافة</button>
+          <button type="button" class="secondary" data-action="inSceneQuizAnswer" data-device="${targetDevId}" data-ans="mains" style="font-size:0.8rem; padding:6px 14px; background:#2F3E36; color:#FFB703;">🔌 كهرباء 220V</button>
+        </div>
+      </div>
+    `;
+  } else {
+    // السؤال الأخير: التفسير العلمي
+    scene?.showTargetRing?.(null);
+    scene?.pointTo?.(null);
+    scene?.fitToDevices?.({ animate: true });
+
+    quizBar.innerHTML = `
+      <div style="background:#EBF1ED; border-radius:12px; padding:8px 12px; font-size:0.85rem; font-weight:800; color:#2F3E36; width:100%;">
+        <p style="margin:0 0 6px;">💡 السؤال الأخير: لماذا تختلف مصادر الطاقة بين هذه الأجهزة؟</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="primary" data-action="inSceneQuizAnswer" data-device="explanation" data-ans="design" style="font-size:0.8rem; padding:6px 12px;">✅ لأن لكل جهاز تصميماً وقدرة كهربائية محددة تناسبه</button>
+          <button type="button" class="secondary" data-action="inSceneQuizAnswer" data-device="explanation" data-ans="size" style="font-size:0.8rem; padding:6px 12px;">❌ لأن حجم الجهاز هو وحده ما يحدد المصدر دائماً</button>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function handleInSceneQuizAnswer(device, answer) {
+  const isCorrect = (device === 'explanation')
+    ? (answer === 'design')
+    : (DEVICE_MAP[device]?.type === answer);
+
+  dispatch({type: 'QUIZ_ANSWER', device, answer});
+
+  if (isCorrect) {
+    playSuccessSound();
+    if (device !== 'explanation') {
+      playDeviceSynthSound(device);
+      // تشغيل الجهاز مؤقتاً لمدة ثانيتين
+      if (state.devices[device]) {
+        state.devices[device].status = 'running';
+        render();
+        setTimeout(() => {
+          if (state.devices[device]) state.devices[device].status = 'off';
+          render();
+        }, 2000);
+      }
+    }
+    currentQuizDevIndex++;
+    if (currentQuizDevIndex > Object.keys(state.devices).length) {
+      inQuizChallengeMode = false;
+      dispatch({type: 'COMPLETE'});
+      completed();
+    } else {
+      renderInSceneQuiz();
+    }
+  } else {
+    playErrorSound();
+    const pill = $('#live-feedback-pill');
+    const textEl = $('#live-feedback-text');
+    if (pill) {
+      pill.textContent = '⚠️ حاول مجدداً يا بطل';
+      pill.className = 'feedback-status-pill pill-warning';
+    }
+    if (textEl) {
+      textEl.textContent = 'تذكر ما شاهدته أثناء تجربتك وفحص الجهاز!';
+    }
+  }
 }
 
 function renderDetectiveReport() {
@@ -550,6 +647,8 @@ function dispatch(event) {
     pendingDevice = null;
     drag = null;
     tutorial = false;
+    inQuizChallengeMode = false;
+    currentQuizDevIndex = 0;
     coach.resetRound();
     $('#drag-ghost').hidden = true;
     hideCentralFeedback();
@@ -566,7 +665,10 @@ function dispatch(event) {
   if (!state.muted && state.devices.radio && state.devices.radio.status === 'running' && (old.devices.radio?.status !== 'running' || old.muted)) playRadio();
 
   if (['SET_MUTED', 'SET_REDUCED_MOTION', 'SET_LANGUAGE', 'SET_AGE'].includes(event.type)) {
-    try { localStorage.setItem('sharara-preferences', JSON.stringify({muted: state.muted, reducedMotion: state.reducedMotion, language: state.language, ageRange: state.ageRange})); } catch {}
+    try {
+      localStorage.setItem('sharara-preferences', JSON.stringify({muted: state.muted, reducedMotion: state.reducedMotion, language: state.language, ageRange: state.ageRange}));
+      localStorage.setItem('sharara_sound_enabled', String(!state.muted));
+    } catch {}
   }
 
   if (event.type === 'DROP_ON_DEVICE') {
@@ -585,7 +687,6 @@ function dispatch(event) {
       }
     }
 
-    // تفعيل توجيه الكوتش وتحديث مقياس القدرة إذا لزم
     const advice = coach.getAdvice(state);
     if (advice.showPowerMeter && advice.targetDevice) {
       showPowerMeter(advice.targetDevice);
@@ -732,6 +833,8 @@ function render() {
     const d = getAudioDiagnostics();
     diagBadge.textContent = `Unlocked: ${d.isUnlocked} | Key: ${d.lastKey} | Err: ${d.lastError || 'None'}`;
   }
+
+  renderInSceneQuiz();
 }
 
 function openDialog(html) {
@@ -801,26 +904,7 @@ function tryDevice(id) {
 }
 
 function compare() {
-  dispatch({type: 'OPEN_COMPARISON'});
-  const c = t();
-  const currentIds = Object.keys(state.devices);
-
-  let html = `${dialogHeader(c.compare)}<p class="comparison-intro">${c.sourceNote}</p><div class="comparison-grid">${currentIds.map(id => {
-    const meta = DEVICE_MAP[id];
-    const factText = state.discoveredFacts.includes(id + '_battery') ? c.batteryFits : (state.discoveredFacts.includes(id + '_mains') ? c.mainsFact : (state.discoveredFacts.includes(id + '_incompatible') ? 'البطارية غير مناسبة' : c.notYet));
-    return `<article>${icon(meta?.icon || 'car')}<h3>${name(id)}</h3><small>${c.now}</small><strong>${c[state.devices[id].status] || state.devices[id].status}${state.devices[id].source ? ' · ' + (state.devices[id].source === 'battery' ? c.battery : 'فيشة رئيسية') : ''}</strong><hr/><small>${c.discovered}</small><p>${factText}</p></article>`;
-  }).join('')}</div><p class="fine-print">${c.symbolic}</p>`;
-
-  if (explorationDone(state)) {
-    html += `<section class="quiz"><h3>${c.challenge}</h3><p>${c.challengeIntro}</p>${currentIds.map(id => {
-      const meta = DEVICE_MAP[id];
-      const answered = state.quiz[id];
-      return `<div class="quiz-row"><strong>${name(id)} ${answered ? icon('check') : ''}</strong><div>${button('quiz', c.battery, 'battery', answered && meta?.type === 'battery' ? 'answer-correct' : 'secondary', `data-device="${id}" data-answer="battery"`)}${button('quiz', 'فيشة رئيسية', 'home', answered && meta?.type === 'mains' ? 'answer-correct' : 'secondary', `data-device="${id}" data-answer="mains"`)}</div></div>`;
-    }).join('')}<h3>${c.explain}</h3><div class="explanation-options">${button('quiz', c.explainGood, state.quiz.explanation ? 'check' : null, state.quiz.explanation ? 'answer-correct' : 'secondary', 'data-device="explanation" data-answer="design"')}${button('quiz', c.explainBad, null, 'secondary', 'data-device="explanation" data-answer="size"')}</div><p id="quiz-feedback" role="status">${['quizRight', 'quizWrong'].includes(state.messageKey) ? state.message : ''}</p>${button('complete', c.finish, 'star', 'primary', quizDone(state) ? '' : 'disabled')}</section>`;
-  } else {
-    html += `<div class="dialog-actions">${button('closeDialog', c.continue, 'arrow', 'primary')}</div>`;
-  }
-  openDialog(html);
+  openDetectiveReport();
 }
 
 function completed() {
@@ -1152,6 +1236,15 @@ app.addEventListener('click', e => {
     case 'closeDetectiveReport':
       closeDetectiveReport();
       break;
+    case 'startChallengeQuiz':
+      closeDetectiveReport();
+      inQuizChallengeMode = true;
+      currentQuizDevIndex = 0;
+      render();
+      break;
+    case 'inSceneQuizAnswer':
+      handleInSceneQuizAnswer(b.dataset.device, b.dataset.ans);
+      break;
     case 'newRoundFromReport':
       closeDetectiveReport();
       dispatch({type: 'RESET'});
@@ -1210,14 +1303,6 @@ app.addEventListener('click', e => {
     }
     case 'compare': compare(); break;
     case 'closeDialog': pendingDevice = null; dispatch({type: 'CLOSE_COMPARISON'}); closeDialog(); break;
-    case 'quiz':
-      dispatch({type: 'QUIZ_ANSWER', device: b.dataset.device, answer: b.dataset.answer});
-      {
-        const d = b.dataset.device, answer = b.dataset.answer;
-        compare();
-        $(`[data-action="quiz"][data-device="${d}"][data-answer="${answer}"]`)?.focus();
-      }
-      break;
     case 'complete': dispatch({type: 'COMPLETE'}); if (state.phase === 'completed') completed(); break;
     case 'quickQuestion': ask(b.dataset.question); break;
     case 'suggested': try { runSuggested(JSON.parse(b.dataset.suggestion)); } catch {} break;
@@ -1241,7 +1326,13 @@ async function loadScene() {
     });
     if (scene) {
       dispatch({type: 'READY', sessionRevision: rev});
-      if (state.phase === 'intro') dispatch({type: 'START', sessionRevision: rev});
+      if (state.phase === 'intro') {
+        dispatch({type: 'START', sessionRevision: rev});
+        scene.playRevealIntro?.();
+        if (!state.muted) {
+          speakIntro('dynamic');
+        }
+      }
     }
   } catch {
     dispatch({type: 'RENDERER_FAILED', sessionRevision: rev});
