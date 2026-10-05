@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { launchArGateway, launchARGateway } from './ar.js';
-import { speak, stopAudio } from './audio.js';
+import { speakKey, stopAudio, unlockAudioSystem, detectInAppBrowser, AUDIO_REGISTRY } from './audio.js';
 import { ALL_DEVICES } from './config.js';
 
 // ─── بنك رسومات SVG الـ 24 عالية الدقة والتباين والوضوح (High-Contrast 3D Skeuomorphic) ───
@@ -91,10 +91,13 @@ function playErrorSound() {
   playTone(220, 'sawtooth', 0.25);
 }
 
-// التوجيه الصوتي العربي الموحد (نبرة أنثوية ناعمة ومخارج حروف واضحة)
-function speakArabic(text) {
+// ─── التوجيه الصوتي الهجين (ملفات MP3 جاهزة أولاً + Web Speech API كاحتياط) ───
+function speakArabic(text, key = null) {
   if (!speechEnabled) return;
-  speak(text, 'ar', { pitch: 1.0, rate: 0.92 });
+  if (!key) {
+    key = Object.keys(AUDIO_REGISTRY).find(k => AUDIO_REGISTRY[k].text === text);
+  }
+  speakKey(key, text, { enabled: speechEnabled });
 }
 
 // ─── بنك التوجيهات الذكية والتغذية الراجعة التفاعلية للأجهزة الـ 24 ───
@@ -288,6 +291,24 @@ export function initStaticLab() {
   const app = document.getElementById('app') || document.body;
   app.innerHTML = `
     <div class="static-app-root">
+      <!-- شريط تنبيه المتصفحات المدمجة (In-App Browser Toast) -->
+      <div class="inapp-browser-toast" id="inapp-toast" style="display: none;">
+        <span>🔊 لتجربة صوتية أوضح، افتح الرابط في المتصفح الرئيسي (Safari أو Chrome)</span>
+        <button type="button" id="btn-copy-link" class="btn-copy-link">📋 نسخ الرابط</button>
+      </div>
+
+      <!-- شاشة ابدأ النشاط وتفعيل الصوت الشامل على الموبايل -->
+      <div class="static-start-overlay" id="start-activity-overlay">
+        <div class="start-card">
+          <div class="start-avatar">🤖⚡</div>
+          <h2 class="start-title">مرحباً بك يا بطل العلوم!</h2>
+          <p class="start-desc">استعد لخوض تحديات مصادر الكهرباء والبطاريات مع التوجيه الصوتي والمجسمات ثلاثية الأبعاد 3D</p>
+          <button type="button" class="static-btn btn-verify btn-start-act" id="btn-start-activity">
+            <span>🚀 ابدأ النشاط وتفعيل الصوت</span>
+          </button>
+        </div>
+      </div>
+
       <!-- 1. الترويسة الرئيسية -->
       <header class="static-header">
         <a href="./index.html" class="static-brand" id="brand-link">
@@ -452,7 +473,8 @@ function openArGateway() {
     title: 'النشاط التقويمي الثابت | مصادر الكهرباء',
     mode: 'static',
     onContinue: () => {
-      speakArabic(
+      speakKey(
+        'ui.welcome_ar',
         'مرحباً بك يا بطل العلوم في النشاط التقويمي! حَدِّدْ جهازين يعملان بالمصدر المطلوب وتجنب الفخاخ. اضغط على الأجهزة لاختيارها، واضغط فحص ثري دي لكشف أسرارها!'
       );
     }
@@ -461,6 +483,42 @@ function openArGateway() {
 
 // ─── ربط الأحداث الرئيسية ───
 function bindEvents() {
+  // زر بدء النشاط وفتح الصوت فوراً
+  const startOverlay = document.getElementById('start-activity-overlay');
+  document.getElementById('btn-start-activity')?.addEventListener('click', () => {
+    unlockAudioSystem();
+    if (startOverlay) {
+      startOverlay.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+      startOverlay.style.opacity = '0';
+      startOverlay.style.transform = 'scale(0.95)';
+      setTimeout(() => startOverlay.remove(), 300);
+    }
+    speakCurrentMission();
+  });
+
+  // كشف المتصفحات المدمجة وإظهار التنبيه المساعد
+  if (detectInAppBrowser()) {
+    const toast = document.getElementById('inapp-toast');
+    if (toast) toast.style.display = 'flex';
+  }
+
+  // زر نسخ الرابط في الشريط التنبيهي
+  document.getElementById('btn-copy-link')?.addEventListener('click', () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        const btn = document.getElementById('btn-copy-link');
+        if (btn) btn.textContent = '✔️ تم النسخ!';
+        setTimeout(() => { if (btn) btn.textContent = '📋 نسخ الرابط'; }, 2500);
+      }).catch(() => {});
+    }
+  });
+
+  // الاستماع لحدث فشل تشغيل الصوت من الطبقة 3
+  window.addEventListener('audio-playback-failed', () => {
+    const toast = document.getElementById('inapp-toast');
+    if (toast) toast.style.display = 'flex';
+  });
+
   // زر AR
   document.getElementById('btn-ar-launch')?.addEventListener('click', openArGateway);
 
@@ -470,7 +528,7 @@ function bindEvents() {
     speechEnabled = !speechEnabled;
     voiceBtn.textContent = speechEnabled ? '🗣️' : '🔇';
     if (!speechEnabled) stopAudio();
-    else speakArabic('تم تفعيل التوجيه الصوتي');
+    else speakArabic('تم تفعيل التوجيه الصوتي بنجاح!', 'ui.voice_enabled');
   });
 
   const soundBtn = document.getElementById('btn-sound-toggle');
@@ -558,9 +616,9 @@ function startNewChallenge() {
 // ─── نطق مهمة التحدي بصوت تشجيعي طفولي دون حرق الإجابة ───
 function speakCurrentMission() {
   if (currentTargetType === 'battery') {
-    speakArabic('هيا يا بطل العلوم! ابحث عن جهازين يعملان بالبطاريات، واضغط فحص 3D لتكتشف حجرة البطاريات أو سلك الكهرباء!');
+    speakKey('mission.battery', 'هيا يا بطل العلوم! ابحث عن جهازين يعملان بالبطاريات الجافة، واضغط فحص 3D لتكتشف حجرة البطاريات أو سلك الكهرباء!');
   } else {
-    speakArabic('هيا يا ذكي! ابحث عن جهازين يحتاجان كهرباء المنزل القوية، واضغط فحص 3D لتفحص الجهاز بنفسك!');
+    speakKey('mission.mains', 'هيا يا ذكي! ابحث عن جهازين يحتاجان كهرباء المنزل 220 فولت، واضغط فحص 3D لتفحص الجهاز بنفسك!');
   }
 }
 
@@ -639,7 +697,7 @@ function renderCards(devices) {
 
     speakReasonBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
-      speakArabic(`تفحص ${dev.name} جيداً! انظر هل يمتلك حجرة بطاريات صغيرة، أم سلكاً ينتهي بفيشة كهرباء؟`);
+      speakKey(`guide.${dev.id}.inspect`, `تفحص ${dev.name} جيداً! انظر هل يمتلك حجرة بطاريات صغيرة، أم سلكاً ينتهي بفيشة كهرباء؟`);
     });
 
     // تأثير الإمالة ثلاثي الأبعاد بالماوس أو اللمس (3D Perspective Tilt)
@@ -672,7 +730,7 @@ function openDeviceArInspector(dev) {
   playFlipSound();
 
   // تشجيع صوتي دون حرق الإجابة
-  speakArabic(`هيا يا محقق! تفحص ${dev.name} من جميع الجهات؛ هل ترى حجرة بطاريات أم سلكاً كهربائياً؟`);
+  speakKey(`guide.${dev.id}.inspect`, `هيا يا محقق! تفحص ${dev.name} من جميع الجهات؛ هل ترى حجرة بطاريات أم سلكاً كهربائياً؟`);
 
   // إزالة أي شاشة سابقة إن وجدت
   document.getElementById('ar-inspector-overlay')?.remove();
@@ -1290,11 +1348,11 @@ function toggleDeviceSelection(devId) {
     if (badge) badge.textContent = '○';
     playSelectSound();
     updateGuidanceBox(`ألغيتَ تحديد ${dev.name}! اخْتَرْ جهازاً آخر.`, '🔍', 'normal');
-    speakArabic(`ألغيتَ تحديد ${dev.name}! اخْتَرْ جهازاً آخر.`);
+    speakKey(`guide.${devId}.deselect`, `ألغيتَ تحديد ${dev.name}! اخْتَرْ جهازاً آخر.`);
   } else {
     if (selectedIds.size >= 2) {
       updateGuidanceBox('حَدِّدْ جهازين فقط يا بطل، أو ألغِ تحديد أحدهما أولاً!', '⚠️', 'normal');
-      speakArabic('حَدِّدْ جهازين فقط يا بطل، أو ألغِ تحديد أحدهما أولاً!');
+      speakKey('ui.limit_two', 'حَدِّدْ جهازين فقط يا بطل، أو ألغِ تحديد أحدهما أولاً!');
       return;
     }
     selectedIds.add(devId);
@@ -1304,11 +1362,11 @@ function toggleDeviceSelection(devId) {
 
     if (selectedIds.size === 2) {
       updateGuidanceBox(`حَدَّدْتَ ${dev.name}! رائع، اكتمل جهازان! اضغط الآن: 🔍 تحقق من إجابتي`, '✔️', 'normal');
-      speakArabic(`حَدَّدْتَ ${dev.name}! رائع، اكتمل جهازان! اضغط الآن زر: تحقق من إجابتي.`);
+      speakKey('ui.ready_validate', `حَدَّدْتَ ${dev.name}! رائع، اكتمل جهازان! اضغط الآن زر: تحقق من إجابتي.`);
     } else {
       const promptText = guide ? guide.prompt : `حَدَّدْتَ ${dev.name}! اخْتَرْ جهازاً ثانياً يا بطل.`;
       updateGuidanceBox(promptText, '🔎', 'normal');
-      speakArabic(guide?.audioPrompt || `حَدَّدْتَ ${dev.name}! اخْتَرْ جهازاً ثانياً يا بطل.`);
+      speakKey(`guide.${devId}.prompt`, guide?.audioPrompt || `حَدَّدْتَ ${dev.name}! اخْتَرْ جهازاً ثانياً يا بطل.`);
     }
   }
 
@@ -1324,13 +1382,13 @@ function updateSelectionCounter() {
 function validateSelection() {
   if (selectedIds.size === 0) {
     updateGuidanceBox('اخْتَرْ جهازين أولاً يا بطل العلوم للتحقق من إجابتك!', '⚠️', 'normal');
-    speakArabic('اخْتَرْ جهازين أولاً يا بطل العلوم!');
+    speakKey('ui.select_two', 'اخْتَرْ جهازين أولاً يا بطل العلوم للتحقق من إجابتك!');
     return;
   }
 
   if (selectedIds.size < 2) {
     updateGuidanceBox('اخْتَرْ جهازين لتكتمل إجابتك، متبقٍ جهاز واحد يا بطل!', '⚠️', 'normal');
-    speakArabic('اخْتَرْ جهازين لتكتمل إجابتك، متبقٍ جهاز واحد يا بطل!');
+    speakKey('ui.need_two', 'اخْتَرْ جهازين لتكتمل إجابتك، متبقٍ جهاز واحد يا بطل!');
     return;
   }
 
@@ -1360,7 +1418,7 @@ function validateSelection() {
     const correctMsg = guide?.correct || 'أنت بطل وعبقري! إجابة صحيحة 100%، هذه الأجهزة تعمل بهذا المصدر بنجاح!';
 
     updateGuidanceBox(correctMsg, '✅', 'correct');
-    speakArabic('أنت بطل وعبقري! إجابة صحيحة مئة بالمئة! كشفت جميع الأجهزة وتجنبت الفخاخ ببراعة!');
+    speakKey('ui.win', 'أنت بطل وعبقري! إجابة صحيحة مئة بالمئة! كشفت جميع الأجهزة وتجنبت الفخاخ ببراعة!');
   } else {
     // ❌ إجابة تحتوي على فخ
     playErrorSound();
@@ -1375,9 +1433,9 @@ function validateSelection() {
     updateGuidanceBox(wrongMsg, '⚠️', 'wrong');
 
     if (wrongDev && guide) {
-      speakArabic(guide.wrong);
+      speakKey(`guide.${wrongDev.id}.wrong`, guide.wrong);
     } else {
-      speakArabic('قريباً جداً يا بطل! تفحص الأجهزة عبر زر فحص ثري دي واكتشف مصدر طاقتها بنفسك. حاول مرة أخرى!');
+      speakKey('ui.general_wrong', 'قريباً جداً يا بطل! تفحص الأجهزة عبر زر فحص ثري دي واكتشف مصدر طاقتها بنفسك. حاول مرة أخرى!');
     }
   }
 }
@@ -1393,12 +1451,14 @@ function showVictoryBanner() {
 function giveDetectiveHint() {
   playSelectSound();
   if (currentTargetType === 'battery') {
-    speakArabic(
-      'تلميح المحقق: اضغط زر فحص ثري دي على الأجهزة، وابحث عن الجهاز الذي يحتوي على حجرة بطاريات صغيرة وزوج من الأقطاب!'
+    speakKey(
+      'hint.battery',
+      'تلميح المحقق: اضغط زر فحص 3D على الأجهزة، وابحث عن الجهاز الذي يحتوي على حجرة بطاريات صغيرة وزوج من الأقطاب!'
     );
   } else {
-    speakArabic(
-      'تلميح المحقق: اضغط زر فحص ثري دي على الأجهزة، وابحث عن الجهاز الذي يمتد منه سلك كهربائي قوي ينتهي بفيشة جدارية!'
+    speakKey(
+      'hint.mains',
+      'تلميح المحقق: اضغط زر فحص 3D على الأجهزة، وابحث عن الجهاز الذي يمتد منه سلك كهربائي قوي ينتهي بفيشة جدارية!'
     );
   }
 }

@@ -635,6 +635,128 @@ html, body {
   box-shadow: 0 4px 14px rgba(249, 115, 22, 0.2) !important;
 }
 
+/* ─── شاشة ابدأ النشاط وتفعيل الصوت الشامل ─── */
+.static-start-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeInStart 0.3s ease;
+}
+
+@keyframes fadeInStart {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.start-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-card);
+  padding: 32px 24px;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-modal);
+  border: 2px solid var(--gold);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transform: translateY(0);
+  animation: popStart 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popStart {
+  from { transform: scale(0.9) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.start-avatar {
+  font-size: 3.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 4px 12px rgba(251, 133, 0, 0.4));
+  animation: floatAvatar 3s ease-in-out infinite;
+}
+
+@keyframes floatAvatar {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.start-title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--frog-dark);
+}
+
+.start-desc {
+  font-size: 0.95rem;
+  color: var(--frog);
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+.btn-start-act {
+  margin-top: 8px;
+  width: 100%;
+  padding: 14px 20px !important;
+  font-size: 1.05rem !important;
+  justify-content: center;
+  border-radius: 16px !important;
+}
+
+/* ─── شريط تنبيه المتصفحات المدمجة (In-App Browser Toast) ─── */
+.inapp-browser-toast {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1E293B;
+  color: #F8FAFC;
+  border: 1.5px solid var(--gold);
+  border-radius: 50px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 999;
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  max-width: 90%;
+  animation: slideDownToast 0.35s ease;
+}
+
+@keyframes slideDownToast {
+  from { transform: translate(-50%, -20px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+.btn-copy-link {
+  background: var(--gold);
+  color: var(--frog-dark);
+  border: none;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.btn-copy-link:hover {
+  background: #FFAA00;
+  transform: scale(1.05);
+}
+
 /* ─── 4. شريط الأوامر التقويمية السفلي (Actions Toolbar) ─── */
 .static-actions-bar {
   height: 56px;
