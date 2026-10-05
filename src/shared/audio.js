@@ -2,5 +2,7 @@
 // src/shared/audio.js — وحدة الصوت الموحدة المشتركة بين الثابت والمتحرك
 // ═══════════════════════════════════════════════════════════════════════════
 
+import * as audioModule from '../audio.js';
+
 export * from '../audio.js';
-export { default } from '../audio.js';
+export default audioModule;

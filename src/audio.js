@@ -495,4 +495,20 @@ if (typeof window !== 'undefined' && window.location.search.includes('debugAudio
   console.table(window.audioDiagnostics());
 }
 
+export default {
+  AUDIO_REGISTRY,
+  stopAudio,
+  speakKey,
+  speak,
+  speakIntro,
+  speakToolPick,
+  speakDropSuccess,
+  speakDropIncompatible,
+  speakHint,
+  radioTune,
+  playDeviceSynthSound,
+  getAudioDiagnostics
+};
+
+
 
