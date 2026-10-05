@@ -79,20 +79,24 @@ export async function unlockAudioSystem() {
   try {
     const audio = getAudioSingleton();
     if (audio) {
-      // تشغيل ملف صامت جداً
+      // تشغيل نغمة صامتة جداً لفك الحظر
       audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
-      await audio.play();
-      audio.pause();
+      try {
+        const p = audio.play();
+        if (p !== undefined) await p;
+      } catch {}
       isAudioUnlocked = true;
     }
 
     // فك حظر SpeechSynthesis
     if (typeof window !== 'undefined' && globalThis.speechSynthesis) {
-      if (globalThis.speechSynthesis.paused) globalThis.speechSynthesis.resume();
-      const u = new SpeechSynthesisUtterance(' ');
-      u.volume = 0.01;
-      u.rate = 10;
-      globalThis.speechSynthesis.speak(u);
+      try {
+        if (globalThis.speechSynthesis.paused) globalThis.speechSynthesis.resume();
+        const u = new SpeechSynthesisUtterance(' ');
+        u.volume = 0.01;
+        u.rate = 10;
+        globalThis.speechSynthesis.speak(u);
+      } catch {}
     }
 
     if (pendingPlayback) {
@@ -102,8 +106,7 @@ export async function unlockAudioSystem() {
     }
     return true;
   } catch (err) {
-    lastAudioError = err.message;
-    console.warn('[Audio Unlock Retry Needed]', err);
+    lastAudioError = err?.message || 'Unlock error';
     return false;
   }
 }
@@ -265,8 +268,7 @@ export async function speakKey(key, fallbackText = '', options = {}) {
         }
       }
     } catch (err) {
-      lastAudioError = err.message;
-      console.warn(`[Audio Tier-1 Fallback] (${key}):`, err.message);
+      lastAudioError = err?.message || 'Tier-1 fallback';
     }
   }
 

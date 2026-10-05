@@ -650,13 +650,18 @@ function dispatch(event) {
     inQuizChallengeMode = false;
     currentQuizDevIndex = 0;
     coach.resetRound();
-    $('#drag-ghost').hidden = true;
+    const ghost = $('#drag-ghost');
+    if (ghost) ghost.hidden = true;
     hideCentralFeedback();
     closeDetectiveReport();
     hidePowerMeter();
     closeDialog();
-    shell();
-    scene?.reset();
+    render();
+    scene?.reset?.();
+    scene?.playRevealIntro?.();
+    if (!state.muted) {
+      speakIntro('dynamic');
+    }
     resetIdle();
     return;
   }
@@ -728,6 +733,35 @@ function actionsHTML(actions) {
   return actions.filter(a => validAction(state, a)).map(a => `<button class="action-chip" data-action="suggested" data-suggestion="${escape(JSON.stringify(a))}">${escape(actionLabel(a))}${icon('arrow')}</button>`).join('');
 }
 
+function renderSceneLabels() {
+  const container = $('#scene-labels');
+  if (!container) return;
+  const currentIds = Object.keys(state.devices || {});
+
+  container.innerHTML = currentIds.map((id, index) => {
+    const d = state.devices[id] || {status: 'off'};
+    const pred = state.predictionByDevice?.[id];
+    const isRunning = d.status === 'running';
+    const badgeText = isRunning ? (d.source === 'battery' ? 'شغال (بطارية)' : 'شغال (كهرباء)') : 'متوقف';
+    const badgeClass = isRunning ? 'label-badge badge-running' : 'label-badge badge-off';
+    const dotText = isRunning ? '⚡' : '○';
+
+    return `
+      <div class="scene-label-stack-item ${isRunning ? 'running' : ''}" id="label-${id}">
+        <button class="label-main-tap" data-action="device" data-device="${id}" data-target="${id}">
+          <span class="label-status-dot" id="dot-${id}">${dotText}</span>
+          <strong class="label-name">#${index + 1} ${shortName(id)}</strong>
+          <span class="${badgeClass}" id="badge-${id}">${badgeText}</span>
+        </button>
+        <div class="label-prediction-btns">
+          <button type="button" class="label-pred-btn ${pred === true ? 'active-battery' : ''}" data-action="quickPredict" data-device="${id}" data-val="battery" title="أتوقع: بطارية جافة">🔋</button>
+          <button type="button" class="label-pred-btn ${pred === false ? 'active-mains' : ''}" data-action="quickPredict" data-device="${id}" data-val="mains" title="أتوقع: كهرباء المنزل">🔌</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function render() {
   if (!$('#message')) return;
   const c = t();
@@ -770,7 +804,12 @@ function render() {
   const countNumEl = $('#running-count-num');
   if (countNumEl) countNumEl.textContent = runningDevs.length;
 
+  const vfStatus = $('#viewfinder-status-text');
+  if (vfStatus) vfStatus.textContent = `كاميرا الكشف: ${currentIds.length} أجهزة`;
+
   $('#scene-guide').textContent = (heldBat || heldMains) ? 'أسقط المصدر قرب الجهاز المناسب' : c.guide;
+
+  renderSceneLabels();
 
   for (const id of currentIds) {
     const d = state.devices[id] || {status: 'off'};
@@ -779,28 +818,11 @@ function render() {
     const statusEl = $('#status-' + id);
     if (statusEl) statusEl.textContent = `${c.now}: ${c[d.status] || d.status}${d.source ? ' · ' + (d.source === 'battery' ? c.battery : 'فيشة رئيسية') : ''}`;
 
-    const labelBadge = $('#badge-' + id);
-    const dotEl = $('#dot-' + id);
-    if (labelBadge) {
-      if (d.status === 'running') {
-        labelBadge.textContent = d.source === 'battery' ? 'شغال (بطارية)' : 'شغال (كهرباء)';
-        labelBadge.className = 'label-badge badge-running';
-        if (dotEl) dotEl.textContent = '⚡';
-      } else {
-        labelBadge.textContent = 'متوقف';
-        labelBadge.className = 'label-badge badge-off';
-        if (dotEl) dotEl.textContent = '○';
-      }
-    }
-
     const cardEl = $('#card-' + id);
     if (cardEl) {
       cardEl.classList.toggle('selected', state.selectedDevice === id);
       cardEl.classList.toggle('running', d.status === 'running');
     }
-
-    const lblEl = $('#label-' + id);
-    if (lblEl) lblEl.classList.toggle('running', d.status === 'running');
 
     const chkEl = $('#check-' + id);
     if (chkEl) chkEl.innerHTML = found ? icon('check') : '○';

@@ -378,38 +378,81 @@ html, body {
   flex-shrink: 0 !important;
 }
 
+.bar-report-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 6px 12px !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  border-radius: 12px !important;
+  background: #edf5ef !important;
+  color: #2F3E36 !important;
+  font-weight: 800 !important;
+  font-size: 12px !important;
+  border: 1.5px solid #d0e2d9 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+}
+.bar-report-btn:hover {
+  background: #2EC4B6 !important;
+  color: #ffffff !important;
+  border-color: #2EC4B6 !important;
+}
+
 .bar-reset-btn {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 5px !important;
   padding: 6px 14px !important;
-  border-radius: 14px !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  border-radius: 12px !important;
   background: var(--gold-gradient) !important;
   color: #2F3E36 !important;
   font-weight: 800 !important;
-  font-size: 12.5px !important;
+  font-size: 12px !important;
   border: 0 !important;
   cursor: pointer !important;
-  box-shadow: 0 3px 10px rgba(251, 133, 0, 0.25) !important;
+  box-shadow: 0 3px 8px rgba(251, 133, 0, 0.25) !important;
   transition: all 0.2s !important;
   white-space: nowrap !important;
 }
 .bar-reset-btn:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 5px 16px rgba(251, 133, 0, 0.4) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 5px 14px rgba(251, 133, 0, 0.4) !important;
 }
 
-/* ─── قائمة شريط الحالة العمودي للأجهزة بدون أي تداخل (Stack) ─── */
+.header-ar-launch-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 5px 12px !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  background: var(--gold-gradient) !important;
+  color: #2F3E36 !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  border: 0 !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 6px rgba(251, 133, 0, 0.3) !important;
+  white-space: nowrap !important;
+}
+
+/* ─── قائمة شريط الحالة للأجهزة في المشهد (#scene-labels) ─── */
 .scene-labels-stack {
   position: absolute !important;
-  top: 50px !important;
+  top: 48px !important;
   right: 12px !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 6px !important;
+  gap: 5px !important;
   z-index: 10 !important;
   pointer-events: auto !important;
-  max-width: 175px !important;
+  max-width: 190px !important;
 }
 
 .scene-label-stack-item {
@@ -417,35 +460,42 @@ html, body {
   flex-direction: row !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 8px !important;
+  gap: 5px !important;
   background: rgba(255, 255, 255, 0.94) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
   border: 1.5px solid #d0e2d9 !important;
-  border-radius: 20px !important;
-  padding: 4px 10px !important;
-  min-height: 28px !important;
-  font-size: 11.5px !important;
-  white-space: nowrap !important;
-  box-shadow: 0 2px 8px rgba(47, 62, 54, 0.08) !important;
+  border-radius: 12px !important;
+  padding: 3px 6px !important;
+  min-height: 30px !important;
+  box-shadow: 0 2px 6px rgba(47, 62, 54, 0.08) !important;
   transition: all 0.2s ease !important;
-  cursor: pointer !important;
-  touch-action: manipulation !important;
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  text-decoration: none !important;
 }
 
 .scene-label-stack-item:hover {
-  transform: translateX(-3px) !important;
+  transform: translateX(-2px) !important;
   border-color: #2EC4B6 !important;
 }
 
 .scene-label-stack-item.running {
   background: #dcfce7 !important;
   border-color: #22c55e !important;
-  color: #15803d !important;
-  box-shadow: 0 0 12px rgba(34, 197, 94, 0.35) !important;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3) !important;
+}
+
+.label-main-tap {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 0 !important;
+  min-height: 24px !important;
+  height: 24px !important;
+  border: 0 !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  text-align: start !important;
 }
 
 .label-status-dot {
@@ -454,12 +504,13 @@ html, body {
 }
 
 .label-name {
-  font-size: 11.5px !important;
+  font-size: 11px !important;
   font-weight: 800 !important;
   color: #2F3E36 !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: 85px !important;
+  white-space: nowrap !important;
+  flex: 1 !important;
 }
 
 .scene-label-stack-item.running .label-name {
@@ -467,11 +518,12 @@ html, body {
 }
 
 .label-badge {
-  font-size: 9.5px !important;
-  padding: 1px 6px !important;
-  border-radius: 10px !important;
-  font-weight: 700 !important;
+  font-size: 9px !important;
+  padding: 1px 5px !important;
+  border-radius: 6px !important;
+  font-weight: 800 !important;
   flex-shrink: 0 !important;
+  white-space: nowrap !important;
 }
 
 .label-badge.badge-running {
@@ -482,6 +534,48 @@ html, body {
 .label-badge.badge-off {
   background: #f1f5f9 !important;
   color: #64748b !important;
+}
+
+.label-prediction-btns {
+  display: flex !important;
+  gap: 3px !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+}
+
+.label-pred-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1px 4px !important;
+  min-height: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  border: 1px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.label-pred-btn:hover {
+  background: #f1f5f9 !important;
+  transform: scale(1.08) !important;
+}
+
+.label-pred-btn.active-battery {
+  background: #2EC4B6 !important;
+  border-color: #0d9488 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 6px rgba(46, 196, 182, 0.6) !important;
+}
+
+.label-pred-btn.active-mains {
+  background: #FB8500 !important;
+  border-color: #ea580c !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 6px rgba(251, 133, 0, 0.6) !important;
 }
 
 .device-icon {
@@ -1626,4 +1720,194 @@ html, body {
   border: 1px solid #0284C7;
   max-width: 280px;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   التجاوب الشامل مع جميع الشاشات والجوالات (Mobile & Tablet)
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .compact-header {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 6px !important;
+  }
+  .compact-header .brand {
+    gap: 5px !important;
+  }
+  .compact-header .brand small {
+    display: none !important;
+  }
+  .compact-header .brand strong {
+    font-size: 13px !important;
+  }
+  .compact-header .brand-mark {
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 6px !important;
+  }
+  .compact-header .brand-mark .icon {
+    width: 15px !important;
+    height: 15px !important;
+  }
+  .compact-header .top-actions {
+    gap: 3px !important;
+  }
+  .compact-header .nav-link-btn,
+  .compact-header .header-ar-launch-btn {
+    padding: 3px 6px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    font-size: 11px !important;
+    gap: 2px !important;
+  }
+  .compact-header .nav-link-btn span,
+  .compact-header .header-ar-launch-btn span {
+    display: none !important;
+  }
+  .compact-header .icon-only,
+  .compact-header .quiet {
+    width: 28px !important;
+    min-width: 28px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 4px !important;
+  }
+  .compact-header .icon-only span,
+  .compact-header .quiet span {
+    display: none !important;
+  }
+  .compact-header .icon {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .lab-main-100vh {
+    padding: 4px 6px 2px !important;
+  }
+
+  .viewfinder-top-bar {
+    padding: 3px 6px !important;
+    gap: 4px !important;
+  }
+  .viewfinder-status-tag {
+    padding: 2px 8px !important;
+    font-size: 10.5px !important;
+  }
+  .viewfinder-actions {
+    gap: 4px !important;
+  }
+  .viewfinder-btn {
+    padding: 2px 8px !important;
+    font-size: 10.5px !important;
+    min-height: 26px !important;
+    height: 26px !important;
+  }
+
+  /* على شاشات الجوال: جعل بطاقات الأجهزة في شريط علوي أنيق 2x2 لا يحجب المشهد */
+  .scene-labels-stack {
+    top: 38px !important;
+    right: 6px !important;
+    left: 6px !important;
+    max-width: none !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 4px !important;
+  }
+  .scene-label-stack-item {
+    padding: 2px 6px !important;
+    min-height: 26px !important;
+    height: 26px !important;
+    border-radius: 10px !important;
+    gap: 4px !important;
+  }
+  .label-name {
+    font-size: 10px !important;
+    max-width: 60px !important;
+  }
+  .label-pred-btn {
+    min-height: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    padding: 0 2px !important;
+    font-size: 9.5px !important;
+  }
+
+  /* أزرار السحب 🔋 / 🔌 فوق المشهد */
+  .table-power-dock {
+    bottom: 4px !important;
+    padding: 2px 8px !important;
+    gap: 6px !important;
+    border-radius: 30px !important;
+  }
+  .dock-power-btn {
+    padding: 3px 8px !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    border-radius: 12px !important;
+    gap: 4px !important;
+  }
+  .power-emoji {
+    font-size: 15px !important;
+  }
+  .power-title {
+    font-size: 10.5px !important;
+  }
+
+  /* شريط التغذية الراجعة السفلي */
+  .bottom-feedback-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 3px !important;
+    padding: 5px 8px !important;
+    margin: 2px 0 !important;
+    min-height: auto !important;
+    border-radius: 12px !important;
+  }
+  .feedback-avatar-wrap {
+    display: none !important;
+  }
+  .feedback-content {
+    width: 100% !important;
+  }
+  .feedback-header-row {
+    width: 100% !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+  }
+  .feedback-status-pill {
+    font-size: 9.5px !important;
+    padding: 1px 6px !important;
+  }
+  .feedback-device-tag {
+    font-size: 10.5px !important;
+    white-space: normal !important;
+  }
+  .active-count-chip {
+    font-size: 9.5px !important;
+    padding: 1px 6px !important;
+  }
+  .live-feedback-text {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    width: 100% !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    margin: 1px 0 !important;
+  }
+  .feedback-bar-actions {
+    width: 100% !important;
+    display: flex !important;
+    gap: 6px !important;
+  }
+  .bar-report-btn, .bar-reset-btn {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 4px 6px !important;
+    font-size: 10.5px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    border-radius: 10px !important;
+  }
+}
+
 

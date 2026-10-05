@@ -20,16 +20,7 @@ const defaults = {
 };
 
 export async function createLabScene(host, { getState, dispatch, onDevice, onBattery, onMains, projectLabel }) {
-  let palette = { ...defaults };
-  try {
-    const result = await fetch('./assets/models/lab-design.json', { signal: AbortSignal.timeout(4000) });
-    if (result.ok) {
-      const data = await result.json();
-      for (const key of Object.keys(defaults)) {
-        if (Number.isInteger(data.palette?.[key])) palette[key] = data.palette[key];
-      }
-    }
-  } catch {}
+  const palette = { ...defaults };
 
   let renderer;
   try {
