@@ -3,6 +3,7 @@
 // مدعوم بمدخل الواقع المعزز الحقيقي (True AR)، والتوجيه الصوتي، والبطاقات ثلاثية الأبعاد
 // ═══════════════════════════════════════════════════════════════════════════
 
+import * as THREE from 'three';
 import { launchArGateway, launchARGateway } from './ar.js';
 import { speak, stopAudio } from './audio.js';
 import { ALL_DEVICES } from './config.js';
@@ -90,10 +91,10 @@ function playErrorSound() {
   playTone(220, 'sawtooth', 0.25);
 }
 
-// التوجيه الصوتي العربي الموحد
+// التوجيه الصوتي العربي الموحد (نبرة طفولية ناعمة تحفيزية لطلاب الصف الرابع)
 function speakArabic(text) {
   if (!speechEnabled) return;
-  speak(text, 'ar');
+  speak(text, 'ar', { pitch: 1.22, rate: 0.94 });
 }
 
 // ─── إدارة حالة النشاط ───
@@ -266,13 +267,6 @@ export function initStaticLab() {
 
   // بدء التحدي الأول
   startNewChallenge();
-
-  // التحقق من إمكانية تشغيل مدخل الواقع المعزز تلقائياً
-  if (typeof window !== 'undefined' && !window.location.hash.includes('skip-ar')) {
-    setTimeout(() => {
-      openArGateway();
-    }, 200);
-  }
 }
 
 // ─── فتح مدخل الواقع المعزز الحقيقي (True AR Gateway) ───
@@ -372,15 +366,16 @@ function startNewChallenge() {
   speakCurrentMission();
 }
 
+// ─── نطق مهمة التحدي بصوت تشجيعي طفولي دون حرق الإجابة ───
 function speakCurrentMission() {
   if (currentTargetType === 'battery') {
-    speakArabic('حَدِّدْ يا بطل جهازين يعملان بالبطارية الجافة، وتجنب أجهزة كهرباء المنزل! انقر على الأجهزة لاختيارها.');
+    speakArabic('هيا يا بطل العلوم! ابحث عن جهازين يعملان بالبطاريات، واضغط فحص 3D لتكتشف حجرة البطاريات أو سلك الكهرباء!');
   } else {
-    speakArabic('حَدِّدْ يا بطل جهازين يحتاجان تياراً قوياً من مقبس كهرباء المنزل 220 فولت! انقر على الأجهزة لاختيارها.');
+    speakArabic('هيا يا ذكي! ابحث عن جهازين يحتاجان كهرباء المنزل القوية، واضغط فحص 3D لتفحص الجهاز بنفسك!');
   }
 }
 
-// ─── رسم البطاقات التفاعلية 3D ───
+// ─── رسم البطاقات التفاعلية 3D بدون أي حرق نصي ───
 function renderCards(devices) {
   const stage = document.getElementById('cards-stage');
   if (!stage) return;
@@ -394,32 +389,28 @@ function renderCards(devices) {
 
     wrap.innerHTML = `
       <div class="card-3d-inner" id="card-inner-${dev.id}">
-        <!-- الوجه الأمامي -->
+        <!-- الوجه الأمامي: نظيف بدون أي تلميحات نصية محروقة -->
         <div class="card-face card-face-front" data-id="${dev.id}">
           <div class="card-select-badge" id="badge-${dev.id}">○</div>
-          <div class="card-category-badge ${dev.type === 'battery' ? 'cat-battery' : 'cat-house'}">
-            ${dev.type === 'battery' ? '🔋 بطارية 1.5V' : '⚡ مقبس 220V'}
-          </div>
           <div class="card-visual-box">
             ${svgIcon}
           </div>
           <div class="card-device-name">${dev.name}</div>
-          <button type="button" class="btn-flip-inspect" data-inspect="${dev.id}">
-            🔍 <span>فحص 3D ومصدر الطاقة</span>
+          <button type="button" class="btn-flip-inspect" data-inspect="${dev.id}" title="فحص الجهاز ثلاثي الأبعاد والبحث عن الدليل">
+            🔍 <span>فحص 3D</span>
           </button>
         </div>
 
         <!-- الوجه الخلفي (3D Flip) -->
         <div class="card-face card-face-back">
           <div class="back-header">
-            <strong style="font-size:0.85rem;">⚡ الدائرة ومصدر الطاقة</strong>
-            <span class="back-voltage-chip">${dev.voltage || (dev.type === 'battery' ? '1.5V بطارية' : '220V مقبس')}</span>
+            <strong style="font-size:0.85rem;">🔍 دليل الفحص والملاحظة</strong>
           </div>
           <div class="back-reason-box">
             <div class="back-reason-title">${dev.name}</div>
             <div class="back-reason-text">${dev.reason}</div>
             <button type="button" class="static-btn-listen" data-speak-reason="${dev.id}" style="align-self:center; margin-top:4px;">
-              📢 <span>استمع للشرح</span>
+              📢 <span>استمع للتوجيه</span>
             </button>
           </div>
           <button type="button" class="btn-flip-back" data-flipback="${dev.id}">
@@ -437,7 +428,7 @@ function renderCards(devices) {
       toggleDeviceSelection(dev.id);
     });
 
-    // تفاعل القلب 3D للفحص
+    // تفاعل فتح فحص 3D عبر الواقع المعزز (AR on Demand)
     const inspectBtn = wrap.querySelector(`[data-inspect="${dev.id}"]`);
     const flipBackBtn = wrap.querySelector(`[data-flipback="${dev.id}"]`);
     const speakReasonBtn = wrap.querySelector(`[data-speak-reason="${dev.id}"]`);
@@ -445,12 +436,10 @@ function renderCards(devices) {
 
     inspectBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      inner.classList.add('is-flipped');
-      playFlipSound();
-      speakArabic(`فحص ${dev.name}: يعمل بجهد ${dev.voltage || 'محدد'}. ${dev.reason}`);
+      openDeviceArInspector(dev);
     });
 
-    flipBackBtn.addEventListener('click', (e) => {
+    flipBackBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
       inner.classList.remove('is-flipped');
       playFlipSound();
@@ -458,7 +447,7 @@ function renderCards(devices) {
 
     speakReasonBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
-      speakArabic(`فحص ${dev.name}: يعمل بجهد ${dev.voltage || (dev.type === 'battery' ? '1.5 فولت بطارية' : '220 فولت مقبس')}. ${dev.reason}`);
+      speakArabic(`تفحص ${dev.name} جيداً! انظر هل يمتلك حجرة بطاريات صغيرة، أم سلكاً ينتهي بفيشة كهرباء؟`);
     });
 
     // تأثير الإمالة ثلاثي الأبعاد بالماوس أو اللمس (3D Perspective Tilt)
@@ -481,6 +470,290 @@ function renderCards(devices) {
 
     stage.appendChild(wrap);
   });
+}
+
+// ─── محاكي فحص الواقع المعزز عند الطلب (AR Inspector on Demand) ───
+let arActiveStream = null;
+let arAnimationId = null;
+
+function openDeviceArInspector(dev) {
+  playFlipSound();
+
+  // تشجيع صوتي دون حرق الإجابة
+  speakArabic(`هيا يا محقق! تفحص ${dev.name} من جميع الجهات؛ هل ترى حجرة بطاريات أم سلكاً كهربائياً؟`);
+
+  // إزالة أي شاشة سابقة إن وجدت
+  document.getElementById('ar-inspector-overlay')?.remove();
+
+  const isBattery = dev.type === 'battery';
+  const clueTitle = isBattery ? 'تلميح بصري: تفحص خلف الجهاز وأسفله 🔍' : 'تلميح بصري: تفحص كابل الطاقة والمقبس 🔍';
+  const clueDesc = isBattery
+    ? 'لاحظ فتحة البطارية والزنبرك المعدني (+ / -) المصمم لخلايا الطاقة الجافة.'
+    : 'لاحظ سلك الكهرباء المتين الذي ينتهي بفيشة ثنائية جاهزة للتوصيل بالجدار.';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'ar-inspector-overlay';
+  overlay.className = 'ar-inspector-overlay';
+  overlay.innerHTML = `
+    <video class="ar-inspector-camera" id="ar-cam-video" autoplay playsinline muted></video>
+    <div class="ar-inspector-canvas-wrap" id="ar-three-container"></div>
+
+    <div class="ar-inspector-header">
+      <div class="ar-inspector-title-group">
+        <div class="ar-inspector-badge-icon">${isBattery ? '🔋' : '⚡'}</div>
+        <div class="ar-inspector-title-text">
+          <strong>فحص 3D: ${dev.name}</strong>
+          <small>ابحث عن الدليل البصري لمصدر الطاقة</small>
+        </div>
+      </div>
+      <button type="button" class="ar-inspector-close-btn" id="btn-close-ar" title="إغلاق الفحص">✕</button>
+    </div>
+
+    <div class="ar-clue-guidance-box">
+      <div class="ar-clue-icon">${isBattery ? '🔋' : '⚡'}</div>
+      <div class="ar-clue-text">
+        <strong>${clueTitle}</strong>
+        <p>${clueDesc} — حرك إصبعك لتدوير المجسم 360 درجة!</p>
+      </div>
+    </div>
+
+    <div class="ar-inspector-footer">
+      <button type="button" class="ar-cam-toggle-btn" id="btn-toggle-cam">
+        📷 <span>الكاميرا: جاري التشغيل...</span>
+      </button>
+      <button type="button" class="ar-return-btn" id="btn-done-ar">
+        <span>✔️ فهمت الدليل! عودة للحل</span>
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // تشغيل الكاميرا الحقيقية في الخلفية
+  const videoEl = document.getElementById('ar-cam-video');
+  const camToggleBtn = document.getElementById('btn-toggle-cam');
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    })
+    .then(stream => {
+      arActiveStream = stream;
+      if (videoEl) {
+        videoEl.srcObject = stream;
+        videoEl.play().catch(() => {});
+      }
+      if (camToggleBtn) camToggleBtn.innerHTML = '📷 <span>الكاميرا تعمل (واقع معزز)</span>';
+    })
+    .catch(() => {
+      if (camToggleBtn) camToggleBtn.innerHTML = '🖼️ <span>وضع المعاينة ثلاثية الأبعاد</span>';
+    });
+  } else {
+    if (camToggleBtn) camToggleBtn.innerHTML = '🖼️ <span>وضع المعاينة ثلاثية الأبعاد</span>';
+  }
+
+  // بناء مشهد Three.js
+  const container = document.getElementById('ar-three-container');
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 5);
+
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.shadowMap.enabled = true;
+  container.appendChild(renderer.domElement);
+
+  // إضاءة واقعية
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+  scene.add(ambientLight);
+  const dirLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+  dirLight.position.set(4, 6, 5);
+  scene.add(dirLight);
+
+  const pointLight = new THREE.PointLight(isBattery ? 0x22c55e : 0x3b82f6, 1.5, 10);
+  pointLight.position.set(0, -1, 2);
+  scene.add(pointLight);
+
+  // بناء مجسم الجهاز مع التلميح البصري الواقعي
+  const deviceGroup = buildClueDeviceMesh(dev);
+  scene.add(deviceGroup);
+
+  // التحكم التفاعلي باللمس والماوس للتدوير الحر (360° Rotation)
+  let isDragging = false;
+  let previousMousePosition = { x: 0, y: 0 };
+
+  const onPointerDown = (e) => {
+    isDragging = true;
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+  };
+
+  const onPointerMove = (e) => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - previousMousePosition.x;
+    const deltaY = e.clientY - previousMousePosition.y;
+    deviceGroup.rotation.y += deltaX * 0.012;
+    deviceGroup.rotation.x += deltaY * 0.012;
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+  };
+
+  const onPointerUp = () => {
+    isDragging = false;
+  };
+
+  window.addEventListener('pointerdown', onPointerDown);
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', onPointerUp);
+
+  // حلقة التصيير والتحريك الطافي
+  let clock = 0;
+  const animate = () => {
+    arAnimationId = requestAnimationFrame(animate);
+    clock += 0.02;
+    if (!isDragging) {
+      deviceGroup.rotation.y += 0.006;
+      deviceGroup.position.y = Math.sin(clock) * 0.08;
+    }
+    renderer.render(scene, camera);
+  };
+  animate();
+
+  const handleResize = () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  };
+  window.addEventListener('resize', handleResize);
+
+  // إغلاق المعاينة والعودة للنشاط
+  const closeInspector = () => {
+    if (arAnimationId) cancelAnimationFrame(arAnimationId);
+    if (arActiveStream) {
+      arActiveStream.getTracks().forEach(track => track.stop());
+      arActiveStream = null;
+    }
+    window.removeEventListener('pointerdown', onPointerDown);
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('resize', handleResize);
+    overlay.remove();
+    renderer.dispose();
+  };
+
+  document.getElementById('btn-close-ar')?.addEventListener('click', closeInspector);
+  document.getElementById('btn-done-ar')?.addEventListener('click', closeInspector);
+}
+
+// ─── بناء مجسم ثلاثي الأبعاد واقعي يحتوي على التلميح البصري ───
+function buildClueDeviceMesh(dev) {
+  const group = new THREE.Group();
+  const isBattery = dev.type === 'battery';
+
+  if (isBattery) {
+    // ─── مجسم جهاز بطارية مع حجرة بطارية مفتوحة وزوج بطاريات جافة ───
+    // جسم الجهاز الخارجي
+    const bodyGeo = new THREE.BoxGeometry(2.2, 1.4, 0.8);
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: 0x2b4c7e,
+      roughness: 0.35,
+      metalness: 0.2
+    });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    group.add(body);
+
+    // واجهة شاشة أو تحكم
+    const screenGeo = new THREE.PlaneGeometry(1.6, 0.8);
+    const screenMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 });
+    const screen = new THREE.Mesh(screenGeo, screenMat);
+    screen.position.set(0, 0, 0.41);
+    group.add(screen);
+
+    // حجرة البطاريات المفتوحة في الخلف (Visual Clue)
+    const bayGeo = new THREE.BoxGeometry(1.5, 0.9, 0.3);
+    const bayMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9 });
+    const bay = new THREE.Mesh(bayGeo, bayMat);
+    bay.position.set(0, 0, -0.3);
+    group.add(bay);
+
+    // أسطوانتا بطاريتين جافتين AA بألوان مميزة وقطب (+) بارز
+    for (let i = -1; i <= 1; i += 2) {
+      const battGeo = new THREE.CylinderGeometry(0.18, 0.18, 1.1, 24);
+      const battMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.7, roughness: 0.3 });
+      const batt = new THREE.Mesh(battGeo, battMat);
+      batt.rotation.z = Math.PI / 2;
+      batt.position.set(0, i * 0.24, -0.3);
+      group.add(batt);
+
+      // رأس القطب الموجب (+)
+      const capGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.12, 16);
+      const capMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9 });
+      const cap = new THREE.Mesh(capGeo, capMat);
+      cap.rotation.z = Math.PI / 2;
+      cap.position.set(i === -1 ? 0.6 : -0.6, i * 0.24, -0.3);
+      group.add(cap);
+
+      // زنبرك القطب السالب (-)
+      const springGeo = new THREE.TorusGeometry(0.12, 0.03, 8, 20);
+      const springMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 });
+      const spring = new THREE.Mesh(springGeo, springMat);
+      spring.rotation.y = Math.PI / 2;
+      spring.position.set(i === -1 ? -0.58 : 0.58, i * 0.24, -0.3);
+      group.add(spring);
+    }
+  } else {
+    // ─── مجسم جهاز منزلي كبير مع سلك كهربائي وفيشة جدارية ثنائية ───
+    // جسم الجهاز الرئيسي
+    const bodyGeo = new THREE.BoxGeometry(2.0, 2.2, 1.4);
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      metalness: 0.3,
+      roughness: 0.25
+    });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    group.add(body);
+
+    // باب/لوحة تحكم معدنية
+    const panelGeo = new THREE.PlaneGeometry(1.6, 1.8);
+    const panelMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.5 });
+    const panel = new THREE.Mesh(panelGeo, panelMat);
+    panel.position.set(0, 0, 0.71);
+    group.add(panel);
+
+    // سلك كهرباء أسود يمتد من خلف الجهاز
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, -0.8, -0.7),
+      new THREE.Vector3(0.4, -1.2, -0.9),
+      new THREE.Vector3(0.8, -1.5, -0.4),
+      new THREE.Vector3(1.4, -1.6, 0.1)
+    ]);
+    const cableGeo = new THREE.TubeGeometry(curve, 24, 0.07, 12, false);
+    const cableMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.8 });
+    const cable = new THREE.Mesh(cableGeo, cableMat);
+    group.add(cable);
+
+    // رأس الفيشة الكهربائية المنزلية (Plug Head)
+    const plugGeo = new THREE.BoxGeometry(0.3, 0.24, 0.36);
+    const plugMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.4 });
+    const plug = new THREE.Mesh(plugGeo, plugMat);
+    plug.position.set(1.4, -1.6, 0.1);
+    group.add(plug);
+
+    // مسمارا الفيشة المعدنيان البارزان (Prongs)
+    for (let p of [-0.08, 0.08]) {
+      const pinGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.25, 12);
+      const pinMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.95 });
+      const pin = new THREE.Mesh(pinGeo, pinMat);
+      pin.rotation.x = Math.PI / 2;
+      pin.position.set(1.4 + p, -1.6, 0.35);
+      group.add(pin);
+    }
+  }
+
+  // زاوية مبدئية توضح التلميح
+  group.rotation.y = Math.PI * 0.15;
+  group.rotation.x = 0.1;
+
+  return group;
 }
 
 // ─── تبديل تحديد الجهاز ───
@@ -566,10 +839,9 @@ function validateSelection() {
     const wrongDev = currentDevices.find(d => d.id === wrongChosenId);
 
     if (wrongDev) {
-      const guidance = wrongDev.wrongReason || wrongDev.reason;
-      speakArabic(`حاول مرة أخرى يا بطل! انتبه: جهاز ${wrongDev.name} ${guidance} اضغط على جهاز آخر لتصحيح اختيارك.`);
+      speakArabic(`حاول مرة أخرى يا بطل! تفحص جهاز ${wrongDev.name} عبر زر فحص ثري دي واكتشف مصدر طاقته بنفسك!`);
     } else {
-      speakArabic('حاول مرة أخرى يا بطل، وتأكد من مصدر الطاقة المناسب لكل جهاز!');
+      speakArabic('حاول مرة أخرى يا بطل! تفحص الأجهزة ثلاثية الأبعاد واكتشف الدليل البصري!');
     }
   }
 }
@@ -581,16 +853,16 @@ function showVictoryBanner() {
   }
 }
 
-// ─── تلميح المحقق الذكي ───
+// ─── تلميح المحقق الذكي (تحفيزي واستكشافي دون حرق الإجابة) ───
 function giveDetectiveHint() {
   playSelectSound();
   if (currentTargetType === 'battery') {
     speakArabic(
-      'تلميح المحقق: الأجهزة الصغيرة المحمولة مثل الساعة والريموت وكشاف الجيب تعمل ببطاريات جافة آمنة. ابحث عن الأجهزة سهلة الحمل!'
+      'تلميح المحقق: اضغط زر فحص ثري دي على الأجهزة، وابحث عن الجهاز الذي يحتوي على حجرة بطاريات صغيرة وزوج من الأقطاب!'
     );
   } else {
     speakArabic(
-      'تلميح المحقق: الأجهزة الكبيرة والحرارية مثل الثلاجة والفرن والمكواة تستهلك طاقة جبارة لا توفرها إلا كهرباء المنزل من مقبس الجدار 220 فولت!'
+      'تلميح المحقق: اضغط زر فحص ثري دي على الأجهزة، وابحث عن الجهاز الذي يمتد منه سلك كهربائي قوي ينتهي بفيشة جدارية!'
     );
   }
 }

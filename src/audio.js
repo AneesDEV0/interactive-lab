@@ -91,7 +91,7 @@ if (typeof window !== 'undefined' && globalThis.speechSynthesis) {
   } catch {}
 }
 
-export function speak(text, lang) {
+export function speak(text, lang = 'ar', options = {}) {
   stopAudio();
   if (!globalThis.speechSynthesis) return false;
 
@@ -109,10 +109,10 @@ export function speak(text, lang) {
     utterance.lang = lang === 'en' ? 'en-US' : 'ar-SA';
   }
 
-  // ضبط السرعة والنبرة لنطق عربي فصيح واضح ومخارج حروف سليمة لطلاب الصف الرابع
-  utterance.rate = 0.88;
-  utterance.pitch = 1.0;
-  utterance.volume = 1.0;
+  // ضبط السرعة والنبرة - نبرة طفولية ناعمة تحفيزية لطلاب الصف الرابع
+  utterance.rate = options.rate ?? 0.94;
+  utterance.pitch = options.pitch ?? 1.22;
+  utterance.volume = options.volume ?? 1.0;
 
   speech = utterance;
   try {
