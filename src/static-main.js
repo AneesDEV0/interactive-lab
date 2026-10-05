@@ -91,10 +91,10 @@ function playErrorSound() {
   playTone(220, 'sawtooth', 0.25);
 }
 
-// التوجيه الصوتي العربي الموحد (نبرة طفولية ناعمة تحفيزية لطلاب الصف الرابع)
+// التوجيه الصوتي العربي الموحد (نبرة واضحة ومحفزة لطلاب الصف الرابع)
 function speakArabic(text) {
   if (!speechEnabled) return;
-  speak(text, 'ar', { pitch: 1.22, rate: 0.94 });
+  speak(text, 'ar', { pitch: 1.0, rate: 0.95 });
 }
 
 // ─── إدارة حالة النشاط ───
@@ -654,88 +654,215 @@ function buildClueDeviceMesh(dev) {
     // ══════════════════════════════════════════════════════════
     // أجهزة البطارية الجافة (مع حجرة بطارية مفتوحة وزوج بطاريات AA)
     // ══════════════════════════════════════════════════════════
-    if (id === 'flashlight') {
-      // كشاف الجيب: أسطوانة معدنية بمقدمة مضيئة مع حجرة خلفية مفتوحة
-      const tubeGeo = new THREE.CylinderGeometry(0.4, 0.45, 2.2, 24);
-      const tubeMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.3 });
-      const tube = new THREE.Mesh(tubeGeo, tubeMat);
+    if (id === 'car') {
+      // 🚗 سيارة ألعاب للأطفال: هيكل سيارة أحمر، كابينة زجاجية، 4 عجلات
+      const carBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.7, 1.4), new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.3, roughness: 0.3 }));
+      group.add(carBody);
+      const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.65, 1.2), new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, transparent: true, opacity: 0.8 }));
+      cabin.position.set(-0.15, 0.65, 0);
+      group.add(cabin);
+      // 4 عجلات
+      for (let x of [-0.75, 0.75]) {
+        for (let z of [-0.75, 0.75]) {
+          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.22, 16), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 }));
+          wheel.rotation.x = Math.PI / 2;
+          wheel.position.set(x, -0.22, z);
+          group.add(wheel);
+        }
+      }
+    } else if (id === 'radio') {
+      // 📻 راديو محمول: هيكل فيروزي، هوائي مائل، مكبر صوت شبكي، ومقبض
+      const rBody = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.5, 0.8), new THREE.MeshStandardMaterial({ color: 0x0d9488, roughness: 0.3 }));
+      group.add(rBody);
+      const speaker = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 0.05, 24), new THREE.MeshStandardMaterial({ color: 0x134e4a }));
+      speaker.rotation.x = Math.PI / 2;
+      speaker.position.set(-0.45, 0, 0.41);
+      group.add(speaker);
+      // مقبض ضبط التردد
+      const dial = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.08, 16), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
+      dial.rotation.x = Math.PI / 2;
+      dial.position.set(0.55, 0.2, 0.42);
+      group.add(dial);
+      // هوائي فضي
+      const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.5, 12), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9 }));
+      ant.rotation.z = -0.3;
+      ant.position.set(-0.6, 1.2, 0);
+      group.add(ant);
+    } else if (id === 'flashlight') {
+      // 🔦 كشاف الجيب: أسطوانة معدنية بمقدمة مضيئة مع حجرة خلفية مفتوحة
+      const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 2.2, 24), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.3 }));
       group.add(tube);
-
-      const headGeo = new THREE.CylinderGeometry(0.7, 0.45, 0.8, 24);
-      const headMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.8, roughness: 0.2 });
-      const head = new THREE.Mesh(headGeo, headMat);
+      const head = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.42, 0.8, 24), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.8, roughness: 0.2 }));
       head.position.y = 1.3;
       group.add(head);
-
-      const lensGeo = new THREE.CircleGeometry(0.65, 24);
-      const lensMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfde047, emissiveIntensity: 0.6 });
-      const lens = new THREE.Mesh(lensGeo, lensMat);
+      const lens = new THREE.Mesh(new THREE.CircleGeometry(0.65, 24), new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfde047, emissiveIntensity: 0.6 }));
       lens.rotation.x = -Math.PI / 2;
       lens.position.y = 1.71;
       group.add(lens);
+    } else if (id === 'wallClock') {
+      // ⏰ ساعة حائط جدارية: قرص دائري أبيض بإطار ذهبي وعقارب
+      const frame = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.2, 32), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.6 }));
+      frame.rotation.x = Math.PI / 2;
+      group.add(frame);
+      const dial = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.22, 32), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
+      dial.rotation.x = Math.PI / 2;
+      group.add(dial);
+      // عقارب الساعة
+      const handH = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.02), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+      handH.position.set(0, 0.22, 0.12);
+      group.add(handH);
+      const handM = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.75, 0.02), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+      handM.rotation.z = -1.2;
+      handM.position.set(0.3, 0.1, 0.13);
+      group.add(handM);
+    } else if (id === 'remote') {
+      // 📱 ريموت التلفاز: لوح تحكم رفيع مع أزرار مطاطية ومصباح أحمر
+      const rBody = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2.4, 0.35), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 }));
+      group.add(rBody);
+      // مصباح إشارة بالأعلى
+      const ir = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xef4444, emissiveIntensity: 0.6 }));
+      ir.position.set(0, 1.23, 0);
+      group.add(ir);
+      // شبكة أزرار
+      for (let y = -0.6; y <= 0.8; y += 0.35) {
+        for (let x of [-0.22, 0.22]) {
+          const btn = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.16, 0.08), new THREE.MeshStandardMaterial({ color: 0x64748b }));
+          btn.position.set(x, y, 0.2);
+          group.add(btn);
+        }
+      }
     } else if (id === 'digitalScale') {
-      // ميزان رقمي: لوح زجاجي مقوى وقاعدة سفلية
-      const plateGeo = new THREE.BoxGeometry(2.4, 0.15, 2.4);
-      const plateMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.1, transparent: true, opacity: 0.9 });
-      const plate = new THREE.Mesh(plateGeo, plateMat);
+      // ميزان رقمي: لوح زجاجي مقوى وقاعدة سفلية وشاشة
+      const plate = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.14, 2.2), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.1, transparent: true, opacity: 0.9 }));
       group.add(plate);
-
-      const baseGeo = new THREE.BoxGeometry(2.0, 0.3, 2.0);
-      const baseMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.4 });
-      const base = new THREE.Mesh(baseGeo, baseMat);
-      base.position.y = -0.22;
+      const base = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.26, 1.8), new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.4 }));
+      base.position.y = -0.2;
       group.add(base);
-
-      const lcdGeo = new THREE.PlaneGeometry(0.8, 0.35);
-      const lcdMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
-      const lcd = new THREE.Mesh(lcdGeo, lcdMat);
+      const lcd = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.3), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
       lcd.rotation.x = -Math.PI / 2;
       lcd.position.set(0, 0.08, -0.6);
       group.add(lcd);
+    } else if (id === 'calculator') {
+      // 🔢 آلة حاسبة إلكترونية: جسم رمادي مائل، شاشة خضراء، خلية شمسية وشبكة مفاتيح
+      const cBody = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.2, 0.25), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 }));
+      group.add(cBody);
+      const lcd = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 0.04), new THREE.MeshStandardMaterial({ color: 0x86efac, roughness: 0.2 }));
+      lcd.position.set(0, 0.65, 0.13);
+      group.add(lcd);
+      const solar = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.15, 0.04), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.1, metalness: 0.8 }));
+      solar.position.set(0, 0.92, 0.13);
+      group.add(solar);
+      for (let y = -0.7; y <= 0.3; y += 0.28) {
+        for (let x of [-0.45, -0.15, 0.15, 0.45]) {
+          const btnCol = (y === 0.3 && x === 0.45) ? 0xf97316 : (x === 0.45 ? 0x0284c7 : 0x94a3b8);
+          const btn = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.18, 0.06), new THREE.MeshStandardMaterial({ color: btnCol }));
+          btn.position.set(x, y, 0.13);
+          group.add(btn);
+        }
+      }
+    } else if (id === 'smokeDetector') {
+      // 🚨 إنذار الدخان: قرص سقفي أبيض مع فتحات تهوية دائرية ولمبة وميض حمراء
+      const sBody = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.25, 0.35, 32), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 }));
+      sBody.rotation.x = Math.PI / 2;
+      group.add(sBody);
+      const innerDome = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.15, 24), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
+      innerDome.rotation.x = Math.PI / 2;
+      innerDome.position.z = 0.22;
+      group.add(innerDome);
+      const led = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xef4444, emissiveIntensity: 0.8 }));
+      led.position.set(0, 0, 0.32);
+      group.add(led);
+    } else if (id === 'laserPointer') {
+      // 🔴 مؤشر ليزر قلم: أسطوانة معدنية زرقاء، مشبك فضي، رأس نحاسي وزر تشغيل
+      const pen = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 2.4, 20), new THREE.MeshStandardMaterial({ color: 0x1d4ed8, metalness: 0.8, roughness: 0.2 }));
+      group.add(pen);
+      const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.18, 0.35, 20), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9 }));
+      tip.position.y = 1.35;
+      group.add(tip);
+      const clip = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.9, 0.12), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
+      clip.position.set(0.19, -0.2, 0);
+      group.add(clip);
+      const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.08, 12), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+      btn.rotation.z = Math.PI / 2;
+      btn.position.set(0.18, 0.4, 0);
+      group.add(btn);
+    } else if (id === 'hearingAid') {
+      // 🦻 سماعة أذن طبية: غلاف منحني بلون بيج ناعم، وسدادة سيليكون
+      const aidBody = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.2, 16, 24, Math.PI * 0.8), new THREE.MeshStandardMaterial({ color: 0xfdba74, roughness: 0.3 }));
+      group.add(aidBody);
+      const earTip = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, transparent: true, opacity: 0.85 }));
+      earTip.position.set(0.65, -0.65, 0);
+      group.add(earTip);
+    } else if (id === 'robotToy') {
+      // 🤖 روبوت ألعاب للأطفال: رأس وجذع كروي/مربع مع عينين مضيئتين وهوائي
+      const botBody = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.7, 1.2), new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.35 }));
+      group.add(botBody);
+      for (let x of [-0.4, 0.4]) {
+        const eye = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.08, 16), new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0xfde047, emissiveIntensity: 0.7 }));
+        eye.rotation.x = Math.PI / 2;
+        eye.position.set(x, 0.35, 0.61);
+        group.add(eye);
+      }
+      const antPole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.6, 12), new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 }));
+      antPole.position.set(0, 1.15, 0);
+      group.add(antPole);
+      const antBall = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xef4444, emissiveIntensity: 0.6 }));
+      antBall.position.set(0, 1.48, 0);
+      group.add(antBall);
+      for (let x of [-0.95, 0.95]) {
+        const arm = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.9, 0.28), new THREE.MeshStandardMaterial({ color: 0x0e7490 }));
+        arm.position.set(x, -0.1, 0);
+        group.add(arm);
+      }
+    } else if (id === 'electricToothbrush') {
+      // 🪥 فرشاة أسنان كهربائية: مقبض أسطواني أبيض/أزرق، زر تشغيل، وعنق ورأس بشعيرات
+      const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.34, 1.8, 24), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 }));
+      group.add(handle);
+      const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.31, 0.31, 0.8, 24), new THREE.MeshStandardMaterial({ color: 0x38bdf8 }));
+      grip.position.set(0, 0, 0);
+      group.add(grip);
+      const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.08, 16), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
+      btn.rotation.x = Math.PI / 2;
+      btn.position.set(0, 0.15, 0.31);
+      group.add(btn);
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.14, 0.9, 16), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.8 }));
+      neck.position.y = 1.35;
+      group.add(neck);
+      const head = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.18, 16), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
+      head.rotation.x = Math.PI / 2;
+      head.position.set(0, 1.85, 0.08);
+      group.add(head);
     } else {
-      // مجسم جهاز بطارية قياسي (سيارة، راديو، ريموت، ساعة)
-      const bodyGeo = new THREE.BoxGeometry(2.0, 1.4, 0.9);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2b4c7e, roughness: 0.35, metalness: 0.2 });
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      // مجسم جهاز بطارية قياسي
+      const body = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.4, 0.9), new THREE.MeshStandardMaterial({ color: 0x2b4c7e, roughness: 0.35, metalness: 0.2 }));
       group.add(body);
-
-      const screenGeo = new THREE.PlaneGeometry(1.5, 0.8);
-      const screenMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 });
-      const screen = new THREE.Mesh(screenGeo, screenMat);
+      const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.8), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 }));
       screen.position.set(0, 0, 0.46);
       group.add(screen);
     }
 
     // حجرة البطاريات المفتوحة في الخلف (Visual Clue)
-    const bayGeo = new THREE.BoxGeometry(1.4, 0.85, 0.3);
-    const bayMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9 });
-    const bay = new THREE.Mesh(bayGeo, bayMat);
-    bay.position.set(0, 0, -0.32);
+    const bay = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.85, 0.3), new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9 }));
+    bay.position.set(0, -0.05, -0.32);
     group.add(bay);
 
     // بطاريتان جافتان AA مع أقطاب ذهبية وزلزنبركات
     for (let i = -1; i <= 1; i += 2) {
-      const battGeo = new THREE.CylinderGeometry(0.16, 0.16, 1.05, 20);
-      const battMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.75, roughness: 0.25 });
-      const batt = new THREE.Mesh(battGeo, battMat);
+      const batt = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 1.05, 20), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.75, roughness: 0.25 }));
       batt.rotation.z = Math.PI / 2;
-      batt.position.set(0, i * 0.22, -0.32);
+      batt.position.set(0, -0.05 + i * 0.22, -0.32);
       group.add(batt);
 
       // رأس القطب الموجب (+)
-      const capGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.1, 16);
-      const capMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9 });
-      const cap = new THREE.Mesh(capGeo, capMat);
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9 }));
       cap.rotation.z = Math.PI / 2;
-      cap.position.set(i === -1 ? 0.58 : -0.58, i * 0.22, -0.32);
+      cap.position.set(i === -1 ? 0.58 : -0.58, -0.05 + i * 0.22, -0.32);
       group.add(cap);
 
       // زنبرك القطب السالب (-)
-      const springGeo = new THREE.TorusGeometry(0.1, 0.025, 8, 16);
-      const springMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85 });
-      const spring = new THREE.Mesh(springGeo, springMat);
+      const spring = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.025, 8, 16), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85 }));
       spring.rotation.y = Math.PI / 2;
-      spring.position.set(i === -1 ? -0.55 : 0.55, i * 0.22, -0.32);
+      spring.position.set(i === -1 ? -0.55 : 0.55, -0.05 + i * 0.22, -0.32);
       group.add(spring);
     }
   } else {
@@ -743,110 +870,206 @@ function buildClueDeviceMesh(dev) {
     // أجهزة كهرباء المنزل (مع سلك كهرباء قوي وقابس جداري ثنائي)
     // ══════════════════════════════════════════════════════════
     if (id === 'electricWaterHeater') {
-      // سخان ماء أسطواني رأسي أبيض مع مقياس حرارة ومواسير
-      const tankGeo = new THREE.CylinderGeometry(0.85, 0.85, 2.2, 32);
-      const tankMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.25 });
-      const tank = new THREE.Mesh(tankGeo, tankMat);
+      // ♨ سخان ماء أسطواني رأسي أبيض مع مقياس حرارة ومواسير ماء
+      const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 2.2, 32), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.25 }));
       group.add(tank);
-
-      // غطاءان علوي وسفلي
       for (let y of [1.1, -1.1]) {
-        const capGeo = new THREE.SphereGeometry(0.85, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2);
-        const capMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 });
-        const cap = new THREE.Mesh(capGeo, capMat);
+        const cap = new THREE.Mesh(new THREE.SphereGeometry(0.85, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 }));
         cap.position.y = y;
         if (y < 0) cap.rotation.x = Math.PI;
         group.add(cap);
       }
-
-      // مقياس درجة الحرارة الدائري في الأمام
-      const gaugeGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.08, 20);
-      const gaugeMat = new THREE.MeshStandardMaterial({ color: 0x0284c7 });
-      const gauge = new THREE.Mesh(gaugeGeo, gaugeMat);
+      const gauge = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.08, 20), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
       gauge.rotation.x = Math.PI / 2;
       gauge.position.set(0, 0.3, 0.86);
       group.add(gauge);
-
-      // مؤشر أحمر للمقياس
-      const needleGeo = new THREE.BoxGeometry(0.04, 0.2, 0.04);
-      const needleMat = new THREE.MeshStandardMaterial({ color: 0xef4444 });
-      const needle = new THREE.Mesh(needleGeo, needleMat);
-      needle.position.set(0, 0.3, 0.91);
-      group.add(needle);
-
-      // أنبوب ماء أزرق وأحمر في الأسفل
-      const pipeGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.4, 12);
-      const coldPipe = new THREE.Mesh(pipeGeo, new THREE.MeshStandardMaterial({ color: 0x3b82f6 }));
+      const coldPipe = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.4, 12), new THREE.MeshStandardMaterial({ color: 0x3b82f6 }));
       coldPipe.position.set(-0.35, -1.3, 0);
-      const hotPipe = new THREE.Mesh(pipeGeo, new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+      const hotPipe = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.4, 12), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
       hotPipe.position.set(0.35, -1.3, 0);
       group.add(coldPipe);
       group.add(hotPipe);
+    } else if (id === 'fridge') {
+      // 🧊 ثلاجة منزلية قائمة: بابان (فريزر وثلاجة) ومقابض طويلة
+      const fBody = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.6, 1.4), new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.2, roughness: 0.25 }));
+      group.add(fBody);
+      const divider = new THREE.Mesh(new THREE.BoxGeometry(1.62, 0.06, 0.04), new THREE.MeshStandardMaterial({ color: 0x64748b }));
+      divider.position.set(0, 0.4, 0.7);
+      group.add(divider);
+      const handle1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.4, 12), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8 }));
+      handle1.position.set(-0.65, 0.75, 0.75);
+      const handle2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.7, 12), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8 }));
+      handle2.position.set(-0.65, -0.2, 0.75);
+      group.add(handle1);
+      group.add(handle2);
+    } else if (id === 'microwave') {
+      // 🍲 فرن ميكروويف: شاشة زجاجية داكنة، مفاتيح لمس، ولوحة أرقام
+      const mBody = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.3, 1.3), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.4 }));
+      group.add(mBody);
+      const windowGlass = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.9, 0.04), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 }));
+      windowGlass.position.set(-0.35, 0, 0.66);
+      group.add(windowGlass);
+      const ctrl = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.9, 0.04), new THREE.MeshStandardMaterial({ color: 0x94a3b8 }));
+      ctrl.position.set(0.7, 0, 0.66);
+      group.add(ctrl);
     } else if (id === 'washer') {
-      // غسالة أوتوماتيكية مع نافذة دائرية زجاجية وباب
-      const bodyGeo = new THREE.BoxGeometry(1.9, 2.2, 1.8);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.25 });
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
-      group.add(body);
-
-      // حوض الغسالة الزجاجي
-      const doorRimGeo = new THREE.TorusGeometry(0.65, 0.09, 16, 32);
-      const doorRimMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 });
-      const doorRim = new THREE.Mesh(doorRimGeo, doorRimMat);
-      doorRim.position.set(0, -0.15, 0.91);
+      // 🧺 غسالة أوتوماتيكية: باب دائري زجاجي مع إطار فضي ودرج مسحوق
+      const wBody = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.1, 1.7), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.25 }));
+      group.add(wBody);
+      const doorRim = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.09, 16, 32), new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 }));
+      doorRim.position.set(0, -0.15, 0.86);
       group.add(doorRim);
-
-      const glassGeo = new THREE.CircleGeometry(0.6, 24);
-      const glassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, transparent: true, opacity: 0.65 });
-      const glass = new THREE.Mesh(glassGeo, glassMat);
-      glass.position.set(0, -0.15, 0.92);
+      const glass = new THREE.Mesh(new THREE.CircleGeometry(0.57, 24), new THREE.MeshStandardMaterial({ color: 0x0284c7, transparent: true, opacity: 0.65 }));
+      glass.position.set(0, -0.15, 0.87);
       group.add(glass);
-
-      // درج المسحوق وشاشة التحكم
-      const drawerGeo = new THREE.BoxGeometry(0.6, 0.25, 0.04);
-      const drawer = new THREE.Mesh(drawerGeo, new THREE.MeshStandardMaterial({ color: 0x94a3b8 }));
-      drawer.position.set(-0.55, 0.85, 0.91);
+      const drawer = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.22, 0.04), new THREE.MeshStandardMaterial({ color: 0x94a3b8 }));
+      drawer.position.set(-0.5, 0.8, 0.86);
       group.add(drawer);
+    } else if (id === 'lamp') {
+      // 💡 مصباح مكتب سلكي: قاعدة مستديرة، ذراع معدني منحني، ومظلّة إنارة
+      const lBase = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.15, 24), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+      lBase.position.y = -0.9;
+      group.add(lBase);
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.8, 16), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 }));
+      stem.position.set(0, 0, 0);
+      group.add(stem);
+      const shade = new THREE.Mesh(new THREE.ConeGeometry(0.75, 0.9, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0xf59e0b, side: THREE.DoubleSide }));
+      shade.rotation.x = Math.PI;
+      shade.position.set(0, 1.1, 0);
+      group.add(shade);
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfde047, emissiveIntensity: 0.8 }));
+      bulb.position.set(0, 0.9, 0);
+      group.add(bulb);
+    } else if (id === 'iron') {
+      // 👔 مكواة ملابس: قاعدة مسطحة مدببة، مقبض مقوس، ومفتاح بخار
+      const iBase = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.22, 0.9), new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9 }));
+      iBase.position.y = -0.4;
+      group.add(iBase);
+      const iBody = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 0.8), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
+      iBody.position.y = -0.1;
+      group.add(iBody);
+      const iHandle = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.08, 12, 24, Math.PI), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+      iHandle.position.set(0, 0.35, 0);
+      group.add(iHandle);
+    } else if (id === 'vacuum') {
+      // 🧹 مكنسة كهربائية: خزان كروي، عجلتان جانبيتان، وخرطوم
+      const vBody = new THREE.Mesh(new THREE.SphereGeometry(0.9, 24, 18), new THREE.MeshStandardMaterial({ color: 0xea580c }));
+      group.add(vBody);
+      for (let z of [-0.95, 0.95]) {
+        const vWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.15, 18), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+        vWheel.rotation.x = Math.PI / 2;
+        vWheel.position.set(-0.2, -0.2, z);
+        group.add(vWheel);
+      }
+    } else if (id === 'airConditioner') {
+      // ❄️ مكيف هواء سبليت: وحدة جدارية بيضاء عريضة، ريش توزيع هواء، وشاشة رقمية
+      const acBody = new THREE.Mesh(new THREE.BoxGeometry(2.7, 1.1, 0.85), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 }));
+      group.add(acBody);
+      const louver = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.14, 0.15), new THREE.MeshStandardMaterial({ color: 0x94a3b8 }));
+      louver.position.set(0, -0.42, 0.38);
+      group.add(louver);
+      const display = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.2), new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 0.6 }));
+      display.position.set(0.85, 0.1, 0.44);
+      group.add(display);
+    } else if (id === 'electricOven') {
+      // 🍳 فرن كهربائي منزلي: كابينة متينة، باب زجاجي داكن، سخانات حرارية حمراء مضيئة
+      const oBody = new THREE.Mesh(new THREE.BoxGeometry(2.0, 2.0, 1.5), new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.6, roughness: 0.3 }));
+      group.add(oBody);
+      const oGlass = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.2, 0.05), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 }));
+      oGlass.position.set(0, -0.15, 0.76);
+      group.add(oGlass);
+      for (let y of [0.2, -0.5]) {
+        const coil = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.3, 12), new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xef4444, emissiveIntensity: 0.8 }));
+        coil.rotation.z = Math.PI / 2;
+        coil.position.set(0, y, 0.77);
+        group.add(coil);
+      }
+      for (let x of [-0.5, 0, 0.5]) {
+        const knob = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.06, 16), new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.8 }));
+        knob.rotation.x = Math.PI / 2;
+        knob.position.set(x, 0.75, 0.76);
+        group.add(knob);
+      }
+    } else if (id === 'hairDryer') {
+      // 💨 مجفف شعر (استشوار): فوهة أسطوانية أفقية، مقبض مريح، وشبكة تهوية خلفية
+      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.48, 1.6, 24), new THREE.MeshStandardMaterial({ color: 0xbe123c, roughness: 0.3 }));
+      barrel.rotation.z = Math.PI / 2;
+      barrel.position.set(0, 0.45, 0);
+      group.add(barrel);
+      const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.42, 0.5, 20), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+      nozzle.rotation.z = Math.PI / 2;
+      nozzle.position.set(-0.95, 0.45, 0);
+      group.add(nozzle);
+      const dHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.22, 1.4, 20), new THREE.MeshStandardMaterial({ color: 0x9f1239 }));
+      dHandle.position.set(0.3, -0.3, 0);
+      group.add(dHandle);
+      const rearMesh = new THREE.Mesh(new THREE.CircleGeometry(0.46, 20), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+      rearMesh.rotation.y = Math.PI / 2;
+      rearMesh.position.set(0.81, 0.45, 0);
+      group.add(rearMesh);
+    } else if (id === 'electricHeater') {
+      // 🔥 مدفأة كهربائية: جسم أحمر مع قضبان تسخين مشعة باللون البرتقالي الساطع
+      const hBody = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.6, 0.75), new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.4 }));
+      group.add(hBody);
+      for (let y of [-0.35, 0, 0.35]) {
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.8, 16), new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0xf97316, emissiveIntensity: 1.0 }));
+        rod.rotation.z = Math.PI / 2;
+        rod.position.set(0, y, 0.39);
+        group.add(rod);
+      }
+      for (let x of [-0.85, 0.85]) {
+        const foot = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.15, 0.9), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+        foot.position.set(x, -0.85, 0);
+        group.add(foot);
+      }
+    } else if (id === 'blender') {
+      // 🥤 خلاط عصائر منزلي: قاعدة محرك زرقاء بمفتاح دوران، وإبريق زجاجي شفاف بغطاء ومقبض
+      const mBase = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.8, 1.0, 24), new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.3 }));
+      mBase.position.y = -0.55;
+      group.add(mBase);
+      const speedKnob = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
+      speedKnob.rotation.x = Math.PI / 2;
+      speedKnob.position.set(0, -0.45, 0.75);
+      group.add(speedKnob);
+      const pitcher = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.52, 1.4, 20), new THREE.MeshStandardMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.65, roughness: 0.1 }));
+      pitcher.position.y = 0.65;
+      group.add(pitcher);
+      const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.72, 0.2, 20), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+      lid.position.y = 1.4;
+      group.add(lid);
+      const pHandle = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.07, 8, 16, Math.PI), new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.8 }));
+      pHandle.rotation.z = -Math.PI / 2;
+      pHandle.position.set(0.75, 0.65, 0);
+      group.add(pHandle);
     } else {
-      // جسم جهاز منزلي معدني قياسي (ثلاجة، فرن، ميكروويف...)
-      const bodyGeo = new THREE.BoxGeometry(1.9, 2.2, 1.4);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.35, roughness: 0.2 });
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      // مجسم جهاز كهرباء منزلي عام
+      const body = new THREE.Mesh(new THREE.BoxGeometry(1.9, 2.2, 1.4), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.35, roughness: 0.2 }));
       group.add(body);
-
-      const panelGeo = new THREE.PlaneGeometry(1.5, 1.8);
-      const panelMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.5 });
-      const panel = new THREE.Mesh(panelGeo, panelMat);
+      const panel = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.8), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.5 }));
       panel.position.set(0, 0, 0.71);
       group.add(panel);
     }
 
     // سلك كهرباء أسود ممتد بوضوح من خلف الجهاز إلى الأسفل
     const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, -0.8, -0.6),
-      new THREE.Vector3(0.5, -1.2, -0.8),
-      new THREE.Vector3(0.9, -1.4, -0.3),
-      new THREE.Vector3(1.3, -1.5, 0.2)
+      new THREE.Vector3(0, -0.7, -0.6),
+      new THREE.Vector3(0.5, -1.1, -0.8),
+      new THREE.Vector3(0.9, -1.3, -0.3),
+      new THREE.Vector3(1.3, -1.45, 0.2)
     ]);
-    const cableGeo = new THREE.TubeGeometry(curve, 24, 0.075, 12, false);
-    const cableMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.7 });
-    const cable = new THREE.Mesh(cableGeo, cableMat);
+    const cable = new THREE.Mesh(new THREE.TubeGeometry(curve, 24, 0.075, 12, false), new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.7 }));
     group.add(cable);
 
     // رأس الفيشة الكهربائية المنزلية (Plug Head)
-    const plugGeo = new THREE.BoxGeometry(0.32, 0.24, 0.38);
-    const plugMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.4 });
-    const plug = new THREE.Mesh(plugGeo, plugMat);
-    plug.position.set(1.3, -1.5, 0.2);
+    const plug = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.24, 0.38), new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.4 }));
+    plug.position.set(1.3, -1.45, 0.2);
     group.add(plug);
 
     // مسمارا الفيشة المعدنيان البارزان (Prongs)
     for (let p of [-0.08, 0.08]) {
-      const pinGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.28, 12);
-      const pinMat = new THREE.MeshStandardMaterial({ color: 0xe4e4e7, metalness: 0.95, roughness: 0.1 });
-      const pin = new THREE.Mesh(pinGeo, pinMat);
+      const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.28, 12), new THREE.MeshStandardMaterial({ color: 0xe4e4e7, metalness: 0.95, roughness: 0.1 }));
       pin.rotation.x = Math.PI / 2;
-      pin.position.set(1.3 + p, -1.5, 0.48);
+      pin.position.set(1.3 + p, -1.45, 0.48);
       group.add(pin);
     }
   }
