@@ -35,6 +35,9 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
   const camera = new THREE.OrthographicCamera(-6.5, 6.5, 4.3, -4.3, 0.1, 80);
   let view = 0, zoom = 1, focus = null, dead = false, frame = 0, renderCount = 0;
   let isIntroPlaying = false, introStartTime = 0;
+  let orbitRadius = 18.5;
+  let orbitTheta = -0.12;
+  let orbitPhi = 0.72;
   let targetCamPos = new THREE.Vector3(-1.8, 12, 14);
   let currentCamPos = new THREE.Vector3(-1.8, 12, 14);
   let targetLookAt = new THREE.Vector3(0, 1.8, 0);
@@ -573,15 +576,21 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     return g;
   }
 
-  // ─── ضبط الكاميرا التلقائي (fitToDevices) ───
+  // ─── ضبط الكاميرا التلقائي وحساب المدار (fitToDevices) ───
   function fitToDevices({ animate = true } = {}) {
     if (focus && objects[focus]) {
       const p = objects[focus].position;
-      targetLookAt.set(p.x, p.y + 0.3, p.z);
-      targetCamPos.set(p.x - 0.5, p.y + 3.2, p.z + 5.5);
+      targetLookAt.set(p.x, p.y + 0.35, p.z);
+      const dist = 7.5;
+      targetCamPos.set(
+        p.x + dist * Math.sin(orbitPhi) * Math.sin(orbitTheta),
+        p.y + 0.35 + dist * Math.cos(orbitPhi),
+        p.z + dist * Math.sin(orbitPhi) * Math.cos(orbitTheta)
+      );
       zoom = 1.45;
     } else {
       const activeKeys = Object.keys(objects);
+      let midX = 0;
       if (activeKeys.length > 0) {
         let minX = Infinity, maxX = -Infinity;
         activeKeys.forEach(k => {
@@ -589,15 +598,16 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
           if (x < minX) minX = x;
           if (x > maxX) maxX = x;
         });
-        const midX = (minX + maxX) / 2;
-        targetLookAt.set(midX, 1.8, 0);
-        targetCamPos.set(midX - 1.2, 12, 14);
-        zoom = 1.0;
-      } else {
-        targetLookAt.set(0, 1.8, 0);
-        targetCamPos.set(-1.8, 12, 14);
-        zoom = 1.0;
+        midX = (minX + maxX) / 2;
       }
+      targetLookAt.set(midX, 1.8, 0);
+      const r = 18.5;
+      targetCamPos.set(
+        midX + r * Math.sin(orbitPhi) * Math.sin(orbitTheta),
+        1.8 + r * Math.cos(orbitPhi),
+        0 + r * Math.sin(orbitPhi) * Math.cos(orbitTheta)
+      );
+      zoom = 1.0;
     }
 
     if (!animate || getState().reducedMotion) {
@@ -722,6 +732,69 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     fitToDevices({ animate: false });
   });
   observer.observe(host);
+  
+  // ─── التحكم في المدار 360° وتدوير الأجهزة بالإصبع أو الماوس ───
+  let isPointerDownOnCanvas = false;
+  let pointerStartX = 0, pointerStartY = 0;
+  let lastPointerX = 0, lastPointerY = 0;
+  let hasPointerMoved = false;
+
+  renderer.domElement.addEventListener('pointerdown', e => {
+    isPointerDownOnCanvas = true;
+    pointerStartX = e.clientX;
+    pointerStartY = e.clientY;
+    lastPointerX = e.clientX;
+    lastPointerY = e.clientY;
+    hasPointerMoved = false;
+    try { renderer.domElement.setPointerCapture(e.pointerId); } catch {}
+  });
+
+  renderer.domElement.addEventListener('pointermove', e => {
+    if (!isPointerDownOnCanvas) return;
+    const dx = e.clientX - lastPointerX;
+    const dy = e.clientY - lastPointerY;
+    if (Math.hypot(e.clientX - pointerStartX, e.clientY - pointerStartY) > 6) {
+      hasPointerMoved = true;
+    }
+    lastPointerX = e.clientX;
+    lastPointerY = e.clientY;
+
+    if (focus && objects[focus]) {
+      objects[focus].rotation.y += dx * 0.02;
+      orbitPhi = Math.max(0.35, Math.min(1.2, orbitPhi - dy * 0.006));
+      fitToDevices({ animate: false });
+    } else {
+      orbitTheta -= dx * 0.009;
+      orbitPhi = Math.max(0.32, Math.min(1.35, orbitPhi - dy * 0.007));
+      fitToDevices({ animate: false });
+    }
+  });
+
+  const onCanvasPointerUp = e => {
+    if (!isPointerDownOnCanvas) return;
+    isPointerDownOnCanvas = false;
+    try { renderer.domElement.releasePointerCapture(e.pointerId); } catch {}
+    if (!hasPointerMoved) {
+      const clickedDev = at(e.clientX, e.clientY);
+      if (clickedDev && onDevice) {
+        onDevice(clickedDev);
+      }
+    }
+  };
+
+  renderer.domElement.addEventListener('pointerup', onCanvasPointerUp);
+  renderer.domElement.addEventListener('pointercancel', () => { isPointerDownOnCanvas = false; });
+
+  renderer.domElement.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      zoom = Math.min(1.8, zoom + 0.08);
+    } else {
+      zoom = Math.max(0.7, zoom - 0.08);
+    }
+    cameraUpdate();
+  }, { passive: false });
+
   cameraUpdate();
 
   // ─── حلقة التصيير والأنيميشن التفاعلي لجميع الأجهزة الـ 24 ───
@@ -1016,7 +1089,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     triggerSparks,
     fitToDevices,
     playRevealIntro,
-    skipRevealIntro() { isIntroPlaying = false; fitToDevices({ animate: true }); },
+    skipRevealIntro() { isIntroPlaying = false; orbitTheta = -0.12; orbitPhi = 0.72; fitToDevices({ animate: true }); },
     setCameraPassthrough,
     pointTo,
     showTargetRing(deviceId) {
@@ -1028,10 +1101,12 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
         targetRing.visible = true;
       }
     },
-    zoomIn() { zoom = Math.min(1.65, zoom + 0.15); cameraUpdate(); },
-    zoomOut() { zoom = Math.max(0.75, zoom - 0.15); cameraUpdate(); },
+    zoomIn() { zoom = Math.min(1.8, zoom + 0.15); cameraUpdate(); },
+    zoomOut() { zoom = Math.max(0.7, zoom - 0.15); cameraUpdate(); },
     reset() {
       focus = null; zoom = 1; view = 0;
+      orbitTheta = -0.12;
+      orbitPhi = 0.72;
       for (const id in objects) {
         objects[id].rotation.set(0, 0, 0);
       }
@@ -1039,13 +1114,20 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     },
     inspect(id) {
       focus = id || Object.keys(objects)[0];
-      zoom = 1.6;
-      view = view === 1 ? 0 : 1;
+      zoom = 1.45;
+      orbitTheta = 0;
+      orbitPhi = 0.65;
       if (objects[focus]) objects[focus].rotation.y += 0.8;
       fitToDevices({ animate: true });
     },
-    rotateDevice(id, angleY) {
-      if (objects[id]) objects[id].rotation.y += angleY;
+    rotateDevice(id, angleY = Math.PI / 2) {
+      const target = id || focus;
+      if (target && objects[target]) {
+        objects[target].rotation.y += angleY;
+      }
+    },
+    getFocused() {
+      return focus;
     },
     runSelfTest,
     dispose() {

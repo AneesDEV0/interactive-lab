@@ -248,7 +248,6 @@ function shell() {
      <nav class="top-actions" aria-label="${c.settings}">
        <a href="${navBase}index.html" class="nav-link-btn" title="الرئيسية">🏠 <span>الرئيسية</span></a>
        <a href="${navBase}static-lab.html" class="nav-link-btn" title="النشاط الثابت">🔍 <span>الثابت</span></a>
-       <button type="button" class="header-ar-launch-btn" data-action="launchAR" title="فتح كاميرا الواقع المعزز الحقيقي">📷 <span>الواقع المعزز AR</span></button>
        ${button('sound', state.muted ? c.muted : c.sound, state.muted ? 'muted' : 'volume', 'quiet', 'id="sound-button"')}
        ${button('compare', c.compare, 'book', 'quiet', 'id="comparison-button" title="جدول الاكتشافات والتحدي"')}
        ${button('chat', c.chat, 'chat', 'quiet', 'id="chat-toggle" aria-expanded="false" title="تحدث مع شرارة"')}
@@ -343,7 +342,26 @@ function shell() {
            </div>
          </div>
 
-         <!-- أدوات الطاقة المباشرة -->
+         
+          <!-- لوحة فحص وتدوير الجهاز 3D -->
+          <div id="inspection-hud" class="inspection-hud" hidden style="display:none;">
+            <div class="inspect-info">
+              <div class="inspect-title-row">
+                <span class="inspect-icon" id="inspect-dev-icon">🔍</span>
+                <strong id="inspect-dev-title">فحص الجهاز 3D</strong>
+                <span class="inspect-type-badge" id="inspect-dev-type">🔋 بطارية جافة</span>
+              </div>
+              <p id="inspect-dev-desc">اسحب المجسم بإصبعك أو الماوس لتدويره 360° وتفحص حجرة البطارية أو المقبس.</p>
+            </div>
+            <div class="inspect-actions">
+              <button type="button" data-action="rotateInspected" class="inspect-btn-rotate" title="تدوير الجهاز 90°">🔄 <span>تدوير 90°</span></button>
+              <button type="button" data-action="tryBatteryInInspect" class="inspect-btn-battery" title="تجربة بالبطارية">🔋 <span>تجربة بطارية</span></button>
+              <button type="button" data-action="tryMainsInInspect" class="inspect-btn-mains" title="تجربة بالكهرباء">🔌 <span>تجربة كهرباء</span></button>
+              <button type="button" data-action="closeInspect" class="inspect-btn-close" title="العودة للطاولة">✕ <span>العودة للطاولة</span></button>
+            </div>
+          </div>
+
+          <!-- أدوات الطاقة المباشرة -->
          <div class="table-power-dock" id="table-power-dock">
            <button id="battery-button" data-action="pick" class="dock-power-btn battery-dock-btn" aria-pressed="false" title="اسحب البطارية لأي جهاز لتجربتها">
              <span class="power-emoji">🔋</span>
@@ -489,7 +507,8 @@ function shell() {
   initTouchDragSupport();
 
   $('#feedback-confirm-btn')?.addEventListener('click', hideCentralFeedback);
-  $('#central-feedback')?.addEventListener('click', e => { if (e.target.id === 'central-feedback') hideCentralFeedback(); });
+  $('#central-feedback')?.addEventListener('click', e => { if (e.target.id === 'central-feedback') hideCentralFeedback();
+    closeDeviceInspection(); });
   
   render();
 }
@@ -678,6 +697,48 @@ function hidePowerMeter() {
   }
 }
 
+
+let inspectedDeviceId = null;
+
+function openDeviceInspection(id) {
+  inspectedDeviceId = id;
+  const meta = DEVICE_MAP[id] || {};
+  scene?.inspect(id);
+
+  const hud = $('#inspection-hud');
+  if (hud) {
+    const titleEl = $('#inspect-dev-title');
+    const iconEl = $('#inspect-dev-icon');
+    const typeEl = $('#inspect-dev-type');
+    const descEl = $('#inspect-dev-desc');
+
+    if (titleEl) titleEl.textContent = `فحص: ${meta.name || id}`;
+    if (iconEl) iconEl.textContent = meta.type === 'battery' ? '🔋' : '🔌';
+    if (typeEl) {
+      typeEl.textContent = meta.type === 'battery' ? '🔋 بطارية جافة' : '🔌 كهرباء 220V';
+      typeEl.className = `inspect-type-badge ${meta.type === 'battery' ? 'badge-battery' : 'badge-mains'}`;
+    }
+    if (descEl) descEl.textContent = meta.reason || 'اسحب المجسم لتفحصه وتدويره 360 درجة.';
+
+    hud.hidden = false;
+    hud.style.display = 'flex';
+  }
+
+  if (!state.muted && meta.name) {
+    speak(`تفحص ${meta.name} جيداً، هل ترى حجرة بطارية أم مقبس كهرباء؟`);
+  }
+}
+
+function closeDeviceInspection() {
+  inspectedDeviceId = null;
+  const hud = $('#inspection-hud');
+  if (hud) {
+    hud.hidden = true;
+    hud.style.display = 'none';
+  }
+  scene?.reset();
+}
+
 function dispatch(event) {
   const old = state;
   state = reducer(state, {id: `${state.sessionRevision}:${++seq}`, sessionRevision: state.sessionRevision, ...event});
@@ -797,6 +858,7 @@ function renderSceneLabels() {
           <span class="${badgeClass}" id="badge-${id}">${badgeText}</span>
         </button>
         <div class="label-prediction-btns">
+          <button type="button" class="label-inspect-btn" data-action="inspectDevice" data-device="${id}" title="فحص 3D وتدوير 360°">🔍 فحص</button>
           <button type="button" class="label-pred-btn ${pred === true ? 'active-battery' : ''}" data-action="quickPredict" data-device="${id}" data-val="battery" title="أتوقع: بطارية جافة">🔋</button>
           <button type="button" class="label-pred-btn ${pred === false ? 'active-mains' : ''}" data-action="quickPredict" data-device="${id}" data-val="mains" title="أتوقع: كهرباء المنزل">🔌</button>
         </div>
@@ -1369,7 +1431,12 @@ app.addEventListener('click', e => {
     case 'complete': dispatch({type: 'COMPLETE'}); if (state.phase === 'completed') completed(); break;
     case 'quickQuestion': ask(b.dataset.question); break;
     case 'suggested': try { runSuggested(JSON.parse(b.dataset.suggestion)); } catch {} break;
-    case 'inspect': scene?.inspect(b.dataset.device); break;
+    case 'inspectDevice': openDeviceInspection(b.dataset.device); break;
+    case 'closeInspect': closeDeviceInspection(); break;
+    case 'rotateInspected': scene?.rotateDevice(inspectedDeviceId, Math.PI / 2); break;
+    case 'tryBatteryInInspect': if (inspectedDeviceId) testWithBattery(inspectedDeviceId); break;
+    case 'tryMainsInInspect': if (inspectedDeviceId) testWithMains(inspectedDeviceId); break;
+    case 'inspect': openDeviceInspection(b.dataset.device); break;
     case 'zoomIn': case 'zoomOut': scene?.[a](); break;
     case 'resetView': scene?.reset(); break;
   }
