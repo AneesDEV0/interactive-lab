@@ -1,131 +1,17 @@
 {
-  "date": "2026-10-03",
-  "browser": "Chrome headless, software WebGL (SwiftShader)",
   "results": [
     {
       "name": "Desktop load: local assets, RTL, no blank scene",
       "status": "passed",
-      "ms": 6370
+      "ms": 20861
     },
     {
       "name": "Optional prediction and toy car running",
-      "status": "passed",
-      "ms": 23716
-    },
-    {
-      "name": "Transfer to radio stops car and preserves discovery",
-      "status": "passed",
-      "ms": 28553
-    },
-    {
-      "name": "Battery cannot power refrigerator",
-      "status": "passed",
-      "ms": 36709
-    },
-    {
-      "name": "Adult mains demonstration and cooling indicator",
-      "status": "passed",
-      "ms": 12670
-    },
-    {
-      "name": "Comparison separates current state from discoveries",
-      "status": "passed",
-      "ms": 6041
-    },
-    {
-      "name": "Classification and explanation gate completion",
-      "status": "passed",
-      "ms": 12464
-    },
-    {
-      "name": "Reset clears progress, chat and running motion",
-      "status": "passed",
-      "ms": 12637
-    },
-    {
-      "name": "Keyboard completes every science action",
-      "status": "passed",
-      "ms": 4406
-    },
-    {
-      "name": "Drag to neutral target and drop outside",
-      "status": "passed",
-      "ms": 15749
-    },
-    {
-      "name": "Escape and pointer cancellation do not count attempts",
-      "status": "passed",
-      "ms": 1662
-    },
-    {
-      "name": "Chat injection is rendered as text and rules cannot be changed",
-      "status": "passed",
-      "ms": 5034
-    },
-    {
-      "name": "Scene controls and door inspection preserve science state",
-      "status": "passed",
-      "ms": 6634
-    },
-    {
-      "name": "Reduced motion setting preserves observations",
-      "status": "passed",
-      "ms": 8139
-    },
-    {
-      "name": "Offline continuation after all resources load",
-      "status": "passed",
-      "ms": 11841
-    },
-    {
-      "name": "English configuration keeps the current round",
-      "status": "passed",
-      "ms": 6001
-    },
-    {
-      "name": "Responsive tablet and 200% equivalent width preserve progress",
-      "status": "passed",
-      "ms": 2126
-    },
-    {
-      "name": "Renderer failure activates equivalent cards without losing discoveries",
-      "status": "passed",
-      "ms": 1335
-    },
-    {
-      "name": "No unexpected browser errors or external requests in main journey",
-      "status": "passed",
-      "ms": 0
-    },
-    {
-      "name": "Touch phone journey and rotation",
-      "status": "passed",
-      "ms": 33042
-    },
-    {
-      "name": "Actual asset request failure uses original fallback model",
-      "status": "passed",
-      "ms": 12005
-    },
-    {
-      "name": "No WebGL at boot still permits full journey",
-      "status": "passed",
-      "ms": 7469
+      "status": "failed",
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-action=\"predictNo\"]')\u001b[22m\n"
     }
   ],
-  "errors": [],
-  "render": {
-    "fps": 5.958587814687369,
-    "quality": "economy",
-    "pixelRatio": 0.8,
-    "triangles": 32616,
-    "drawCalls": 130,
-    "geometries": 130
-  },
-  "limits": [
-    "Touch tested with browser emulation, not physical hardware.",
-    "720 CSS-pixel layout checked as 200% width equivalent; OS/browser zoom and screen-reader speech not automated.",
-    "Offline continuation tested after loading; offline reopening is not supported.",
-    "Performance is this test host only, not a medium-range phone measurement."
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
   ]
 }

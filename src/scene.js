@@ -42,8 +42,8 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
-  renderer.setClearColor(0xeaf5f2, 1);
+  renderer.toneMappingExposure = 0.95;
+  renderer.setClearColor(0x23332c, 1);
 
   host.prepend(renderer.domElement);
   renderer.domElement.setAttribute('aria-hidden', 'true');
@@ -56,17 +56,17 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
   }
 
   // ─── الإضاءة الاحترافية الموزعة للمشهد ───
-  const ambient = new THREE.HemisphereLight(0xffffff, 0xb0cdd4, 1.9);
+  const ambient = new THREE.HemisphereLight(0xffffff, 0x759a90, 1.1);
   scene.add(ambient);
 
-  const sun = new THREE.DirectionalLight(0xfff5dc, 2.3);
+  const sun = new THREE.DirectionalLight(0xfff8e8, 1.4);
   sun.position.set(-3.5, 12, 8);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
   sun.shadow.bias = -0.0002;
   scene.add(sun);
 
-  const fillLight = new THREE.DirectionalLight(0x2ec4b6, 0.6);
+  const fillLight = new THREE.DirectionalLight(0x2ec4b6, 0.4);
   fillLight.position.set(4, 3, -3);
   scene.add(fillLight);
 
@@ -76,7 +76,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
 
   // أرضية وشبكة هادئة
   const groundGeo = new THREE.PlaneGeometry(40, 30);
-  const groundMat = new THREE.MeshStandardMaterial({ color: 0xdfedea, roughness: 0.9 });
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x2f4239, roughness: 0.8 });
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -0.02;
@@ -91,7 +91,7 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
 
   // جدار الغرفة الخلفي
   const wallGeo = new THREE.PlaneGeometry(30, 12);
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0xe5f0eb, roughness: 0.95 });
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x1d2c25, roughness: 0.95 });
   const wall = new THREE.Mesh(wallGeo, wallMat);
   wall.position.set(0, 5, -5.5);
   bgGroup.add(wall);
@@ -284,12 +284,11 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
 
     devIds.forEach((id, idx) => {
       const meshObj = createDevice3D(id, materials);
-      normalizeDeviceOnPlinth(meshObj, 1.35);
+      const placedObj = normalizeDeviceOnPlinth(meshObj, 1.35);
       const xPos = PLINTH_X_SLOTS[idx] || 0;
-      meshObj.position.set(xPos, PLINTH_TOP_Y, 0);
-
-      scene.add(meshObj);
-      objects[id] = meshObj;
+      placedObj.position.set(xPos, PLINTH_TOP_Y, 0);
+      scene.add(placedObj);
+      objects[id] = placedObj;
       activeEffects[id] = meshObj.userData.effects || {};
 
       meshObj.traverse(o => {

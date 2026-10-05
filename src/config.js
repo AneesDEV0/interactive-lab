@@ -323,23 +323,25 @@ function refillBags() {
 }
 
 export function pickRandomDevices(count = 4) {
-  if (batteryBag.length < 2 || mainsBag.length < 2) {
-    refillBags();
+  const featured = ['car', 'radio', 'fridge'];
+  const additionalPool = ALL_DEVICES
+    .filter(d => d.id !== 'car' && d.id !== 'radio' && d.id !== 'fridge')
+    .map(d => d.id);
+
+  const remaining = Math.max(0, count - featured.length);
+  const extra = [...additionalPool];
+  for (let i = extra.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [extra[i], extra[j]] = [extra[j], extra[i]];
   }
 
-  const b1 = batteryBag.pop();
-  const b2 = batteryBag.pop();
-  const m1 = mainsBag.pop();
-  const m2 = mainsBag.pop();
-
-  const chosen = [b1, b2, m1, m2];
-  // خلط ترتيب العرض
+  const chosen = [...featured, ...extra.slice(0, remaining)];
   for (let i = chosen.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [chosen[i], chosen[j]] = [chosen[j], chosen[i]];
   }
 
-  return chosen;
+  return chosen.slice(0, count);
 }
 
 export const config = {

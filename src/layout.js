@@ -94,27 +94,25 @@ export function normalizeDeviceOnPlinth(deviceGroup, targetUnitSize = 1.35) {
   const box = new THREE.Box3().setFromObject(deviceGroup);
   const size = new THREE.Vector3();
   box.getSize(size);
-  const center = new THREE.Vector3();
-  box.getCenter(center);
 
   const maxDim = Math.max(size.x, size.y, size.z);
   if (maxDim > 0.001) {
     const scaleFactor = targetUnitSize / maxDim;
     deviceGroup.scale.multiplyScalar(scaleFactor);
-
-    deviceGroup.updateMatrixWorld(true);
-    const scaledBox = new THREE.Box3().setFromObject(deviceGroup);
-    const scaledSize = new THREE.Vector3();
-    scaledBox.getSize(scaledSize);
-    const scaledCenter = new THREE.Vector3();
-    scaledBox.getCenter(scaledCenter);
-
-    deviceGroup.position.x -= scaledCenter.x;
-    deviceGroup.position.z -= scaledCenter.z;
-    deviceGroup.position.y -= scaledBox.min.y;
   }
 
-  return deviceGroup;
+  deviceGroup.updateMatrixWorld(true);
+  const scaledBox = new THREE.Box3().setFromObject(deviceGroup);
+  const scaledCenter = new THREE.Vector3();
+  scaledBox.getCenter(scaledCenter);
+
+  deviceGroup.position.x = -scaledCenter.x;
+  deviceGroup.position.z = -scaledCenter.z;
+  deviceGroup.position.y = -scaledBox.min.y;
+
+  const wrapper = new THREE.Group();
+  wrapper.add(deviceGroup);
+  return wrapper;
 }
 
 /**

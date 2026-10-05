@@ -73,8 +73,8 @@ export function createInspectorViewer({ renderer, materials, host, onExit }) {
           <span class="inspect-tag-badge" id="inspect-tag-badge">🔋 بطارية جافة</span>
           <h2 class="inspect-dev-title" id="inspect-ui-title">فحص الجهاز</h2>
         </div>
-        <button type="button" class="inspect-close-btn" id="inspect-close-btn" aria-label="إغلاق الفحص">
-          ✕ <span>العودة للطاولة</span>
+        <button type="button" class="inspect-close-btn" id="inspect-close-btn" aria-label="العودة للمختبر ومتابعة التحدي">
+          ↩ <span>رجوع للمختبر ومتابعة التحدي</span>
         </button>
       </div>
 
@@ -93,7 +93,7 @@ export function createInspectorViewer({ renderer, materials, host, onExit }) {
         </button>
       </div>
     `;
-    host.parentElement?.appendChild(overlayEl) || host.appendChild(overlayEl);
+    document.body.appendChild(overlayEl);
 
     overlayEl.querySelector('#inspect-close-btn')?.addEventListener('click', close);
     overlayEl.querySelector('#inspect-toggle-bay-btn')?.addEventListener('click', toggleBay);

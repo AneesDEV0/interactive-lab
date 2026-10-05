@@ -4,8 +4,8 @@
 @font-face{font-family:Tajawal;src:url('../assets/fonts/tajawal-latin-700-normal.woff2') format('woff2');font-weight:700 900;font-display:swap}
 :root {
   --z-canvas: 0;
-  --z-hud: 10;
-  --z-device-strip: 20;
+  --z-hud: 6;
+  --z-device-strip: 25;
   --z-dock: 30;
   --z-inspector: 100;
   --z-toast: 200;
@@ -55,6 +55,7 @@ html, body {
 }
 
 #app {
+  min-width: 0 !important;
   height: 100vh !important;
   max-height: 100vh !important;
   height: 100dvh !important;
@@ -163,12 +164,14 @@ html, body {
 
 .lab-root {
   display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   grid-template-rows: auto 1fr !important;
   height: 100vh !important;
   height: 100dvh !important;
   max-height: 100dvh !important;
   overflow: hidden !important;
   width: 100% !important;
+  min-width: 0 !important;
 }
 
 .lab-main-100vh {
@@ -176,6 +179,7 @@ html, body {
   flex-direction: column !important;
   flex: 1 !important;
   min-height: 0 !important;
+  min-width: 0 !important;
   padding: 4px 10px 4px !important;
   overflow: hidden !important;
   max-width: 100% !important;
@@ -204,6 +208,7 @@ html, body {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
+  touch-action: none !important;
 }
 
 .hud-layer {
@@ -214,6 +219,15 @@ html, body {
 }
 
 .hud-layer > * {
+  pointer-events: none !important;
+}
+.hud-layer button,
+.hud-layer .viewfinder-actions,
+.hud-layer .camera-tools,
+.hud-layer .power-meter-container,
+.hud-layer .intro-card,
+.hud-layer .tutorial-card,
+.hud-layer .power-meter-close {
   pointer-events: auto !important;
 }
 
@@ -230,7 +244,8 @@ html, body {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   gap: var(--gap, 8px) !important;
   width: 100% !important;
-  z-index: var(--z-device-strip, 20) !important;
+  position: relative !important;
+  z-index: var(--z-device-strip, 25) !important;
 }
 
 .device-col-card, .scene-label-plinth-chip {
@@ -245,6 +260,22 @@ html, body {
   padding: 5px 8px !important;
   box-shadow: 0 2px 6px rgba(0,0,0,0.04) !important;
   transition: all 0.2s ease !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.device-select-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  text-align: start !important;
+  color: inherit !important;
 }
 
 .device-col-card.running, .scene-label-plinth-chip.running {
@@ -1543,7 +1574,7 @@ html, body {
   position: absolute;
   inset: 12px;
   pointer-events: none;
-  z-index: 20;
+  z-index: var(--z-hud, 6);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -2111,13 +2142,11 @@ html, body {
   position: fixed !important;
   inset: 0 !important;
   z-index: var(--z-inspector, 100) !important;
-  display: none !important;
+  display: none;
   flex-direction: column !important;
   justify-content: space-between !important;
   padding: 14px 18px !important;
   background: radial-gradient(circle at center, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
   pointer-events: auto !important;
   touch-action: none !important;
 }
@@ -2269,4 +2298,511 @@ html, body {
 .lab-toast.visible {
   transform: translateX(-50%) translateY(0) !important;
   opacity: 1 !important;
+}
+
+
+/* ─── حاوية جدول تقرير المحقق المتجاوبة ─── */
+#detective-report-table-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  margin: 10px 0 !important;
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   تنسيقات التجاوب الفائقة للمختبر المتحرك (Responsive Dynamic Lab Enhancements)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ضبط البطاقات لتكون 2x2 على الأجهزة اللوحية والشاشات المتوسطة والصغيرة */
+@media (max-width: 820px) {
+  .device-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+  .device-col-card {
+    padding: 4px 6px !important;
+  }
+  .label-name {
+    font-size: 11px !important;
+  }
+  .dev-inspect-btn {
+    min-height: 32px !important;
+    height: 32px !important;
+    font-size: 11px !important;
+    padding: 2px 4px !important;
+  }
+  .label-pred-btn {
+    min-width: 32px !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    font-size: 15px !important;
+  }
+  .dock-power-btn {
+    padding: 4px 12px !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    font-size: 12px !important;
+  }
+  .power-emoji {
+    font-size: 18px !important;
+  }
+  .power-title {
+    font-size: 12px !important;
+  }
+  .bottom-feedback-bar {
+    padding: 5px 10px !important;
+    min-height: 46px !important;
+    gap: 6px !important;
+  }
+  .live-feedback-text {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .compact-header {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 6px !important;
+  }
+  .compact-header .brand strong {
+    font-size: 14px !important;
+  }
+  .compact-header .brand small {
+    display: none !important;
+  }
+  .lab-main-100vh {
+    padding: 2px 4px 4px !important;
+    gap: 4px !important;
+  }
+  .device-strip {
+    gap: 4px !important;
+  }
+  .device-col-card {
+    border-radius: 10px !important;
+    padding: 3px 5px !important;
+  }
+  .label-chip-header {
+    font-size: 11px !important;
+    margin-bottom: 2px !important;
+  }
+  .label-badge {
+    font-size: 9px !important;
+    padding: 1px 4px !important;
+  }
+  .dev-inspect-btn {
+    font-size: 10px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+  }
+  .label-pred-btn {
+    min-width: 28px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    font-size: 13px !important;
+  }
+  .table-power-dock {
+    padding: 3px 6px !important;
+    gap: 6px !important;
+    border-radius: 16px !important;
+  }
+  .dock-power-btn {
+    padding: 2px 8px !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    font-size: 11px !important;
+  }
+  .power-emoji {
+    font-size: 16px !important;
+  }
+  .power-title {
+    font-size: 11px !important;
+  }
+  .scene-top {
+    inset: auto !important;
+    top: 48px !important;
+    right: 8px !important;
+    left: 8px !important;
+    z-index: 21 !important;
+    gap: 8px !important;
+  }
+  .scene-top .room-tag {
+    min-width: 0 !important;
+    max-width: 45% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+  }
+  .scene-top .camera-tools {
+    flex-shrink: 0 !important;
+  }
+  .scene-top .camera-tools button {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 4px !important;
+  }
+  .feedback-avatar-wrap {
+    display: none !important;
+  }
+  .bottom-feedback-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 4px 8px !important;
+    border-radius: 12px !important;
+  }
+  .feedback-bar-actions {
+    display: flex !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+  .feedback-bar-actions button {
+    flex: 1 !important;
+    padding: 4px 6px !important;
+    font-size: 11px !important;
+    min-height: 28px !important;
+  }
+  .inspect-bottom-controls {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+  .inspect-action-btn {
+    width: 100% !important;
+    min-height: 38px !important;
+    font-size: 12px !important;
+  }
+  .detective-report-card {
+    padding: 14px 10px !important;
+    border-radius: 16px !important;
+  }
+  .detective-report-title {
+    font-size: 1.1rem !important;
+  }
+  .detective-report-actions {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+  .detective-report-actions button {
+    width: 100% !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   تنسيقات المختبر المتحرك النظيفة والمثالية (Final Responsive Layout & Contrast)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.table-power-dock {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  align-self: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 2px solid #d0e2d9 !important;
+  border-radius: 30px !important;
+  padding: 4px 16px !important;
+  z-index: var(--z-dock, 30) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18) !important;
+  width: auto !important;
+  max-width: 100% !important;
+  pointer-events: auto !important;
+}
+
+.control-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
+  z-index: var(--z-device-strip, 20) !important;
+  width: 100% !important;
+}
+
+.device-strip {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+#scene-labels.device-strip {
+  position: static !important;
+  inset: auto !important;
+  pointer-events: auto !important;
+}
+
+.device-col-card {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  background: #ffffff !important;
+  border: 1.5px solid #d0e2d9 !important;
+  border-radius: 14px !important;
+  padding: 6px 10px !important;
+  min-height: 68px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.2s ease !important;
+}
+
+.device-col-card.running {
+  border-color: #2EC4B6 !important;
+  background: #f0fdf9 !important;
+  box-shadow: 0 0 12px rgba(46, 196, 182, 0.25) !important;
+}
+
+.label-chip-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+  font-size: 12px !important;
+  margin-bottom: 2px !important;
+}
+
+.label-name {
+  font-weight: 800 !important;
+  color: #2F3E36 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 12px !important;
+}
+
+.label-chip-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.dev-inspect-btn, .label-inspect-btn {
+  flex: 1 !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  border-radius: 10px !important;
+  background: #eaf4f1 !important;
+  border: 1px solid #c2ded7 !important;
+  color: #0d6b62 !important;
+  padding: 2px 6px !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+}
+
+.label-prediction-btns {
+  display: flex !important;
+  gap: 4px !important;
+}
+
+.label-pred-btn {
+  min-width: 32px !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  font-size: 15px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #d0e2d9 !important;
+  background: #f8faf9 !important;
+  cursor: pointer !important;
+}
+
+.bottom-feedback-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  background: #ffffff !important;
+  border: 1.5px solid #d0e2d9 !important;
+  border-radius: 16px !important;
+  padding: 6px 14px !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  box-shadow: 0 3px 12px rgba(47, 62, 54, 0.06) !important;
+  flex-shrink: 0 !important;
+}
+
+@media (max-width: 820px) {
+  .device-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .compact-header {
+    gap: 4px !important;
+    padding-inline: 4px !important;
+  }
+  .compact-header .brand {
+    min-width: 0 !important;
+    gap: 4px !important;
+  }
+  .compact-header .brand strong {
+    font-size: 12px !important;
+  }
+  .compact-header .brand-mark {
+    width: 24px !important;
+    min-width: 24px !important;
+    height: 24px !important;
+  }
+  .compact-header .top-actions {
+    gap: 1px !important;
+  }
+  .compact-header .nav-link-btn,
+  .compact-header .icon-only,
+  .compact-header .quiet {
+    width: 26px !important;
+    min-width: 26px !important;
+    padding-inline: 2px !important;
+  }
+
+  .table-power-dock {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: min(100%, 420px) !important;
+    gap: 6px !important;
+    padding: 4px !important;
+    border-radius: 16px !important;
+  }
+  .dock-power-btn {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    padding-inline: 4px !important;
+    white-space: normal !important;
+  }
+  .power-title {
+    min-width: 0 !important;
+    font-size: 11px !important;
+    white-space: normal !important;
+    text-align: center !important;
+  }
+
+  .inspect-fullscreen-overlay {
+    padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) !important;
+  }
+  .inspect-top-header {
+    align-items: flex-start !important;
+    gap: 6px !important;
+  }
+  .inspect-dev-meta {
+    min-width: 0 !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+  }
+  .inspect-dev-title {
+    font-size: 14px !important;
+  }
+  .inspect-close-btn {
+    min-width: 0 !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+  .inspect-close-btn span {
+    white-space: normal !important;
+  }
+  .inspect-callouts-layer {
+    top: 76px !important;
+    right: 8px !important;
+    left: 8px !important;
+    gap: 4px !important;
+  }
+  .inspect-callout-pill {
+    width: fit-content !important;
+    max-width: 100% !important;
+    padding: 3px 8px !important;
+  }
+  .inspect-callout-pill strong {
+    font-size: 10px !important;
+  }
+  .inspect-callout-pill small {
+    font-size: 9px !important;
+  }
+  .inspect-bottom-controls {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+  .inspect-action-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 36px !important;
+    padding: 5px !important;
+    font-size: 10px !important;
+    gap: 3px !important;
+  }
+  #inspect-spin-btn {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (max-height: 620px) {
+  html,
+  body,
+  #app {
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .lab-root {
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    grid-template-rows: auto auto !important;
+    overflow: visible !important;
+  }
+  .lab-main-100vh {
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  .stage.scene-wrap {
+    flex: 0 0 clamp(220px, 48dvh, 360px) !important;
+  }
+}
+
+#camera-passthrough-video {
+  filter: none !important;
+  -webkit-filter: none !important;
+  z-index: 0 !important;
+  background: #0b1410 !important;
+}
+
+@media (min-width: 521px) {
+  .scene-top {
+    inset: auto !important;
+    top: 84px !important;
+    right: 16px !important;
+    left: 16px !important;
+    z-index: 21 !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .viewfinder-top-bar {
+    gap: 2px !important;
+    padding-inline: 4px !important;
+  }
+  .viewfinder-status-tag {
+    gap: 3px !important;
+    padding-inline: 5px !important;
+    font-size: 9px !important;
+  }
+  .viewfinder-btn {
+    min-width: 30px !important;
+    padding-inline: 5px !important;
+  }
+  .viewfinder-btn span {
+    display: none !important;
+  }
 }

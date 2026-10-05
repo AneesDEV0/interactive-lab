@@ -62,78 +62,108 @@ function showToast(message, duration = 3500) {
 
 async function toggleCameraPassthrough(btn) {
   const videoEl = $('#camera-passthrough-video');
-  if (!videoEl) return;
+  if (!videoEl || btn?.disabled) return;
 
   if (isCameraPassthroughActive) {
-    if (activeVideoStream) {
-      activeVideoStream.getTracks().forEach(track => track.stop());
-      activeVideoStream = null;
-    }
-    videoEl.srcObject = null;
-    videoEl.style.display = 'none';
-    videoEl.style.transform = '';
-    isCameraPassthroughActive = false;
-    scene?.setCameraPassthrough?.(false);
+    stopCameraPassthrough(videoEl, btn);
     if (btn) btn.innerHTML = '📷 <span>كاميرا الجهاز</span>';
     showToast(state.language === 'ar' ? 'تم العودة إلى البيئة الافتراضية' : 'Switched to 3D virtual environment');
-  } else {
-    try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showToast(state.language === 'ar' ? 'كاميرا الجهاز غير مدعومة في هذا المتصفح' : 'Camera not supported');
-        return;
-      }
-      
-      let stream = null;
-      let isFrontCamera = false;
-      try {
-        // First try rear camera explicitly
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { exact: 'environment' } },
-          audio: false
-        });
-      } catch {
-        try {
-          // Then try ideal rear camera
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { ideal: 'environment' } },
-            audio: false
-          });
-          const track = stream.getVideoTracks()[0];
-          const settings = track?.getSettings ? track.getSettings() : {};
-          if (settings.facingMode === 'user') {
-            isFrontCamera = true;
-          }
-        } catch {
-          // Fallback to any available video camera (e.g. PC webcam)
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: false
-          });
-          isFrontCamera = true;
-        }
-      }
+    return;
+  }
 
-      activeVideoStream = stream;
-      videoEl.srcObject = stream;
-      videoEl.style.display = 'block';
-      if (isFrontCamera) {
-        videoEl.style.transform = 'scaleX(-1)';
-      } else {
-        videoEl.style.transform = '';
-      }
-      await videoEl.play();
-      isCameraPassthroughActive = true;
-      scene?.setCameraPassthrough?.(true);
-      if (btn) btn.innerHTML = '🎨 <span>بيئة افتراضية</span>';
-      showToast(state.language === 'ar' ? 'تم تفعيل كاميرا الجهاز بنجاح' : 'Camera passthrough enabled');
+  if (!window.isSecureContext) {
+    showToast(state.language === 'ar' ? 'يلزم فتح المختبر عبر HTTPS أو localhost لتشغيل الكاميرا.' : 'Open the lab over HTTPS or localhost to use the camera.');
+    return;
+  }
+  if (!navigator.mediaDevices?.getUserMedia) {
+    showToast(state.language === 'ar' ? 'الكاميرا غير مدعومة في هذا المتصفح.' : 'Camera access is not supported in this browser.');
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
+    btn.innerHTML = '⏳ <span>جاري تشغيل الكاميرا...</span>';
+  }
+
+  let stream = null;
+  try {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
+      });
     } catch (err) {
-      console.warn('Camera access failed:', err);
-      showToast(state.language === 'ar' ? 'تعذر الوصول إلى كاميرا الجهاز. تأكد من منح الإذن.' : 'Camera access failed.');
-      isCameraPassthroughActive = false;
-      scene?.setCameraPassthrough?.(false);
-      if (btn) btn.innerHTML = '📷 <span>كاميرا الجهاز</span>';
+      if (!['OverconstrainedError', 'NotFoundError', 'TypeError'].includes(err?.name)) throw err;
+      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    }
+
+    const track = stream.getVideoTracks()[0];
+    if (!track) throw new Error('Camera stream contains no video track');
+
+    const facingMode = track.getSettings?.().facingMode;
+    videoEl.muted = true;
+    videoEl.playsInline = true;
+    videoEl.autoplay = true;
+    videoEl.srcObject = stream;
+    videoEl.style.display = 'block';
+    videoEl.style.transform = facingMode === 'user' ? 'scaleX(-1)' : '';
+    let playTimeout;
+    await Promise.race([
+      Promise.resolve(videoEl.play()),
+      new Promise((_, reject) => {
+        playTimeout = window.setTimeout(() => reject(new Error('Camera preview timed out')), 8000);
+      })
+    ]).finally(() => window.clearTimeout(playTimeout));
+
+    activeVideoStream = stream;
+    isCameraPassthroughActive = true;
+    scene?.setCameraPassthrough?.(true);
+    track.addEventListener('ended', () => {
+      if (!isCameraPassthroughActive) return;
+      stopCameraPassthrough(videoEl, btn);
+      showToast(state.language === 'ar' ? 'توقف بث الكاميرا. يمكنك تشغيله مجددًا.' : 'Camera stream stopped. You can start it again.');
+    }, { once: true });
+    if (btn) btn.innerHTML = '🎨 <span>بيئة افتراضية</span>';
+    showToast(state.language === 'ar' ? 'تم تفعيل كاميرا الجهاز بنجاح' : 'Camera passthrough enabled');
+  } catch (err) {
+    console.warn('Camera access failed:', err);
+    for (const track of stream?.getTracks() || []) track.stop();
+    stopCameraPassthrough(videoEl, btn);
+    const messages = {
+      NotAllowedError: 'اسمح للمتصفح باستخدام الكاميرا من إعدادات الموقع، ثم أعد المحاولة.',
+      PermissionDeniedError: 'اسمح للمتصفح باستخدام الكاميرا من إعدادات الموقع، ثم أعد المحاولة.',
+      NotFoundError: 'لم يتم العثور على كاميرا متاحة على هذا الجهاز.',
+      NotReadableError: 'الكاميرا مستخدمة من تطبيق آخر. أغلقه ثم أعد المحاولة.',
+      AbortError: 'توقف تشغيل الكاميرا قبل اكتماله. حاول مرة أخرى.',
+      OverconstrainedError: 'تعذر تشغيل الكاميرا المطلوبة على هذا الجهاز.'
+    };
+    const message = messages[err?.name] || 'تعذر تشغيل الكاميرا. تحقق من إذن الموقع وأن الكاميرا غير مستخدمة من تطبيق آخر.';
+    showToast(state.language === 'ar' ? message : 'Camera could not start. Check site permissions and close other apps using the camera.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.removeAttribute('aria-busy');
     }
   }
+}
+
+function stopCameraPassthrough(videoEl, btn) {
+  isCameraPassthroughActive = false;
+  if (activeVideoStream) {
+    activeVideoStream.getTracks().forEach(track => track.stop());
+    activeVideoStream = null;
+  }
+  videoEl.pause();
+  videoEl.srcObject = null;
+  videoEl.style.display = 'none';
+  videoEl.style.transform = '';
+  scene?.setCameraPassthrough?.(false);
+  if (btn) btn.innerHTML = '📷 <span>كاميرا الجهاز</span>';
 }
 
 const $ = s => document.querySelector(s);
@@ -436,55 +466,24 @@ function shell() {
              </button>
            </div>
          </section>
-       </div>
-     </main>
-   </div>
-             <div class="active-power-summary" id="active-power-summary">
-               <span class="active-count-chip" id="active-count-chip">🔋 المشغلة: <b id="running-count-num">0</b> / 4</span>
-             </div>
-           </div>
-           <p class="live-feedback-text" id="live-feedback-text">${state.message || c.intro}</p>
+        </div>
 
-           <!-- عناصر أسئلة الاختبار المباشرة داخل المشهد -->
-           <div id="in-scene-quiz-bar" style="display:none; margin-top:8px; gap:8px; align-items:center; flex-wrap:wrap;"></div>
-         </div>
-         <div class="feedback-bar-actions">
-           <button type="button" class="bar-report-btn" data-action="openDetectiveReport" title="عرض لوحة تقرير المحقق">
-             📊 <span>تقرير المحقق</span>
-           </button>
-           <button type="button" class="bar-reset-btn" data-action="reset" title="توليد 4 أجهزة عشوائية جديدة">
-             🔄 <span>أجهزة جديدة</span>
-           </button>
-         </div>
-       </section>
-
-       <div class="sr-only">
+        <div class="sr-only">
          <span id="progress-count">0 / 4</span>
          <i id="progress-fill"></i>
          <p id="progress-text">${c.notYet}</p>
          <p id="message" role="status" aria-live="polite" aria-atomic="true">${c.intro}</p>
          <div id="suggestions" class="suggestions"></div>
-         <div id="accessible-cards">
-           ${currentIds.map(id => `
-             <article id="card-${id}" data-target="${id}">
-               <button data-action="device" data-device="${id}">${name(id)}</button>
-               <button data-action="inspect" data-device="${id}">تدوير وتفحص</button>
-               <button data-action="power" data-device="${id}">تشغيل</button>
-               <span id="status-${id}"></span>
-               <span id="check-${id}"></span>
-             </article>
-           `).join('')}
-         </div>
        </div>
 
        <footer class="compact-footer sr-only">
          <span>${icon('shield')}${c.safety}</span>
          ${button('reset', c.reset, 'refresh', 'text-button')}
        </footer>
-     </div>
-   </main>
+      </main>
+    </div>
 
-   <!-- نافذة لوحة تقرير المحقق (Detective Report Modal) -->
+    <!-- نافذة لوحة تقرير المحقق (Detective Report Modal) -->
    <div id="detective-report-modal" class="detective-report-modal" hidden style="display:none;">
      <div class="detective-report-card">
        <div class="detective-report-header">
@@ -849,10 +848,12 @@ function renderSceneLabels() {
     const dotText = isRunning ? '⚡' : '○';
 
     return `
-      <div class="device-col-card ${isRunning ? 'running' : ''}" id="label-${id}" data-target="${id}">
+      <div class="device-col-card ${isRunning ? 'running' : ''}" id="card-${id}" data-target="${id}">
         <div class="label-chip-header">
-          <span class="label-status-dot" id="dot-${id}">${dotText}</span>
-          <strong class="label-name">#${index + 1} ${shortName(id)}</strong>
+          <button type="button" class="device-select-btn" data-action="device" data-device="${id}" aria-pressed="${state.selectedDevice === id ? 'true' : 'false'}" title="${name(id)}">
+            <span class="label-status-dot" id="dot-${id}">${dotText}</span>
+            <strong class="label-name">#${index + 1} ${shortName(id)}</strong>
+          </button>
           <span class="${badgeClass}" id="badge-${id}">${badgeText}</span>
         </div>
         <div class="label-chip-actions">
@@ -1160,7 +1161,7 @@ function initTouchDragSupport() {
       if (g) {
         g.innerHTML = tool === 'battery' ? icon('battery') : '<span style="font-size:36px;">🔌</span>';
         g.style.left = touch.clientX + 'px';
-        g.style.top = touch.clientY + 'px';
+        g.style.top = (touch.clientY - 45) + 'px';
         g.hidden = false;
       }
     }, { passive: false });
@@ -1210,7 +1211,7 @@ window.addEventListener('touchmove', e => {
   if (g && drag.moved) {
     g.hidden = false;
     g.style.left = touch.clientX + 'px';
-    g.style.top = touch.clientY + 'px';
+        g.style.top = (touch.clientY - 45) + 'px';
   }
 
   if (drag.moved && scene?.setDragWorld) {
@@ -1452,7 +1453,6 @@ async function loadScene() {
     if (scene) {
       dispatch({type: 'READY', sessionRevision: rev});
       if (state.phase === 'intro') {
-        dispatch({type: 'START', sessionRevision: rev});
         scene.playRevealIntro?.();
         if (!state.muted) {
           speakIntro('dynamic');
