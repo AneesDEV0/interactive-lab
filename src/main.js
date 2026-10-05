@@ -679,10 +679,6 @@ function hidePowerMeter() {
   }
 }
 
-
-  scene?.reset();
-}
-
 function dispatch(event) {
   const old = state;
   state = reducer(state, {id: `${state.sessionRevision}:${++seq}`, sessionRevision: state.sessionRevision, ...event});
