@@ -64,17 +64,21 @@ html, body {
 
 /* ─── 1. الترويسة الموحدة (Header) ─── */
 .static-header {
-  height: 56px;
-  min-height: 56px;
-  background: rgba(255, 255, 255, 0.94);
+  height: 54px;
+  min-height: 54px;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-bottom: 2px solid rgba(255, 183, 3, 0.3);
-  padding: 0 16px;
+  border-bottom: 2px solid rgba(255, 183, 3, 0.35);
+  padding: 0 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow: hidden;
   z-index: 40;
   box-shadow: var(--shadow-sm);
 }
@@ -82,27 +86,31 @@ html, body {
 .static-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   text-decoration: none;
   color: var(--frog-dark);
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .static-brand-icon {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
   background: var(--gold-gradient);
   border-radius: 12px;
   display: grid;
   place-items: center;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   box-shadow: 0 3px 10px rgba(251, 133, 0, 0.35);
   transform: rotate(-3deg);
+  flex-shrink: 0;
 }
 
 .static-brand-title {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .static-brand-title h1 {
@@ -110,18 +118,23 @@ html, body {
   font-weight: 900;
   color: var(--frog-dark);
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .static-brand-title span {
   font-size: 0.72rem;
   color: var(--frog);
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .static-header-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .static-nav-btn {
@@ -129,17 +142,20 @@ html, body {
   border: 1.5px solid var(--line);
   color: var(--frog-dark);
   border-radius: 50px;
-  padding: 6px 12px;
+  padding: 5px 11px;
   font-size: 0.8rem;
   font-weight: 800;
   font-family: inherit;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 5px;
   cursor: pointer;
   text-decoration: none;
   transition: all 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
+  height: 34px;
 }
 
 .static-nav-btn:hover {
@@ -156,9 +172,9 @@ html, body {
 }
 
 .static-nav-btn.icon-only {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
   padding: 0;
   border-radius: 50%;
   justify-content: center;
@@ -166,13 +182,17 @@ html, body {
 
 /* ─── 2. شريط التحدي والمهمة (Mission HUD) ─── */
 .static-mission-hud {
-  padding: 6px 18px;
+  padding: 6px 14px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
   background: rgba(255, 255, 255, 0.96);
   border-bottom: 1.5px solid var(--line);
   flex-shrink: 0;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow: hidden;
   box-shadow: 0 1px 4px rgba(47, 62, 54, 0.04);
 }
 
@@ -180,25 +200,27 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
+  min-width: 0;
 }
 
 .static-mission-instruction-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
+  min-width: 0;
 }
 
 .static-target-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 14px;
+  padding: 4px 12px;
   border-radius: 50px;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   font-weight: 900;
   white-space: nowrap;
   flex-shrink: 0;
@@ -218,14 +240,14 @@ html, body {
 }
 
 .static-mission-instruction {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 800;
   color: var(--frog-dark);
   white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-  line-height: 1.35;
+  line-height: 1.3;
   flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-word;
 }
 
 .static-btn-listen {
@@ -233,7 +255,7 @@ html, body {
   border: 1.5px solid var(--gold);
   color: #8C4E00;
   border-radius: 50px;
-  padding: 3px 11px;
+  padding: 3px 10px;
   font-size: 0.76rem;
   font-weight: 800;
   font-family: inherit;
@@ -255,21 +277,21 @@ html, body {
 .static-mission-stats {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .static-stat-pill {
   background: #FFFFFF;
   border: 1.5px solid var(--line);
-  padding: 3px 9px;
+  padding: 3px 8px;
   border-radius: 50px;
   font-size: 0.76rem;
   font-weight: 800;
   color: var(--frog-dark);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   white-space: nowrap;
 }
 
@@ -421,11 +443,11 @@ html, body {
 
 /* إطار دائري مجسم 3D غني بالتدرجات والظلال لأيقونة الجهاز */
 .card-visual-box {
-  width: 88px;
-  height: 88px;
-  min-height: 88px;
-  border-radius: 24px;
-  background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #F1F6F3 65%, #DFECE5 100%);
+  width: 90px;
+  height: 90px;
+  min-height: 90px;
+  border-radius: 22px;
+  background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #F8FAF7 65%, #E2ECE6 100%);
   border: 2.5px solid #FFB703;
   display: flex;
   align-items: center;
@@ -449,10 +471,10 @@ html, body {
 }
 
 .card-visual-box svg {
-  width: 66px;
-  height: 66px;
-  max-width: 90%;
-  max-height: 90%;
+  width: 72px;
+  height: 72px;
+  max-width: 88%;
+  max-height: 88%;
   display: block;
   margin: 0 auto;
   filter: drop-shadow(0 6px 8px rgba(30, 45, 36, 0.22)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.15));
@@ -775,27 +797,28 @@ html, body {
   line-height: 1.35;
 }
 
-/* ─── 7. شاشة الجوال والتابلت المتجاوبة ─── */
+/* ─── 7. شاشة الجوال والتابلت المتجاوبة (100% Fluid Responsive System) ─── */
 @media (max-width: 900px) {
   .static-cards-stage, main.static-cards-stage {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    max-height: calc(100vh - 195px) !important;
-    max-height: calc(100dvh - 195px) !important;
-    gap: 10px !important;
-    padding: 6px 12px !important;
+    max-height: calc(100vh - 175px) !important;
+    max-height: calc(100dvh - 175px) !important;
+    gap: 12px !important;
+    padding: 6px 14px !important;
+    align-content: center !important;
   }
   .card-visual-box {
-    width: 72px;
-    height: 72px;
-    min-height: 72px;
+    width: 84px;
+    height: 84px;
+    min-height: 84px;
   }
   .card-visual-box svg {
-    width: 50px;
-    height: 50px;
-    max-height: 52px;
+    width: 68px;
+    height: 68px;
+    max-height: 72px;
   }
   .card-device-name {
-    font-size: 0.92rem;
+    font-size: 0.94rem;
     margin-bottom: 3px;
   }
   .static-mission-hud {
@@ -806,84 +829,164 @@ html, body {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 680px) {
   .static-header {
     height: 48px;
     min-height: 48px;
-    padding: 0 10px;
+    padding: 0 8px;
+    gap: 6px;
+  }
+  .static-brand-icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    font-size: 1.1rem;
+    border-radius: 9px;
+  }
+  .static-brand-title h1 {
+    font-size: 0.85rem;
+    white-space: nowrap;
   }
   .static-brand-title span {
     display: none;
   }
-  .static-brand-title h1 {
-    font-size: 0.95rem;
-    white-space: nowrap;
+  .static-header-nav {
+    gap: 4px;
   }
-  .static-nav-btn span {
+  .static-nav-btn {
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    font-size: 0.92rem;
+    justify-content: center;
+  }
+  .static-nav-btn .nav-text {
     display: none;
   }
   .static-mission-hud {
-    padding: 5px 10px;
-    gap: 4px;
+    padding: 4px 8px;
+    gap: 3px;
   }
   .static-target-chip {
-    padding: 3px 10px;
+    padding: 3px 9px;
     font-size: 0.76rem;
-  }
-  .static-mission-instruction {
-    font-size: 0.78rem;
-    line-height: 1.3;
   }
   .static-mission-stats {
     gap: 4px;
   }
   .static-stat-pill {
     padding: 2px 6px;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
+    gap: 2px;
+  }
+  .static-stat-pill .stat-label {
+    display: none;
+  }
+  .static-mission-instruction {
+    font-size: 0.76rem;
+    line-height: 1.25;
+  }
+  .static-btn-listen {
+    padding: 3px 8px;
+    font-size: 0.72rem;
+  }
+  .static-btn-listen .listen-text {
+    display: none;
   }
   .static-cards-stage, main.static-cards-stage {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    max-height: calc(100vh - 175px) !important;
-    max-height: calc(100dvh - 175px) !important;
+    max-height: calc(100vh - 165px) !important;
+    max-height: calc(100dvh - 165px) !important;
     gap: 8px !important;
-    padding: 4px 8px !important;
-  }
-  .static-actions-bar {
-    height: 52px;
-    min-height: 52px;
-    padding: 0 8px;
-  }
-  .static-btn {
-    padding: 7px 14px;
-    font-size: 0.8rem;
-    gap: 4px;
+    padding: 4px 6px !important;
+    align-content: center !important;
   }
   .card-face {
-    padding: 8px 6px 6px;
+    padding: 8px 6px 7px !important;
+    border-radius: 16px !important;
   }
-  .card-category-badge {
-    font-size: 0.68rem;
-    padding: 2px 6px;
+  .card-header-bar {
+    margin-bottom: 2px !important;
+  }
+  .card-tag-pill {
+    font-size: 0.68rem !important;
+    padding: 1.5px 6px !important;
+  }
+  .card-select-badge {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.75rem !important;
   }
   .card-visual-box {
-    width: 60px;
-    height: 60px;
-    min-height: 60px;
-    margin: 2px auto;
+    width: 78px !important;
+    height: 78px !important;
+    min-height: 78px !important;
+    border-radius: 18px !important;
+    margin: 2px auto !important;
   }
   .card-visual-box svg {
-    width: 44px;
-    height: 44px;
-    max-height: 46px;
+    width: 62px !important;
+    height: 62px !important;
+    max-width: 86% !important;
+    max-height: 86% !important;
   }
   .card-device-name {
-    font-size: 0.82rem;
-    margin-bottom: 3px;
+    font-size: 0.85rem !important;
+    font-weight: 900 !important;
+    margin: 2px 0 4px !important;
   }
   .btn-flip-inspect {
-    font-size: 0.7rem;
-    padding: 4px 6px;
-    border-radius: 8px;
+    font-size: 0.75rem !important;
+    padding: 5px 6px !important;
+    border-radius: 9px !important;
+    gap: 4px !important;
+  }
+  .static-actions-bar {
+    height: 50px;
+    min-height: 50px;
+    padding: 0 8px;
+  }
+  .static-actions-center {
+    gap: 6px;
+    width: 100%;
+  }
+  .static-btn {
+    padding: 7px 8px;
+    font-size: 0.78rem;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+  .static-btn.btn-verify {
+    flex: 1.3;
+  }
+}
+
+@media (max-width: 380px) {
+  .static-brand-title h1 {
+    font-size: 0.78rem;
+  }
+  .card-visual-box {
+    width: 72px !important;
+    height: 72px !important;
+    min-height: 72px !important;
+  }
+  .card-visual-box svg {
+    width: 56px !important;
+    height: 56px !important;
+  }
+  .card-device-name {
+    font-size: 0.8rem !important;
+  }
+  .btn-flip-inspect {
+    font-size: 0.7rem !important;
+    padding: 4px 4px !important;
+  }
+  .static-btn {
+    font-size: 0.72rem;
+    padding: 6px 4px;
   }
 }
 
