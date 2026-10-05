@@ -311,27 +311,6 @@ export async function speakKey(key, fallbackText = '', options = {}) {
 
   return false;
 }
-          return true;
-        }
-      }
-    } catch (err) {
-      lastAudioError = err?.message || 'Tier-1 fallback';
-    }
-  }
-
-  // ─── الطبقة 2: تشغيل الاحتياط عبر Web Speech API ───
-  const ttsSuccess = speakTts(spokenText, 'ar', options, token);
-  if (ttsSuccess) return true;
-
-  // ─── الطبقة 3: إشعار النظام بحالة الفشل للتعامل معها بصرياً ───
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('audio-playback-failed', {
-      detail: { key, text: spokenText, inApp: detectInAppBrowser() }
-    }));
-  }
-
-  return false;
-}
 
 // ─── دوال التوجيه الصوتي للمتحرك ───
 export function speak(text, lang = 'ar', options = {}) {
