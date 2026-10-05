@@ -91,10 +91,10 @@ function playErrorSound() {
   playTone(220, 'sawtooth', 0.25);
 }
 
-// التوجيه الصوتي العربي الموحد (نبرة واضحة ومحفزة لطلاب الصف الرابع)
+// التوجيه الصوتي العربي الموحد (نبرة أنثوية ناعمة ومخارج حروف واضحة)
 function speakArabic(text) {
   if (!speechEnabled) return;
-  speak(text, 'ar', { pitch: 1.0, rate: 0.95 });
+  speak(text, 'ar', { pitch: 1.0, rate: 0.92 });
 }
 
 // ─── إدارة حالة النشاط ───
@@ -130,9 +130,6 @@ export function initStaticLab() {
         </a>
 
         <nav class="static-header-nav">
-          <button type="button" id="btn-ar-launch" class="static-nav-btn btn-ar" title="فتح كاميرا الواقع المعزز الحقيقي">
-            📷 <span>الواقع المعزز AR</span>
-          </button>
           <button type="button" id="btn-voice-toggle" class="static-nav-btn icon-only" title="تفعيل/تعطيل التوجيه الصوتي">
             🗣️
           </button>
@@ -162,34 +159,37 @@ export function initStaticLab() {
         </button>
       </div>
 
-      <!-- 2. شريط المهمة والتحدي (HUD) -->
+      <!-- 2. شريط المهمة والتحدي (HUD) المتجاوب -->
       <section class="static-mission-hud">
-        <div class="static-mission-info">
+        <div class="static-mission-top-row">
           <div class="static-target-chip" id="target-chip">
             <span id="target-icon">🔋</span>
             <span id="target-title">تحدي البطاريات الجافة</span>
           </div>
+
+          <div class="static-mission-stats">
+            <div class="static-stat-pill">
+              <span>🏆 النقاط:</span>
+              <span class="val" id="stat-score">0</span>
+            </div>
+            <div class="static-stat-pill">
+              <span>🎯 التحديات:</span>
+              <span class="val" id="stat-challenges">0</span>
+            </div>
+            <div class="static-stat-pill">
+              <span>✔️ المحددة:</span>
+              <span class="val" id="stat-selected">0 / 2</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="static-mission-instruction-row">
           <div class="static-mission-instruction" id="mission-instruction">
             حَدِّدْ جهازين يعملان بهذا المصدر، واضغط فحص 3D لكشف الدليل!
           </div>
           <button type="button" class="static-btn-listen" id="btn-listen-mission" title="استمع للتعليمات صوتياً">
             📢 <span>استمع للتوجيه</span>
           </button>
-        </div>
-
-        <div class="static-mission-stats">
-          <div class="static-stat-pill">
-            <span>🏆 النقاط:</span>
-            <span class="val" id="stat-score">0</span>
-          </div>
-          <div class="static-stat-pill">
-            <span>🎯 التحديات:</span>
-            <span class="val" id="stat-challenges">0</span>
-          </div>
-          <div class="static-stat-pill">
-            <span>✔️ المحددة:</span>
-            <span class="val" id="stat-selected">0 / 2</span>
-          </div>
         </div>
       </section>
 
@@ -198,7 +198,7 @@ export function initStaticLab() {
 
       <!-- 4. شريط الأوامر التقويمية السفلي -->
       <footer class="static-actions-bar">
-        <div class="static-actions-right">
+        <div class="static-actions-center">
           <button type="button" class="static-btn btn-verify" id="btn-validate">
             <span>🔍 تحقق من إجابتي</span>
           </button>
@@ -209,10 +209,6 @@ export function initStaticLab() {
             <span>🔄 أجهزة أخرى</span>
           </button>
         </div>
-
-        <button type="button" class="static-btn btn-secondary" id="btn-summary">
-          <span>📋 كشف التصنيف والمقارنة</span>
-        </button>
       </footer>
 
       <!-- 5. نافذة كشف المقارنة والتصنيف العلمي الموحدة -->

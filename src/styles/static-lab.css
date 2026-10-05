@@ -166,32 +166,39 @@ html, body {
 
 /* ─── 2. شريط التحدي والمهمة (Mission HUD) ─── */
 .static-mission-hud {
-  padding: 8px 18px;
+  padding: 6px 18px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  background: rgba(255, 255, 255, 0.95);
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.96);
   border-bottom: 1.5px solid var(--line);
   flex-shrink: 0;
   box-shadow: 0 1px 4px rgba(47, 62, 54, 0.04);
 }
 
-.static-mission-info {
+.static-mission-top-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex: 1 1 auto;
-  min-width: 0;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.static-mission-instruction-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
 }
 
 .static-target-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 4px 14px;
   border-radius: 50px;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 900;
   white-space: nowrap;
   flex-shrink: 0;
@@ -211,13 +218,13 @@ html, body {
 }
 
 .static-mission-instruction {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 800;
   color: var(--frog-dark);
   white-space: normal;
   overflow: visible;
   text-overflow: clip;
-  line-height: 1.4;
+  line-height: 1.35;
   flex: 1 1 auto;
 }
 
@@ -226,8 +233,8 @@ html, body {
   border: 1.5px solid var(--gold);
   color: #8C4E00;
   border-radius: 50px;
-  padding: 4px 12px;
-  font-size: 0.78rem;
+  padding: 3px 11px;
+  font-size: 0.76rem;
   font-weight: 800;
   font-family: inherit;
   display: inline-flex;
@@ -242,7 +249,7 @@ html, body {
 .static-btn-listen:hover {
   background: var(--gold);
   color: var(--frog-dark);
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .static-mission-stats {
@@ -255,13 +262,15 @@ html, body {
 .static-stat-pill {
   background: #FFFFFF;
   border: 1.5px solid var(--line);
-  padding: 4px 10px;
+  padding: 3px 9px;
   border-radius: 50px;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 800;
+  color: var(--frog-dark);
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
+  white-space: nowrap;
 }
 
 .static-stat-pill .val {
@@ -530,24 +539,26 @@ html, body {
 
 /* ─── 4. شريط الأوامر التقويمية السفلي (Actions Toolbar) ─── */
 .static-actions-bar {
-  height: 58px;
-  min-height: 58px;
+  height: 56px;
+  min-height: 56px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(14px);
   border-top: 1.5px solid var(--line);
   padding: 0 16px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 10px;
   z-index: 30;
   flex-shrink: 0;
 }
 
-.static-actions-right {
+.static-actions-center {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
 }
 
 .static-btn {
@@ -732,24 +743,30 @@ html, body {
 @media (max-width: 900px) {
   .static-cards-stage, main.static-cards-stage {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    max-height: calc(100vh - 190px) !important;
-    max-height: calc(100dvh - 190px) !important;
-    gap: 12px !important;
-    padding: 8px 12px !important;
+    max-height: calc(100vh - 195px) !important;
+    max-height: calc(100dvh - 195px) !important;
+    gap: 10px !important;
+    padding: 6px 12px !important;
   }
   .card-visual-box {
-    width: 76px;
-    height: 76px;
-    min-height: 76px;
+    width: 72px;
+    height: 72px;
+    min-height: 72px;
   }
   .card-visual-box svg {
-    width: 54px;
-    height: 54px;
-    max-height: 58px;
+    width: 50px;
+    height: 50px;
+    max-height: 52px;
   }
   .card-device-name {
-    font-size: 0.94rem;
-    margin-bottom: 4px;
+    font-size: 0.92rem;
+    margin-bottom: 3px;
+  }
+  .static-mission-hud {
+    padding: 6px 12px;
+  }
+  .static-mission-instruction {
+    font-size: 0.86rem;
   }
 }
 
@@ -757,48 +774,53 @@ html, body {
   .static-header {
     height: 48px;
     min-height: 48px;
-    padding: 0 8px;
+    padding: 0 10px;
   }
   .static-brand-title span {
     display: none;
   }
   .static-brand-title h1 {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
+    white-space: nowrap;
   }
   .static-nav-btn span {
     display: none;
   }
   .static-mission-hud {
-    padding: 6px 8px;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-  .static-mission-info {
-    gap: 8px;
-    flex-wrap: wrap;
+    padding: 5px 10px;
+    gap: 4px;
   }
   .static-target-chip {
     padding: 3px 10px;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
   }
   .static-mission-instruction {
-    font-size: 0.76rem;
-    white-space: normal;
+    font-size: 0.78rem;
     line-height: 1.3;
   }
   .static-mission-stats {
     gap: 4px;
   }
   .static-stat-pill {
-    padding: 2px 7px;
-    font-size: 0.72rem;
+    padding: 2px 6px;
+    font-size: 0.7rem;
   }
   .static-cards-stage, main.static-cards-stage {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    max-height: calc(100vh - 180px) !important;
-    max-height: calc(100dvh - 180px) !important;
+    max-height: calc(100vh - 175px) !important;
+    max-height: calc(100dvh - 175px) !important;
     gap: 8px !important;
-    padding: 4px 6px !important;
+    padding: 4px 8px !important;
+  }
+  .static-actions-bar {
+    height: 52px;
+    min-height: 52px;
+    padding: 0 8px;
+  }
+  .static-btn {
+    padding: 7px 14px;
+    font-size: 0.8rem;
+    gap: 4px;
   }
   .card-face {
     padding: 8px 6px 6px;
@@ -826,15 +848,6 @@ html, body {
     font-size: 0.7rem;
     padding: 4px 6px;
     border-radius: 8px;
-  }
-  .static-actions-bar {
-    height: 50px;
-    min-height: 50px;
-    padding: 0 8px;
-  }
-  .static-btn {
-    padding: 6px 10px;
-    font-size: 0.76rem;
   }
 }
 

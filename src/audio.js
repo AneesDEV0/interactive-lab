@@ -58,20 +58,27 @@ export function selectBestVoice(voices, lang) {
     const name = (v.name || '').toLowerCase();
     const vLang = (v.lang || '').toLowerCase().replace('_', '-');
 
-    // Prefer modern high-definition neural / natural voices
-    if (name.includes('natural') || name.includes('online') || name.includes('neural')) s += 120;
-    if (name.includes('google')) s += 60;
+    // 1. الأولوية القصوى للأصوات النسائية الناعمة الطبيعية (Soft Natural Female Voices)
+    if (name.includes('salma') || name.includes('zariyah') || name.includes('fatima') || name.includes('sana')) s += 300;
+    if (name.includes('laila') || name.includes('mariam') || name.includes('zeina') || name.includes('hoda')) s += 200;
+    if (name.includes('female') || name.includes('woman') || name.includes('girl')) s += 150;
 
-    // High quality named Arabic neural voices (Edge / Windows / Chrome / Apple / Android)
-    if (name.includes('salma') || name.includes('zariyah') || name.includes('fatima') || name.includes('shakir') || name.includes('hamed')) s += 80;
-    if (name.includes('hamdan') || name.includes('naayf') || name.includes('maged') || name.includes('hoda') || name.includes('zeina')) s += 50;
-    if (name.includes('laila') || name.includes('tarik') || name.includes('mariam') || name.includes('youssef') || name.includes('sana')) s += 40;
+    // الأصوات العصبية الطبيعية الحديثة (Neural / Natural / Online)
+    if (name.includes('natural') || name.includes('online') || name.includes('neural')) s += 100;
+    if (name.includes('google')) s += 50;
 
-    // Region preference
-    if (vLang === 'ar-sa' || vLang === 'ar-eg' || vLang === 'ar-ae') s += 20;
+    // خفض نقاط الأصوات الذكورية تماماً لضمان اختيار صوت أنثوي ناعم
+    if (name.includes('shakir') || name.includes('hamed') || name.includes('hamdan') || 
+        name.includes('naayf') || name.includes('maged') || name.includes('tarik') || 
+        name.includes('youssef') || name.includes('male') || name.includes('man')) {
+      s -= 200;
+    }
 
-    // Remote neural web service
-    if (!v.localService) s += 15;
+    // تفضيل اللهجات الفصحى الرسمية
+    if (vLang === 'ar-sa' || vLang === 'ar-eg' || vLang === 'ar-ae') s += 25;
+
+    // الخدمة السحابية العصبية عالية الجودة
+    if (!v.localService) s += 20;
     if (v.default) s += 5;
 
     return s;
@@ -99,7 +106,7 @@ export function speak(text, lang = 'ar', options = {}) {
   const cleaned = cleanSpeechText(text);
   if (!cleaned) return false;
 
-  const voices = speechSynthesis.getVoices();
+  let voices = speechSynthesis.getVoices();
   const voice = selectBestVoice(voices, lang);
 
   const utterance = new SpeechSynthesisUtterance(cleaned);
@@ -110,8 +117,8 @@ export function speak(text, lang = 'ar', options = {}) {
     utterance.lang = lang === 'en' ? 'en-US' : 'ar-SA';
   }
 
-  // ضبط السرعة والنبرة - نبرة طبيعية واضحة ومخارج حروف سليمة ومحفزة لطلاب الصف الرابع
-  utterance.rate = options.rate ?? 0.95;
+  // ضبط السرعة والنبرة - نبرة أنثوية ناعمة ومخارج حروف واضحة جداً
+  utterance.rate = options.rate ?? 0.92;
   utterance.pitch = options.pitch ?? 1.0;
   utterance.volume = options.volume ?? 1.0;
 
