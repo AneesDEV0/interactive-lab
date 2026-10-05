@@ -17,7 +17,7 @@ export function createInspectorViewer({ renderer, materials, host, onExit }) {
 
   // مشهد وكاميرا فحص معزولان تماماً
   const inspectScene = new THREE.Scene();
-  const inspectCamera = new THREE.PerspectiveCamera(45, host.clientWidth / host.clientHeight, 0.1, 100);
+  const inspectCamera = new THREE.PerspectiveCamera(45, Math.max(1, host.clientWidth) / Math.max(1, host.clientHeight), 0.1, 100);
   inspectCamera.position.set(0, 1.8, 4.2);
 
   // إضاءة استوديو ثلاثية احترافية
@@ -32,27 +32,18 @@ export function createInspectorViewer({ renderer, materials, host, onExit }) {
   fillLight.position.set(-4, 2, -2);
   inspectScene.add(fillLight);
 
-  const rimLight = new THREE.DirectionalLight(0xffb703, 1.5);
+  const rimLight = new THREE.DirectionalLight(0x2ec4b6, 1.5);
   rimLight.position.set(0, 4, -4);
   inspectScene.add(rimLight);
 
   // منصة العرض الدائرية الاستوديو في الفحص
   const studioPlinth = new THREE.Group();
   const plinthBase = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.5, 0.18, 40), materials.plinthBase);
-  const plinthRim = new THREE.Mesh(new THREE.TorusGeometry(1.42, 0.03, 16, 40), materials.plinthRim);
+  const plinthRim = new THREE.Mesh(new THREE.TorusGeometry(1.42, 0.03, 16, 40), materials.custom(0x0f766e, { roughness: 0.3 }));
   plinthRim.rotation.x = Math.PI / 2;
   plinthRim.position.y = 0.09;
   studioPlinth.add(plinthBase, plinthRim);
   inspectScene.add(studioPlinth);
-
-  // حلقة توهج ناعمة تحت الجهاز
-  const glowRing = new THREE.Mesh(
-    new THREE.RingGeometry(1.2, 1.35, 32),
-    new THREE.MeshBasicMaterial({ color: 0x2ec4b6, side: THREE.DoubleSide, transparent: true, opacity: 0.6 })
-  );
-  glowRing.rotation.x = -Math.PI / 2;
-  glowRing.position.y = 0.1;
-  studioPlinth.add(glowRing);
 
   let currentMesh = null;
   let currentFx = null;
@@ -75,6 +66,7 @@ export function createInspectorViewer({ renderer, materials, host, onExit }) {
     if (overlayEl) return;
     overlayEl = document.createElement('div');
     overlayEl.className = 'inspect-fullscreen-overlay';
+    overlayEl.id = 'inspector-overlay';
     overlayEl.innerHTML = `
       <div class="inspect-top-header">
         <div class="inspect-dev-meta">
@@ -101,7 +93,7 @@ export function createInspectorViewer({ renderer, materials, host, onExit }) {
         </button>
       </div>
     `;
-    host.appendChild(overlayEl);
+    host.parentElement?.appendChild(overlayEl) || host.appendChild(overlayEl);
 
     overlayEl.querySelector('#inspect-close-btn')?.addEventListener('click', close);
     overlayEl.querySelector('#inspect-toggle-bay-btn')?.addEventListener('click', toggleBay);
@@ -239,16 +231,17 @@ export function createInspectorViewer({ renderer, materials, host, onExit }) {
     targetCameraDist = 4.2;
 
     createOverlayUI();
-    if (overlayEl) overlayEl.style.display = 'flex';
+    if (overlayEl) {
+      overlayEl.hidden = false;
+      overlayEl.style.display = 'flex';
+    }
 
-    // تنظيف المجسم السابق
     if (currentMesh) {
       inspectScene.remove(currentMesh);
       currentMesh.traverse(o => { if (o.geometry) o.geometry.dispose(); });
       currentMesh = null;
     }
 
-    // بناء مجسم الجهاز الجديد للفحص
     currentMesh = createDevice3D(deviceId, materials);
     currentMesh.position.set(0, 0.1, 0);
     currentMesh.scale.setScalar(1.45);
@@ -278,9 +271,13 @@ export function createInspectorViewer({ renderer, materials, host, onExit }) {
   }
 
   function close() {
+    if (!isOpen) return;
     isOpen = false;
     cancelAnimationFrame(animFrame);
-    if (overlayEl) overlayEl.style.display = 'none';
+    if (overlayEl) {
+      overlayEl.hidden = true;
+      overlayEl.style.display = 'none';
+    }
     if (currentMesh) {
       inspectScene.remove(currentMesh);
       currentMesh.traverse(o => { if (o.geometry) o.geometry.dispose(); });
@@ -289,18 +286,25 @@ export function createInspectorViewer({ renderer, materials, host, onExit }) {
     if (onExit) onExit();
   }
 
+  // دعم زر Escape للإغلاق
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && isOpen) {
+      close();
+    }
+  });
+
   function tick() {
     if (!isOpen) return;
     animFrame = requestAnimationFrame(tick);
 
-    const now = performance.now() * 0.001;
+    const w = host.clientWidth;
+    const h = host.clientHeight;
+    if (w < 2 || h < 2) return;
 
-    // تدوير تلقائي بطيء
     if (autoRotate && !isDragging) {
       targetRotY += 0.004;
     }
 
-    // تجانس القصور الذاتي (Damping)
     rotX += (targetRotX - rotX) * 0.1;
     rotY += (targetRotY - rotY) * 0.1;
     cameraDist += (targetCameraDist - cameraDist) * 0.1;
@@ -310,7 +314,6 @@ export function createInspectorViewer({ renderer, materials, host, onExit }) {
       currentMesh.rotation.x = rotX;
     }
 
-    // تحديث مؤثرات التشغيل إن كان يعمل داخل الفحص
     if (isRunning && currentFx) {
       if (currentFx.wheels) currentFx.wheels.forEach(w => { w.rotation.x += 0.35; });
       if (currentFx.drum) currentFx.drum.rotation.z += 0.4;
@@ -323,7 +326,7 @@ export function createInspectorViewer({ renderer, materials, host, onExit }) {
       if (currentFx.juice) currentFx.juice.visible = true;
     }
 
-    inspectCamera.aspect = host.clientWidth / host.clientHeight;
+    inspectCamera.aspect = w / h;
     inspectCamera.updateProjectionMatrix();
 
     inspectCamera.position.x = Math.sin(rotY * 0.2) * 0.8;

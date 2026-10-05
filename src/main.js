@@ -44,6 +44,22 @@ let inQuizChallengeMode = false;
 let currentQuizDevIndex = 0;
 const history = [], counts = new Map(), app = document.querySelector('#app');
 
+function showToast(message, duration = 3500) {
+  let toast = $('#lab-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'lab-toast';
+    toast.className = 'lab-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('visible');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.classList.remove('visible');
+  }, duration);
+}
+
 async function toggleCameraPassthrough(btn) {
   const videoEl = $('#camera-passthrough-video');
   if (!videoEl) return;
@@ -55,46 +71,64 @@ async function toggleCameraPassthrough(btn) {
     }
     videoEl.srcObject = null;
     videoEl.style.display = 'none';
+    videoEl.style.transform = '';
     isCameraPassthroughActive = false;
     scene?.setCameraPassthrough?.(false);
     if (btn) btn.innerHTML = '📷 <span>كاميرا الجهاز</span>';
+    showToast(state.language === 'ar' ? 'تم العودة إلى البيئة الافتراضية' : 'Switched to 3D virtual environment');
   } else {
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert(state.language === 'ar' ? 'كاميرا الجهاز غير مدعومة في هذا المتصفح' : 'Camera not supported');
+        showToast(state.language === 'ar' ? 'كاميرا الجهاز غير مدعومة في هذا المتصفح' : 'Camera not supported');
         return;
       }
       
       let stream = null;
+      let isFrontCamera = false;
       try {
+        // First try rear camera explicitly
         stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { exact: 'environment' } },
           audio: false
         });
       } catch {
-        const idealStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } },
-          audio: false
-        });
-        const track = idealStream.getVideoTracks()[0];
-        const settings = track.getSettings ? track.getSettings() : {};
-        if (settings.facingMode === 'user') {
-          track.stop();
-          throw new Error('Rear camera not available');
+        try {
+          // Then try ideal rear camera
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: 'environment' } },
+            audio: false
+          });
+          const track = stream.getVideoTracks()[0];
+          const settings = track?.getSettings ? track.getSettings() : {};
+          if (settings.facingMode === 'user') {
+            isFrontCamera = true;
+          }
+        } catch {
+          // Fallback to any available video camera (e.g. PC webcam)
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+          });
+          isFrontCamera = true;
         }
-        stream = idealStream;
       }
 
       activeVideoStream = stream;
       videoEl.srcObject = stream;
       videoEl.style.display = 'block';
+      if (isFrontCamera) {
+        videoEl.style.transform = 'scaleX(-1)';
+      } else {
+        videoEl.style.transform = '';
+      }
       await videoEl.play();
       isCameraPassthroughActive = true;
       scene?.setCameraPassthrough?.(true);
       if (btn) btn.innerHTML = '🎨 <span>بيئة افتراضية</span>';
+      showToast(state.language === 'ar' ? 'تم تفعيل كاميرا الجهاز بنجاح' : 'Camera passthrough enabled');
     } catch (err) {
-      console.warn('Rear camera access failed:', err);
-      alert(state.language === 'ar' ? 'الكاميرا الخلفية غير متاحة أو تم رفض الإذن. سيبقى المشهد في البيئة الافتراضية.' : 'Rear camera not available.');
+      console.warn('Camera access failed:', err);
+      showToast(state.language === 'ar' ? 'تعذر الوصول إلى كاميرا الجهاز. تأكد من منح الإذن.' : 'Camera access failed.');
       isCameraPassthroughActive = false;
       scene?.setCameraPassthrough?.(false);
       if (btn) btn.innerHTML = '📷 <span>كاميرا الجهاز</span>';
@@ -257,110 +291,112 @@ function shell() {
   const isDebugAudio = typeof window !== 'undefined' && window.location.search.includes('debugAudio=1');
 
   app.innerHTML = `
-   <header class="header compact-header">
-     <a class="brand" href="${navBase}index.html" aria-label="${c.brand}">
-       <span class="brand-mark">${icon('bolt')}</span>
-       <span><strong>${c.brand} 3D</strong><small>${c.tagline}</small></span>
-     </a>
-     <nav class="top-actions" aria-label="${c.settings}">
-       <a href="${navBase}index.html" class="nav-link-btn" title="الرئيسية">🏠 <span>الرئيسية</span></a>
-       <a href="${navBase}static-lab.html" class="nav-link-btn" title="النشاط الثابت">🔍 <span>الثابت</span></a>
-       ${button('sound', state.muted ? c.muted : c.sound, state.muted ? 'muted' : 'volume', 'quiet', 'id="sound-button"')}
-       ${button('compare', c.compare, 'book', 'quiet', 'id="comparison-button" title="جدول الاكتشافات والتحدي"')}
-       ${button('chat', c.chat, 'chat', 'quiet', 'id="chat-toggle" aria-expanded="false" title="تحدث مع شرارة"')}
-       ${button('settings', c.settings, 'settings', 'icon-only', 'title="الإعدادات"')}
-     </nav>
-   </header>
+   <div class="lab-root">
+     <header class="header compact-header">
+       <a class="brand" href="${navBase}index.html" aria-label="${c.brand}">
+         <span class="brand-mark">${icon('bolt')}</span>
+         <span><strong>${c.brand} 3D</strong><small>${c.tagline}</small></span>
+       </a>
+       <nav class="top-actions" aria-label="${c.settings}">
+         <a href="${navBase}index.html" class="nav-link-btn" title="الرئيسية">🏠 <span>الرئيسية</span></a>
+         <a href="${navBase}static-lab.html" class="nav-link-btn" title="النشاط الثابت">🔍 <span>الثابت</span></a>
+         ${button('sound', state.muted ? c.muted : c.sound, state.muted ? 'muted' : 'volume', 'quiet', 'id="sound-button"')}
+         ${button('compare', c.compare, 'book', 'quiet', 'id="comparison-button" title="جدول الاكتشافات والتحدي"')}
+         ${button('chat', c.chat, 'chat', 'quiet', 'id="chat-toggle" aria-expanded="false" title="تحدث مع شرارة"')}
+         ${button('settings', c.settings, 'settings', 'icon-only', 'title="الإعدادات"')}
+       </nav>
+     </header>
 
-   <main class="lab-main-100vh">
-     <div class="workspace">
-       <div class="scene-wrap">
+     <main class="lab-main-100vh">
+       <div class="stage scene-wrap">
          <video id="camera-passthrough-video" autoplay playsinline muted style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; display:none; pointer-events:none;"></video>
          <div id="scene" role="img" aria-label="${c.lab}"></div>
 
          <!-- كاميرا الكشف الافتتاحية (Viewfinder HUD) -->
-         <div class="viewfinder-hud" id="viewfinder-hud">
-           <div class="viewfinder-corner tl"></div>
-           <div class="viewfinder-corner tr"></div>
-           <div class="viewfinder-corner bl"></div>
-           <div class="viewfinder-corner br"></div>
-           <div class="scan-laser-line"></div>
+         <div class="hud-layer">
+           <div class="viewfinder-hud" id="viewfinder-hud">
+             <div class="viewfinder-corner tl"></div>
+             <div class="viewfinder-corner tr"></div>
+             <div class="viewfinder-corner bl"></div>
+             <div class="viewfinder-corner br"></div>
+             <div class="scan-laser-line"></div>
 
-           <div class="viewfinder-top-bar">
-             <span class="viewfinder-status-tag">
-               <i class="hud-pulse-dot"></i>
-               <span id="viewfinder-status-text">كاميرا الكشف: ${currentIds.length} أجهزة</span>
-             </span>
-             <div class="viewfinder-actions">
-               <button type="button" class="viewfinder-btn" data-action="togglePassthrough" id="camera-passthrough-btn" title="تبديل بين كاميرا الجوال والخلفية الافتراضية">
-                 📷 <span>كاميرا الجهاز</span>
-               </button>
-               <button type="button" class="viewfinder-btn" data-action="skipIntro" title="تخطي الحركة الافتتاحية">
-                 ⏩ <span>تخطي</span>
-               </button>
-             </div>
-           </div>
-         </div>
-
-         <div class="scene-top">
-           <span class="room-tag"><i></i>${c.available}</span>
-           <div class="camera-tools">
-             ${button('zoomIn', c.zoomIn, 'plus', 'icon-only')}
-             ${button('zoomOut', c.zoomOut, 'minus', 'icon-only')}
-             ${button('resetView', c.resetView, 'refresh', 'icon-only')}
-           </div>
-         </div>
-
-         <!-- بطاقات الأجهزة في المشهد لتأطير 1-4 والتوقع السريع -->
-         <div id="scene-labels" class="scene-labels-stack">
-           ${currentIds.map((id, index) => {
-             const pred = state.predictionByDevice?.[id];
-             return `
-               <div class="scene-label-stack-item" id="label-${id}">
-                 <button class="label-main-tap" data-action="device" data-device="${id}" data-target="${id}">
-                   <span class="label-status-dot" id="dot-${id}">○</span>
-                   <strong class="label-name">#${index + 1} ${shortName(id)}</strong>
-                   <span class="label-badge badge-off" id="badge-${id}">متوقف</span>
+             <div class="viewfinder-top-bar">
+               <span class="viewfinder-status-tag">
+                 <i class="hud-pulse-dot"></i>
+                 <span id="viewfinder-status-text">كاميرا الكشف: ${currentIds.length} أجهزة</span>
+               </span>
+               <div class="viewfinder-actions">
+                 <button type="button" class="viewfinder-btn" data-action="togglePassthrough" id="camera-passthrough-btn" title="تبديل بين كاميرا الجوال والخلفية الافتراضية">
+                   📷 <span>كاميرا الجهاز</span>
                  </button>
-                 <div class="label-prediction-btns">
-                   <button type="button" class="label-pred-btn ${pred === true ? 'active-battery' : ''}" data-action="quickPredict" data-device="${id}" data-val="battery" title="أتوقع: بطارية جافة">🔋</button>
-                   <button type="button" class="label-pred-btn ${pred === false ? 'active-mains' : ''}" data-action="quickPredict" data-device="${id}" data-val="mains" title="أتوقع: كهرباء المنزل">🔌</button>
-                 </div>
+                 <button type="button" class="viewfinder-btn" data-action="skipIntro" title="تخطي الحركة الافتتاحية">
+                   ⏩ <span>تخطي</span>
+                 </button>
                </div>
-             `;
-           }).join('')}
-         </div>
-
-         <div id="fallback-panel" hidden>
-           <div class="fallback-illustration">${icon('battery')}${icon('car')}${icon('radio')}${icon('fridge')}</div>
-           <h2>${c.fallback}</h2>
-           <p>${c.guide}</p>
-         </div>
-
-         <div class="scene-caption">${icon('hand')}<span id="scene-guide">${c.guide}</span></div>
-
-         <!-- مقياس القدرة المدمج (Power Meter Widget) -->
-         <div class="power-meter-container" id="power-meter-widget" hidden style="display:none;">
-           <div class="power-meter-header">
-             <span class="power-meter-title">⚡ مقياس مقارنة القدرة الكهربائية</span>
-             <button type="button" class="power-meter-close" data-action="closePowerMeter">✕</button>
-           </div>
-           <div class="power-meter-bars" id="power-meter-bars">
-             <div class="power-meter-row">
-               <span class="power-meter-label">🔋 طاقة البطارية:</span>
-               <div class="power-meter-track"><div class="power-meter-fill battery-fill"></div></div>
-               <span class="power-meter-val">1.5V – 3V (~2 واط)</span>
-             </div>
-             <div class="power-meter-row">
-               <span class="power-meter-label" id="power-meter-dev-label">🔌 حاجة الجهاز:</span>
-               <div class="power-meter-track"><div class="power-meter-fill device-fill"></div></div>
-               <span class="power-meter-val" id="power-meter-dev-val">220V (~2000 واط)</span>
              </div>
            </div>
-         </div>
 
-         
-          <!-- أدوات الطاقة المباشرة -->
+           <div class="scene-top">
+             <span class="room-tag"><i></i>${c.available}</span>
+             <div class="camera-tools">
+               ${button('zoomIn', c.zoomIn, 'plus', 'icon-only')}
+               ${button('zoomOut', c.zoomOut, 'minus', 'icon-only')}
+               ${button('resetView', c.resetView, 'refresh', 'icon-only')}
+             </div>
+           </div>
+
+           <div id="fallback-panel" hidden>
+             <div class="fallback-illustration">${icon('battery')}${icon('car')}${icon('radio')}${icon('fridge')}</div>
+             <h2>${c.fallback}</h2>
+             <p>${c.guide}</p>
+           </div>
+
+           <div class="scene-caption">${icon('hand')}<span id="scene-guide">${c.guide}</span></div>
+
+           <!-- مقياس القدرة المدمج (Power Meter Widget) -->
+           <div class="power-meter-container" id="power-meter-widget" hidden style="display:none;">
+             <div class="power-meter-header">
+               <span class="power-meter-title">⚡ مقياس مقارنة القدرة الكهربائية</span>
+               <button type="button" class="power-meter-close" data-action="closePowerMeter">✕</button>
+             </div>
+             <div class="power-meter-bars" id="power-meter-bars">
+               <div class="power-meter-row">
+                 <span class="power-meter-label">🔋 طاقة البطارية:</span>
+                 <div class="power-meter-track"><div class="power-meter-fill battery-fill"></div></div>
+                 <span class="power-meter-val">1.5V – 3V (~2 واط)</span>
+               </div>
+               <div class="power-meter-row">
+                 <span class="power-meter-label" id="power-meter-dev-label">🔌 حاجة الجهاز:</span>
+                 <div class="power-meter-track"><div class="power-meter-fill device-fill"></div></div>
+                 <span class="power-meter-val" id="power-meter-dev-val">220V (~2000 واط)</span>
+               </div>
+             </div>
+           </div>
+
+           <div id="intro" class="intro-card">
+             <span class="intro-bolt">${icon('bolt')}</span>
+             <h2>${c.welcome}</h2>
+             <p>${c.intro}</p>
+             ${button('start', c.start, 'arrow', 'primary')}
+           </div>
+
+           <div id="tutorial" class="tutorial-card" hidden>
+             <div class="tutorial-path">${icon('battery')}<span>······</span>${icon('car')}</div>
+             <h2>${c.tutorialTitle}</h2>
+             <p>${c.tutorial}</p>
+             ${button('doneTutorial', c.doneTutorial, 'check', 'primary')}
+             ${button('doneTutorial', c.skipTutorial, null, 'text-button')}
+           </div>
+         </div>
+       </div>
+
+       <!-- صف لوحة التحكم السفلي: بطاقات 1x4 + أدوات الطاقة + شريط التغذية -->
+       <div class="control-panel">
+         <!-- بطاقات الأجهزة في شريط أفقي 1x4 متجاوب -->
+         <div id="scene-labels" class="device-strip"></div>
+
+         <!-- أدوات الطاقة المباشرة -->
          <div class="table-power-dock" id="table-power-dock">
            <button id="battery-button" data-action="pick" class="dock-power-btn battery-dock-btn" aria-pressed="false" title="اسحب البطارية لأي جهاز لتجربتها">
              <span class="power-emoji">🔋</span>
@@ -372,32 +408,37 @@ function shell() {
            </button>
          </div>
 
-         <div id="intro" class="intro-card">
-           <span class="intro-bolt">${icon('bolt')}</span>
-           <h2>${c.welcome}</h2>
-           <p>${c.intro}</p>
-           ${button('start', c.start, 'arrow', 'primary')}
-         </div>
+         <!-- شريط التغذية الراجعة الحي والمباشر أسفل الطاولة -->
+         <section class="bottom-feedback-bar" id="bottom-feedback-bar" aria-live="polite">
+           <div class="feedback-avatar-wrap">
+             <div class="feedback-spark-avatar">⚡</div>
+             <div class="feedback-spark-pulse"></div>
+           </div>
+           <div class="feedback-content">
+             <div class="feedback-header-row">
+               <span class="feedback-status-pill" id="live-feedback-pill">⚡ جاهز للاستكشاف</span>
+               <strong class="feedback-device-tag" id="live-feedback-device">اسحب بطارية 🔋 أو فيشة 🔌 إلى أي جهاز</strong>
+               <div class="active-power-summary" id="active-power-summary">
+                 <span class="active-count-chip" id="active-count-chip">🔋 المشغلة: <b id="running-count-num">0</b> / 4</span>
+               </div>
+             </div>
+             <p class="live-feedback-text" id="live-feedback-text">${state.message || c.intro}</p>
 
-         <div id="tutorial" class="tutorial-card" hidden>
-           <div class="tutorial-path">${icon('battery')}<span>······</span>${icon('car')}</div>
-           <h2>${c.tutorialTitle}</h2>
-           <p>${c.tutorial}</p>
-           ${button('doneTutorial', c.doneTutorial, 'check', 'primary')}
-           ${button('doneTutorial', c.skipTutorial, null, 'text-button')}
-         </div>
+             <!-- عناصر أسئلة الاختبار المباشرة داخل المشهد -->
+             <div id="in-scene-quiz-bar" style="display:none; margin-top:8px; gap:8px; align-items:center; flex-wrap:wrap;"></div>
+           </div>
+           <div class="feedback-bar-actions">
+             <button type="button" class="bar-report-btn" data-action="openDetectiveReport" title="عرض لوحة تقرير المحقق">
+               📊 <span>تقرير المحقق</span>
+             </button>
+             <button type="button" class="bar-reset-btn" data-action="reset" title="توليد 4 أجهزة عشوائية جديدة">
+               🔄 <span>أجهزة جديدة</span>
+             </button>
+           </div>
+         </section>
        </div>
-
-       <!-- شريط التغذية الراجعة الحي والمباشر أسفل الطاولة -->
-       <section class="bottom-feedback-bar" id="bottom-feedback-bar" aria-live="polite">
-         <div class="feedback-avatar-wrap">
-           <div class="feedback-spark-avatar">⚡</div>
-           <div class="feedback-spark-pulse"></div>
-         </div>
-         <div class="feedback-content">
-           <div class="feedback-header-row">
-             <span class="feedback-status-pill" id="live-feedback-pill">⚡ جاهز للاستكشاف</span>
-             <strong class="feedback-device-tag" id="live-feedback-device">اسحب بطارية 🔋 أو فيشة 🔌 إلى أي جهاز</strong>
+     </main>
+   </div>
              <div class="active-power-summary" id="active-power-summary">
                <span class="active-count-chip" id="active-count-chip">🔋 المشغلة: <b id="running-count-num">0</b> / 4</span>
              </div>
@@ -808,14 +849,14 @@ function renderSceneLabels() {
     const dotText = isRunning ? '⚡' : '○';
 
     return `
-      <div class="scene-label-plinth-chip ${isRunning ? 'running' : ''}" id="label-${id}">
+      <div class="device-col-card ${isRunning ? 'running' : ''}" id="label-${id}" data-target="${id}">
         <div class="label-chip-header">
           <span class="label-status-dot" id="dot-${id}">${dotText}</span>
           <strong class="label-name">#${index + 1} ${shortName(id)}</strong>
           <span class="${badgeClass}" id="badge-${id}">${badgeText}</span>
         </div>
         <div class="label-chip-actions">
-          <button type="button" class="label-inspect-btn" data-action="inspect" data-device="${id}" title="فحص 3D في الاستوديو">🔍 فحص 3D</button>
+          <button type="button" class="label-inspect-btn dev-inspect-btn" data-action="inspect" data-device="${id}" title="فحص 3D وتدوير الجهاز">🔍 فحص 3D</button>
           <div class="label-prediction-btns">
             <button type="button" class="label-pred-btn ${pred === true ? 'active-battery' : ''}" data-action="quickPredict" data-device="${id}" data-val="battery" title="أتوقع: بطارية جافة">🔋</button>
             <button type="button" class="label-pred-btn ${pred === false ? 'active-mains' : ''}" data-action="quickPredict" data-device="${id}" data-val="mains" title="أتوقع: كهرباء المنزل">🔌</button>
@@ -1406,13 +1447,7 @@ async function loadScene() {
       onBattery: e => toolDown('battery', e),
       onMains: e => toolDown('mains', e),
       onDevice: tryDevice,
-      projectLabel: (id, x, y) => {
-        const el = document.getElementById('label-' + id);
-        if (el) {
-          el.style.left = `${x}px`;
-          el.style.top = `${y}px`;
-        }
-      }
+      projectLabel: () => {}
     });
     if (scene) {
       dispatch({type: 'READY', sessionRevision: rev});
@@ -1429,8 +1464,46 @@ async function loadScene() {
   }
 }
 
+function checkLayoutDebug() {
+  if (typeof window === 'undefined' || !window.location.search.includes('debug=layout')) return;
+
+  setTimeout(() => {
+    const root = $('.lab-root') || $('#app');
+    const stage = $('.stage') || $('.scene-wrap');
+    const strip = $('.device-strip') || $('#scene-labels');
+    const dock = $('.table-power-dock');
+    const cards = document.querySelectorAll('.device-col-card, .scene-label-plinth-chip');
+    const buttons = document.querySelectorAll('button:not([hidden])');
+
+    const sub44Btns = Array.from(buttons).filter(b => {
+      const rect = b.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0 && (rect.height < 43.5 || rect.width < 43.5);
+    });
+
+    console.group('🛠️ [Sharara Layout Contract Debugger]');
+    console.log('Root Bounds:', root?.getBoundingClientRect());
+    console.log('Stage Canvas Bounds:', stage?.getBoundingClientRect());
+    console.log('Device Strip Bounds (1x4):', strip?.getBoundingClientRect());
+    console.log('Cards Count:', cards.length);
+    console.log('Dock Bounds:', dock?.getBoundingClientRect());
+    console.log('Sub-44px Touch Targets Count:', sub44Btns.length);
+    if (sub44Btns.length) {
+      console.warn('Elements under 44px:', sub44Btns.map(b => ({
+        text: b.innerText.trim(),
+        action: b.dataset.action,
+        w: b.getBoundingClientRect().width,
+        h: b.getBoundingClientRect().height
+      })));
+    } else {
+      console.log('✅ All active buttons meet the 44px touch target contract!');
+    }
+    console.groupEnd();
+  }, 1000);
+}
+
 shell();
 loadScene();
 resetIdle();
+checkLayoutDebug();
 
 Object.defineProperty(window, 'labDiagnostics', {value: () => ({state: structuredClone(state), render: scene?.stats() || null}), writable: false});

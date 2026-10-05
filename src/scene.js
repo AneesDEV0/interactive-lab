@@ -48,6 +48,13 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
   host.prepend(renderer.domElement);
   renderer.domElement.setAttribute('aria-hidden', 'true');
 
+  // تعيين الحجم الأولي فقط إن كان الحجم صالحاً (> 1px)
+  const initW = host.clientWidth;
+  const initH = host.clientHeight;
+  if (initW >= 2 && initH >= 2) {
+    renderer.setSize(initW, initH, false);
+  }
+
   // ─── الإضاءة الاحترافية الموزعة للمشهد ───
   const ambient = new THREE.HemisphereLight(0xffffff, 0xb0cdd4, 1.9);
   scene.add(ambient);
@@ -254,16 +261,6 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     });
   }
 
-  // حلقة هالة التوجيه
-  const targetRing = new THREE.Mesh(
-    new THREE.RingGeometry(0.85, 1.05, 32),
-    new THREE.MeshBasicMaterial({ color: 0xffb703, side: THREE.DoubleSide, transparent: true, opacity: 0.85 })
-  );
-  targetRing.rotation.x = -Math.PI / 2;
-  targetRing.position.y = PLINTH_TOP_Y + 0.02;
-  targetRing.visible = false;
-  scene.add(targetRing);
-
   // ─── إدارة المنصات الأربع وتطبيع الأجهزة ───
   const plinths = [];
   for (let i = 0; i < 4; i++) {
@@ -287,7 +284,6 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
 
     devIds.forEach((id, idx) => {
       const meshObj = createDevice3D(id, materials);
-      // تطبيع الحجم ووضعه فوق منصته الدائرية تماماً
       normalizeDeviceOnPlinth(meshObj, 1.35);
       const xPos = PLINTH_X_SLOTS[idx] || 0;
       meshObj.position.set(xPos, PLINTH_TOP_Y, 0);
@@ -319,8 +315,11 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
 
   // ─── ضبط الكاميرا التلقائي (fitToDevices) ───
   function cameraUpdate() {
-    const isPortrait = host.clientHeight > host.clientWidth * 1.05;
-    const frustum = calculateCameraFrustum(host.clientWidth, host.clientHeight, zoom, isPortrait);
+    const w = host.clientWidth;
+    const h = host.clientHeight;
+    if (w < 2 || h < 2) return;
+    const isPortrait = h > w * 1.05;
+    const frustum = calculateCameraFrustum(w, h, zoom, isPortrait);
     camera.left = frustum.left;
     camera.right = frustum.right;
     camera.top = frustum.top;
@@ -346,13 +345,20 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     cameraUpdate();
   }
 
-  const observer = new ResizeObserver(() => {
+  function handleResize() {
     if (dead) return;
-    renderer.setSize(host.clientWidth, host.clientHeight);
+    const w = host.clientWidth;
+    const h = host.clientHeight;
+    if (w < 2 || h < 2) return;
+    renderer.setSize(w, h, false);
     cameraUpdate();
     fitToDevices({ animate: false });
-  });
+  }
+
+  const observer = new ResizeObserver(handleResize);
   observer.observe(host);
+  window.addEventListener('resize', handleResize, { passive: true });
+  window.addEventListener('orientationchange', handleResize, { passive: true });
 
   // ─── تفاعل السحب لتدوير الطاولة 360° ───
   let isPointerDown = false;
@@ -428,7 +434,11 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     frame = requestAnimationFrame(tick);
     renderCount++;
 
-    if (inspector.isOpen()) return;
+    if (document.hidden || inspector.isOpen()) return;
+
+    const w = host.clientWidth;
+    const h = host.clientHeight;
+    if (w < 2 || h < 2) return;
 
     const s = getState();
     const t = now * 0.001;
@@ -454,10 +464,6 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     currentLookAt.lerp(targetLookAt, 0.08);
     camera.position.copy(currentCamPos);
     camera.lookAt(currentLookAt);
-
-    if (targetRing.visible) {
-      targetRing.scale.setScalar(1 + Math.sin(t * 8) * 0.06);
-    }
 
     updateSparks(now);
 
@@ -635,13 +641,15 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
           break;
       }
 
-      // إسقاط موقع كل منصة على شاشة الـ DOM لعرض الشريحة تحتها مباشرة
-      const v = objects[id].position.clone();
-      v.y -= 0.15;
-      v.project(camera);
-      const screenX = ((v.x + 1) * host.clientWidth) / 2;
-      const screenY = ((-v.y + 1) * host.clientHeight) / 2;
-      projectLabel(id, screenX, screenY);
+      // إسقاط موقع كل منصة على شاشة الـ DOM
+      if (projectLabel) {
+        const v = objects[id].position.clone();
+        v.y -= 0.15;
+        v.project(camera);
+        const screenX = ((v.x + 1) * w) / 2;
+        const screenY = ((-v.y + 1) * h) / 2;
+        projectLabel(id, screenX, screenY);
+      }
     }
 
     renderer.render(scene, camera);
@@ -652,15 +660,9 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
   return {
     at,
     setDragWorld(tool, x, y) {
-      const d = at(x, y);
-      if (d && objects[d]) {
-        targetRing.position.set(objects[d].position.x, PLINTH_TOP_Y + 0.02, objects[d].position.z);
-        targetRing.visible = true;
-      } else {
-        targetRing.visible = false;
-      }
+      // إشارة بدون حلقات صفراء
     },
-    clearDragWorld() { targetRing.visible = false; },
+    clearDragWorld() {},
     triggerSparks,
     fitToDevices,
     playRevealIntro() {
@@ -686,22 +688,11 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
     pointTo(deviceId) {
       if (!deviceId || !objects[deviceId]) {
         robotArmPivot.rotation.z = 0.2;
-        targetRing.visible = false;
         return;
       }
-      const devPos = objects[deviceId].position;
       robotArmPivot.rotation.z = -0.65;
-      targetRing.position.set(devPos.x, PLINTH_TOP_Y + 0.02, devPos.z);
-      targetRing.visible = true;
     },
-    showTargetRing(deviceId) {
-      if (!deviceId || !objects[deviceId]) {
-        targetRing.visible = false;
-      } else {
-        targetRing.position.set(objects[deviceId].position.x, PLINTH_TOP_Y + 0.02, objects[deviceId].position.z);
-        targetRing.visible = true;
-      }
-    },
+    showTargetRing(deviceId) {},
     zoomIn() { zoom = Math.min(1.8, zoom + 0.15); cameraUpdate(); },
     zoomOut() { zoom = Math.max(0.7, zoom - 0.15); cameraUpdate(); },
     reset() {
@@ -720,6 +711,8 @@ export async function createLabScene(host, { getState, dispatch, onDevice, onBat
       dead = true;
       cancelAnimationFrame(frame);
       observer.disconnect();
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
       inspector.dispose();
       disposeMaterials();
       scene.traverse(o => {

@@ -54,6 +54,33 @@ export function detectInAppBrowser() {
   return /FBAN|FBAV|Instagram|Line|WhatsApp|Telegram|TikTok|wv|Snapchat/i.test(ua);
 }
 
+
+// ─── كاش والتحقق من وجود ملفات MP3 المسجلة ───
+let audioManifest = null;
+let manifestChecked = false;
+let manifestWarnLogged = false;
+
+async function checkAudioManifest() {
+  if (manifestChecked) return audioManifest;
+  manifestChecked = true;
+  try {
+    const manifestUrl = new URL('./audio/ar/manifest.json', import.meta.url).href;
+    const res = await fetch(manifestUrl);
+    if (res.ok) {
+      audioManifest = await res.json();
+    }
+  } catch {}
+  if (!audioManifest && !manifestWarnLogged && typeof window !== 'undefined') {
+    manifestWarnLogged = true;
+    console.warn('[Audio Engine] ملفات الصوت المسجلة غير موجودة، الاعتماد على صوت الجهاز (TTS).');
+  }
+  return audioManifest;
+}
+
+if (typeof window !== 'undefined') {
+  checkAudioManifest();
+}
+
 // ─── المشغل الصوتي الموحد (Singleton HTMLAudioElement) للطبقة 1 ───
 let audioSingleton = null;
 let currentPlaybackToken = 0;
@@ -248,12 +275,11 @@ export async function speakKey(key, fallbackText = '', options = {}) {
   const audioFilePath = entry ? entry.file : null;
   const spokenText = fallbackText || (entry ? entry.text : key);
 
-  // ─── الطبقة 1: تشغيل ملف MP3 المسجل ───
-  if (audioFilePath) {
+  // ─── الطبقة 1: تشغيل ملف MP3 المسجل (فقط في حال توفره في الـ manifest) ───
+  if (audioFilePath && audioManifest && audioManifest[key]) {
     try {
       const audio = getAudioSingleton();
       if (audio) {
-        // مسار محدد ديناميكياً باستخدام import.meta.url
         const resolvedPath = new URL(audioFilePath, import.meta.url).href;
         audio.src = resolvedPath;
         const playPromise = audio.play();
@@ -264,6 +290,27 @@ export async function speakKey(key, fallbackText = '', options = {}) {
             audio.pause();
             return false;
           }
+          return true;
+        }
+      }
+    } catch (err) {
+      lastAudioError = err?.message || 'Tier-1 fallback';
+    }
+  }
+
+  // ─── الطبقة 2: تشغيل الاحتياط عبر Web Speech API ───
+  const ttsSuccess = speakTts(spokenText, 'ar', options, token);
+  if (ttsSuccess) return true;
+
+  // ─── الطبقة 3: إشعار النظام بحالة الفشل للتعامل معها بصرياً ───
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('audio-playback-failed', {
+      detail: { key, text: spokenText, inApp: detectInAppBrowser() }
+    }));
+  }
+
+  return false;
+}
           return true;
         }
       }

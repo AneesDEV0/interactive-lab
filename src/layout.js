@@ -12,7 +12,7 @@ export const PLINTH_HEIGHT = 0.12;
 export const PLINTH_TOP_Y = TABLE_SURFACE_Y + PLINTH_HEIGHT;
 
 /**
- * إنشاء منصة عرض دائرية مصقولة (Turntable Plinth) برقم واسم وظل تلامس
+ * إنشاء منصة عرض دائرية مصقولة (Turntable Plinth) برقم وظل تلامس ناعم
  */
 export function createPlinth(slotIndex, materials) {
   const group = new THREE.Group();
@@ -26,8 +26,8 @@ export function createPlinth(slotIndex, materials) {
   shadowCanvas.width = 128; shadowCanvas.height = 128;
   const sCtx = shadowCanvas.getContext('2d');
   const grad = sCtx.createRadialGradient(64, 64, 10, 64, 64, 60);
-  grad.addColorStop(0, 'rgba(15, 23, 42, 0.45)');
-  grad.addColorStop(0.6, 'rgba(15, 23, 42, 0.18)');
+  grad.addColorStop(0, 'rgba(15, 23, 42, 0.35)');
+  grad.addColorStop(0.6, 'rgba(15, 23, 42, 0.12)');
   grad.addColorStop(1, 'rgba(15, 23, 42, 0)');
   sCtx.fillStyle = grad;
   sCtx.fillRect(0, 0, 128, 128);
@@ -45,32 +45,32 @@ export function createPlinth(slotIndex, materials) {
   group.add(shadowMesh);
 
   // 2. جسم المنصة الدائري اللامع
-  const plinthGeo = new THREE.CylinderGeometry(0.85, 0.90, PLINTH_HEIGHT, 40);
+  const plinthGeo = new THREE.CylinderGeometry(0.85, 0.90, PLINTH_HEIGHT, 36);
   const plinthMesh = new THREE.Mesh(plinthGeo, materials.plinthBase);
   plinthMesh.position.y = PLINTH_HEIGHT / 2;
   plinthMesh.receiveShadow = true;
   group.add(plinthMesh);
 
-  // 3. حافة دائرية معدنية/تركوازية أنيقة
-  const rimGeo = new THREE.TorusGeometry(0.86, 0.022, 16, 40);
-  const rimMesh = new THREE.Mesh(rimGeo, materials.plinthRim);
+  // 3. حافة دائرية معدنية أنيقة
+  const rimGeo = new THREE.TorusGeometry(0.86, 0.018, 12, 36);
+  const rimMesh = new THREE.Mesh(rimGeo, materials.custom(0x0f766e, { roughness: 0.3 }));
   rimMesh.rotation.x = Math.PI / 2;
   rimMesh.position.y = PLINTH_HEIGHT;
   group.add(rimMesh);
 
-  // 4. رقم المنصة الذهبي البارز في الأمام (1 - 4)
+  // 4. رقم المنصة البارز في الأمام (1 - 4)
   const numCanvas = document.createElement('canvas');
   numCanvas.width = 128; numCanvas.height = 128;
   const nCtx = numCanvas.getContext('2d');
   nCtx.fillStyle = '#0f172a';
   nCtx.beginPath();
-  nCtx.arc(64, 64, 52, 0, Math.PI * 2);
+  nCtx.arc(64, 64, 50, 0, Math.PI * 2);
   nCtx.fill();
-  nCtx.lineWidth = 6;
+  nCtx.lineWidth = 5;
   nCtx.strokeStyle = '#2ec4b6';
   nCtx.stroke();
-  nCtx.fillStyle = '#ffb703';
-  nCtx.font = 'bold 64px Arial';
+  nCtx.fillStyle = '#f8fafc';
+  nCtx.font = 'bold 60px Arial';
   nCtx.textAlign = 'center';
   nCtx.textBaseline = 'middle';
   nCtx.fillText(String(slotIndex + 1), 64, 66);
@@ -90,7 +90,6 @@ export function createPlinth(slotIndex, materials) {
  * تطبيع الحجم وضبط قاعدة المجسم على سطح المنصة بدقة (Box3 Normalization)
  */
 export function normalizeDeviceOnPlinth(deviceGroup, targetUnitSize = 1.35) {
-  // حساب الصندوق المحيط الفعلي للمجسم
   deviceGroup.updateMatrixWorld(true);
   const box = new THREE.Box3().setFromObject(deviceGroup);
   const size = new THREE.Vector3();
@@ -103,7 +102,6 @@ export function normalizeDeviceOnPlinth(deviceGroup, targetUnitSize = 1.35) {
     const scaleFactor = targetUnitSize / maxDim;
     deviceGroup.scale.multiplyScalar(scaleFactor);
 
-    // إعادة حساب بعد التكبير لضبط المركز والارتفاع
     deviceGroup.updateMatrixWorld(true);
     const scaledBox = new THREE.Box3().setFromObject(deviceGroup);
     const scaledSize = new THREE.Vector3();
@@ -111,7 +109,6 @@ export function normalizeDeviceOnPlinth(deviceGroup, targetUnitSize = 1.35) {
     const scaledCenter = new THREE.Vector3();
     scaledBox.getCenter(scaledCenter);
 
-    // محاذاة أفقية للمركز ومحاذاة القاع تماماً على y = 0
     deviceGroup.position.x -= scaledCenter.x;
     deviceGroup.position.z -= scaledCenter.z;
     deviceGroup.position.y -= scaledBox.min.y;
@@ -125,15 +122,12 @@ export function normalizeDeviceOnPlinth(deviceGroup, targetUnitSize = 1.35) {
  */
 export function calculateCameraFrustum(hostWidth, hostHeight, zoom = 1.0, isPortrait = false) {
   const aspect = hostWidth / hostHeight;
-  // عرض المنصات الأربع مع هوامش أمان 6% على الجانبين
   const totalTableWidth = 7.6;
   let frustumSize;
 
   if (isPortrait) {
-    // في الشاشات الرأسية للجوالات، نضمن أن العرض يغطي المنصات كاملة دون قص
-    frustumSize = (totalTableWidth / aspect) * 1.12 / zoom;
+    frustumSize = (totalTableWidth / aspect) * 1.15 / zoom;
   } else {
-    // في الشاشات العرضية
     frustumSize = 9.8 / zoom;
   }
 
