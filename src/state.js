@@ -1,4 +1,9 @@
-import {config,msg,DEVICE_MAP,pickRandomDevices} from './config.js';
+// ═══════════════════════════════════════════════════════════════════════════
+// src/state.js — إدارة الحالة المركزية للمختبر المتحرك (State & Reducer)
+// تعميم الاكتشافات، نقاوة التخفيض، ودعم كامل للأجهزة الـ 24 والتوقعات
+// ═══════════════════════════════════════════════════════════════════════════
+
+import { config, msg, DEVICE_MAP, pickRandomDevices } from './config.js';
 
 export let ids = config.devices;
 
@@ -7,7 +12,7 @@ export function updateActiveDevices(newIds) {
   config.devices = newIds;
 }
 
-const emptyDevice = () => ({status: 'off', source: null, reason: 'never_connected'});
+const emptyDevice = () => ({ status: 'off', source: null, reason: 'never_connected' });
 
 export function initialState(p = {}) {
   const isTest = typeof window === 'undefined';
@@ -48,14 +53,28 @@ export function initialState(p = {}) {
     quiz: {},
     chatResponse: null,
     questionCount: {},
-    doorOpen: false
+    doorOpen: false,
+    viewfinderActive: true // كاميرا الكشف الافتتاحية
   };
 }
 
-export const explorationDone = s =>
-  ids.includes('fridge')
-    ? ['car_battery', 'radio_battery', 'fridge_incompatible', 'fridge_mains'].every(x => s.discoveredFacts.includes(x))
-    : ids.every(id => s.exploredDevices.includes(id));
+export const explorationDone = s => {
+  const active = Object.keys(s.devices || {});
+  if (!active.length) return false;
+  if (ids.includes('fridge')) {
+    return ['car_battery', 'radio_battery', 'fridge_incompatible', 'fridge_mains'].every(x => s.discoveredFacts.includes(x));
+  }
+  return active.every(id => {
+    const meta = DEVICE_MAP[id];
+    if (!meta) return s.exploredDevices.includes(id);
+    if (meta.type === 'battery') {
+      return s.discoveredFacts.includes(`${id}_battery`) || s.exploredDevices.includes(id);
+    } else {
+      return s.discoveredFacts.includes(`${id}_mains`) || s.exploredDevices.includes(id);
+    }
+  });
+};
+
 export const quizDone = s => [...ids, 'explanation'].every(x => s.quiz[x] === true);
 
 function say(s, key, priority = 2, customText = '') {
@@ -72,7 +91,7 @@ function fact(s, key) {
 function detach(s, reason = 'removed') {
   const old = s.batteryLocation;
   if (ids.includes(old) && (s.activePowerSource[old] === 'battery' || !s.activePowerSource[old])) {
-    s.devices[old] = {status: 'off', source: null, reason};
+    s.devices[old] = { status: 'off', source: null, reason };
     s.activePowerSource[old] = null;
   }
   s.batteryLocation = 'tray';
@@ -82,7 +101,7 @@ function detach(s, reason = 'removed') {
 function detachMains(s, reason = 'removed') {
   const old = s.mainsLocation;
   if (ids.includes(old) && s.activePowerSource[old] === 'mains') {
-    s.devices[old] = {status: 'off', source: null, reason};
+    s.devices[old] = { status: 'off', source: null, reason };
     s.activePowerSource[old] = null;
   }
   s.mainsLocation = 'socket';
@@ -110,7 +129,8 @@ export function reducer(state, event) {
       assetStatus: state.assetStatus,
       rendererStatus: state.rendererStatus,
       message: msg(state, 'start'),
-      messageKey: 'start'
+      messageKey: 'start',
+      viewfinderActive: true
     };
   }
 
@@ -119,7 +139,7 @@ export function reducer(state, event) {
   if (event.id) s.processedEvents.push(event.id);
 
   const relevant = () => {
-    s.lastRelevantEvent = {...event, time: event.time ?? Date.now(), revision: s.revision};
+    s.lastRelevantEvent = { ...event, time: event.time ?? Date.now(), revision: s.revision };
   };
 
   switch (event.type) {
@@ -132,8 +152,13 @@ export function reducer(state, event) {
     case 'START':
       if (s.phase === 'intro' || s.phase === 'recoverable_error') {
         s.phase = 'exploring';
+        s.viewfinderActive = false;
         say(s, 'start');
       }
+      break;
+
+    case 'CLOSE_VIEWFINDER':
+      s.viewfinderActive = false;
       break;
 
     case 'SELECT_DEVICE':
@@ -149,33 +174,29 @@ export function reducer(state, event) {
       }
       break;
 
-    case 'PICK_BATTERY':
+    case 'PICK_BATTERY': {
       if (s.phase === 'intro' || s.phase === 'loading') return state;
-      const isTest = typeof window === 'undefined';
-      if (isTest) {
-        const old = detach(s, 'transferred');
-        if (ids.includes(old)) {
-          s.lastRelevantEvent = {...event, device: old, time: event.time ?? Date.now(), revision: s.revision};
-        }
+      const old = detach(s, 'transferred');
+      if (ids.includes(old)) {
+        s.lastRelevantEvent = { ...event, device: old, time: event.time ?? Date.now(), revision: s.revision };
       }
       s.batteryLocation = 'held';
       s.interactionMode = event.mode || 'click';
       say(s, 'pick');
       break;
+    }
 
-    case 'PICK_MAINS':
+    case 'PICK_MAINS': {
       if (s.phase === 'intro' || s.phase === 'loading') return state;
-      const isTestM = typeof window === 'undefined';
-      if (isTestM) {
-        const old = detachMains(s, 'transferred');
-        if (ids.includes(old)) {
-          s.lastRelevantEvent = {...event, device: old, time: event.time ?? Date.now(), revision: s.revision};
-        }
+      const old = detachMains(s, 'transferred');
+      if (ids.includes(old)) {
+        s.lastRelevantEvent = { ...event, device: old, time: event.time ?? Date.now(), revision: s.revision };
       }
       s.mainsLocation = 'held';
       s.interactionMode = event.mode || 'click';
-      say(s, 'pickMains', 2, 'أنت تمسك فيشة الكهرباء الرئيسية 🔌! اسحبها أو اختر جهازاً لتجربته.');
+      say(s, 'pickMains', 2, 'أنت تمسك قابس كهرباء المنزل 220V 🔌! صِله بجهاز لتجربته.');
       break;
+    }
 
     case 'DROP_ON_DEVICE': {
       if (!ids.includes(event.device) || !['exploring', 'summary', 'completed'].includes(s.phase)) return state;
@@ -194,18 +215,18 @@ export function reducer(state, event) {
       s.selectedDevice = d;
       s.attemptsByDevice[d]++;
       if (!s.exploredDevices.includes(d)) s.exploredDevices.push(d);
-      const isNodeTest = typeof window === 'undefined';
 
       if (tool === 'battery') {
         const success = meta.type === 'battery';
-        s.lastAttempt = {id: event.id, device: d, source: 'battery', time: event.time ?? Date.now(), success};
+        s.lastAttempt = { id: event.id, device: d, source: 'battery', time: event.time ?? Date.now(), success };
         s.lastOutcome = success ? 'running' : 'incompatible';
         relevant();
 
         if (success) {
-          if (isNodeTest) detachMains(s);
+          detach(s, 'transferred');
+          detachMains(s);
           s.batteryLocation = d;
-          s.devices[d] = {status: 'running', source: 'battery', reason: 'connected'};
+          s.devices[d] = { status: 'running', source: 'battery', reason: 'connected' };
           s.activePowerSource[d] = 'battery';
           fact(s, d + '_battery');
           const customMsg = `🌟 أحسنت بطلنا الصغير! نجحت في تشغيل ${meta.name} بالبطارية الجافة؛ ${meta.reason}`;
@@ -225,22 +246,23 @@ export function reducer(state, event) {
         }
       } else if (tool === 'mains') {
         const success = meta.type === 'mains';
-        s.lastAttempt = {id: event.id, device: d, source: 'mains', time: event.time ?? Date.now(), success};
+        s.lastAttempt = { id: event.id, device: d, source: 'mains', time: event.time ?? Date.now(), success };
         s.lastOutcome = success ? 'mains_running' : 'incompatible';
         relevant();
 
         if (success) {
-          if (isNodeTest) detach(s);
+          detachMains(s, 'transferred');
+          detach(s);
           s.mainsLocation = d;
-          s.devices[d] = {status: 'running', source: 'mains', reason: 'connected'};
+          s.devices[d] = { status: 'running', source: 'mains', reason: 'connected' };
           s.activePowerSource[d] = 'mains';
           fact(s, d + '_mains');
-          const customMsg = `🌟 رائع جداً يا ذكي! تم تشغيل ${meta.name} بنجاح بفيشة الكهرباء الرئيسية؛ ${meta.reason}`;
+          const customMsg = `🌟 رائع جداً يا ذكي! تم تشغيل ${meta.name} بنجاح بقابس كهرباء المنزل؛ ${meta.reason}`;
           say(s, 'mains', 2, customMsg);
         } else {
           s.mainsLocation = 'socket';
           fact(s, d + '_mains_incompatible');
-          const customMsg = `⚠️ تنبيه تعليمي من شرارة: لا نصل ${meta.name} بفيشة المقبس الجداري؛ لأن السبب العلمي: ${meta.wrongReason}`;
+          const customMsg = `⚠️ تنبيه تعليمي من شرارة: لا نصل ${meta.name} بقابس المقبس الجداري؛ لأن السبب العلمي: ${meta.wrongReason}`;
           say(s, 'wrongMains', 2, customMsg);
         }
       }
@@ -254,33 +276,27 @@ export function reducer(state, event) {
       break;
 
     case 'DROP_OUTSIDE':
-      if (typeof window === 'undefined') { detach(s); detachMains(s); }
-      else {
-        if (s.batteryLocation === 'held') s.batteryLocation = 'tray';
-        if (s.mainsLocation === 'held') s.mainsLocation = 'socket';
-      }
+      if (s.batteryLocation === 'held') s.batteryLocation = 'tray';
+      if (s.mainsLocation === 'held') s.mainsLocation = 'socket';
       say(s, 'outside');
       break;
 
     case 'CANCEL_DRAG':
-      if (typeof window === 'undefined') { detach(s); detachMains(s); }
-      else {
-        if (s.batteryLocation === 'held') s.batteryLocation = 'tray';
-        if (s.mainsLocation === 'held') s.mainsLocation = 'socket';
-      }
+      if (s.batteryLocation === 'held') s.batteryLocation = 'tray';
+      if (s.mainsLocation === 'held') s.mainsLocation = 'socket';
       say(s, 'cancel');
       break;
 
     case 'REMOVE_BATTERY': {
       const d = event.device || s.batteryLocation;
       if (d && ids.includes(d)) {
-        s.devices[d] = {status: 'off', source: null, reason: 'removed'};
+        s.devices[d] = { status: 'off', source: null, reason: 'removed' };
         s.activePowerSource[d] = null;
         if (s.batteryLocation === d) s.batteryLocation = 'tray';
-        s.lastRelevantEvent = {...event, device: d, time: event.time ?? Date.now(), revision: s.revision};
+        s.lastRelevantEvent = { ...event, device: d, time: event.time ?? Date.now(), revision: s.revision };
       } else {
         const device = detach(s);
-        if (ids.includes(device)) s.lastRelevantEvent = {...event, device, time: event.time ?? Date.now(), revision: s.revision};
+        if (ids.includes(device)) s.lastRelevantEvent = { ...event, device, time: event.time ?? Date.now(), revision: s.revision };
       }
       say(s, 'remove');
       break;
@@ -289,13 +305,13 @@ export function reducer(state, event) {
     case 'REMOVE_MAINS': {
       const d = event.device || s.mainsLocation;
       if (d && ids.includes(d)) {
-        s.devices[d] = {status: 'off', source: null, reason: 'removed'};
+        s.devices[d] = { status: 'off', source: null, reason: 'removed' };
         s.activePowerSource[d] = null;
         if (s.mainsLocation === d) s.mainsLocation = 'socket';
-        s.lastRelevantEvent = {...event, device: d, time: event.time ?? Date.now(), revision: s.revision};
+        s.lastRelevantEvent = { ...event, device: d, time: event.time ?? Date.now(), revision: s.revision };
       } else {
         const device = detachMains(s);
-        if (ids.includes(device)) s.lastRelevantEvent = {...event, device, time: event.time ?? Date.now(), revision: s.revision};
+        if (ids.includes(device)) s.lastRelevantEvent = { ...event, device, time: event.time ?? Date.now(), revision: s.revision };
       }
       say(s, 'stopMains');
       break;
@@ -305,11 +321,11 @@ export function reducer(state, event) {
       const targetDevice = event.device || (ids.includes('fridge') ? 'fridge' : ids.find(id => DEVICE_MAP[id]?.type === 'mains'));
       if (!targetDevice) return state;
       if (!s.discoveredFacts.includes(targetDevice + '_incompatible') && !s.discoveredFacts.includes('fridge_incompatible')) return state;
-      s.devices[targetDevice] = {status: 'running', source: 'mains', reason: 'connected'};
+      s.devices[targetDevice] = { status: 'running', source: 'mains', reason: 'connected' };
       s.activePowerSource[targetDevice] = 'mains';
       fact(s, targetDevice + '_mains');
       s.lastOutcome = 'mains_running';
-      s.lastRelevantEvent = {...event, device: targetDevice, time: event.time ?? Date.now(), revision: s.revision};
+      s.lastRelevantEvent = { ...event, device: targetDevice, time: event.time ?? Date.now(), revision: s.revision };
       say(s, 'mains');
       break;
     }
@@ -317,11 +333,11 @@ export function reducer(state, event) {
     case 'STOP_MAINS_DEMO': {
       const targetDevice = event.device || (ids.includes('fridge') ? 'fridge' : ids.find(id => DEVICE_MAP[id]?.type === 'mains'));
       if (targetDevice && s.devices[targetDevice]) {
-        s.devices[targetDevice] = {status: 'off', source: null, reason: 'demo_stopped'};
+        s.devices[targetDevice] = { status: 'off', source: null, reason: 'demo_stopped' };
         s.activePowerSource[targetDevice] = null;
       }
       s.mainsLocation = 'socket';
-      s.lastRelevantEvent = {...event, device: targetDevice, time: event.time ?? Date.now(), revision: s.revision};
+      s.lastRelevantEvent = { ...event, device: targetDevice, time: event.time ?? Date.now(), revision: s.revision };
       say(s, 'stopMains');
       break;
     }
@@ -457,9 +473,9 @@ export function validAction(s, a) {
 export function nextActions(s) {
   let a = [];
   const mainsDev = ids.find(x => DEVICE_MAP[x]?.type === 'mains' && (s.discoveredFacts.includes(x + '_incompatible') || s.discoveredFacts.includes('fridge_incompatible')) && !s.discoveredFacts.includes(x + '_mains'));
-  if (mainsDev) a.push({id: 'show_mains_demo', device: mainsDev});
+  if (mainsDev) a.push({ id: 'show_mains_demo', device: mainsDev });
   const d = ids.find(x => !s.exploredDevices.includes(x));
-  if (d) a.push({id: 'select_device', device: d});
-  else a.push({id: 'open_comparison'});
+  if (d) a.push({ id: 'select_device', device: d });
+  else a.push({ id: 'open_comparison' });
   return a.filter(x => validAction(s, x)).slice(0, 2);
 }

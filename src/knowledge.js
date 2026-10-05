@@ -1,11 +1,16 @@
-import {config,deviceNames,msg,DEVICE_MAP} from './config.js';
-import {nextActions,validAction} from './state.js';
+// ═══════════════════════════════════════════════════════════════════════════
+// src/knowledge.js — المحرك المعرفي الذكي لشات بوت الروبوت شرارة
+// معالجة لغوية متقدمة (NLP)، تطبيع لهجات، وتوليد ديناميكي لجميع الأجهزة الـ 24
+// ═══════════════════════════════════════════════════════════════════════════
+
+import { config, deviceNames, msg, DEVICE_MAP, ALL_DEVICES } from './config.js';
+import { nextActions, validAction } from './state.js';
 
 export function normalize(text) {
   return String(text ?? '')
     .normalize('NFKC')
     .toLowerCase()
-    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '') // إزالة التشكيل والتطويل
     .replace(/[أإآٱ]/g, 'ا')
     .replace(/ى/g, 'ي')
     .replace(/ة/g, 'ه')
@@ -14,39 +19,74 @@ export function normalize(text) {
     .trim();
 }
 
+// حساب مسافة ليفنشتاين للتعامل مع الأخطاء الإملائية البسيطة (Levenshtein <= 1)
+export function levenshteinDistance(a, b) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
 export const synonyms = {
-  car: ['سياره', 'عربيه', 'سيارة', 'car', 'toycar'],
-  radio: ['راديو', 'مذياع', 'radio'],
-  fridge: ['ثلاجه', 'تلاجه', 'براد', 'fridge', 'refrigerator'],
-  flashlight: ['كشاف', 'شعله', 'مصباح يدوي', 'شعلة', 'flashlight', 'torch'],
-  wallClock: ['ساعه جدار', 'ساعه حائط', 'ساعه', 'ساعة', 'clock', 'wallclock'],
-  remote: ['ريموت', 'تحكم', 'ريموت تلفاز', 'remote'],
-  calculator: ['حاسبه', 'اله حاسبه', 'حاسبة', 'calculator'],
-  digitalScale: ['ميزان', 'وزن', 'scale'],
-  smokeDetector: ['انذار دخان', 'كاشف دخان', 'دخان', 'انذار', 'smokedetector'],
+  car: ['سياره', 'عربيه', 'سيارة اطفال', 'سياره لعبه', 'car', 'toycar'],
+  radio: ['راديو', 'مذياع', 'مسجل', 'radio'],
+  flashlight: ['كشاف', 'شعله', 'كشاف جيب', 'مصباح يدوي', 'flashlight', 'torch'],
+  wallClock: ['ساعه جدار', 'ساعه حائط', 'ساعه معلقه', 'clock', 'wallclock'],
+  remote: ['ريموت', 'تحكم', 'ريموت تلفاز', 'جهاز تحكم', 'remote'],
+  calculator: ['حاسبه', 'اله حاسبه', 'اله رقميه', 'calculator'],
+  digitalScale: ['ميزان', 'ميزان رقمي', 'ميزان ارضي', 'scale'],
+  smokeDetector: ['انذار دخان', 'كاشف دخان', 'جهاز انذار', 'smokedetector'],
   laserPointer: ['ليزر', 'مؤشر ليزر', 'قلم ليزر', 'laser'],
-  hearingAid: ['سماعه اذن', 'سماعه طبيه', 'سماعه', 'سماعة', 'hearingaid'],
-  robotToy: ['روبوت', 'لعبه روبوت', 'robot', 'robottoy'],
-  electricToothbrush: ['فرشاه اسنان', 'فرشاه', 'فرشاة', 'toothbrush'],
-  microwave: ['ميكروويف', 'مكرويف', 'مايكرويف', 'microwave'],
-  washer: ['غساله', 'غسالة', 'washer', 'washingmachine'],
-  airConditioner: ['مكيف', 'تكييف', 'سبلت', 'airconditioner', 'ac'],
-  vacuum: ['مكنسه', 'مكنسة', 'شفاط', 'vacuum'],
-  lamp: ['مصباح', 'لمبه', 'اباجوره', 'مصباح مكتب', 'lamp'],
-  electricOven: ['فرن', 'فرن كهربائي', 'oven'],
-  iron: ['مكواه', 'مكوايه', 'كوايه', 'مكواة', 'iron'],
+  hearingAid: ['سماعه اذن', 'سماعه طبيه', 'سماعه طبية', 'hearingaid'],
+  robotToy: ['روبوت لعبه', 'لعبه روبوت', 'روبوت اطفال', 'robottoy'],
+  electricToothbrush: ['فرشاه اسنان', 'فرشاه كهربائيه', 'فرشاة اسنان', 'toothbrush'],
+
+  fridge: ['ثلاجه', 'تلاجه', 'براد', 'fridge', 'refrigerator'],
+  microwave: ['ميكروويف', 'مكرويف', 'مايكرويف', 'فرن ميكروويف', 'microwave'],
+  washer: ['غساله', 'غسالة ملابس', 'washer', 'washingmachine'],
+  airConditioner: ['مكيف', 'تكييف', 'سبلت', 'مكيف هواء', 'airconditioner', /\bac\b/i],
+  vacuum: ['مكنسه', 'مكنسة كهربائية', 'مكنسه كهربائيه', 'شفاط', 'vacuum'],
+  lamp: ['مصباح مكتب', 'مصباح سلكي', 'اباجوره', 'لمبه مكتب', 'desk lamp', 'desklamp'],
+  electricOven: ['فرن كهربائي', 'فرن منزلي', 'oven', 'electricoven'],
+  iron: ['مكواه', 'مكوايه', 'كوايه', 'مكواة بخار', 'iron'],
   hairDryer: ['استشوار', 'سشوار', 'مجفف شعر', 'مجفف', 'hairdryer'],
-  electricWaterHeater: ['سخان ماء', 'سخان', 'كويزر', 'بويلر', 'waterheater'],
-  electricHeater: ['مدفاه', 'صوبه', 'دفايه', 'مدفأة', 'heater'],
-  blender: ['خلاط', 'عصاره', 'خلاط فواكه', 'blender'],
-  battery: ['بطاريه', 'حجر', 'بطارية', 'battery'],
-  electricity: ['كهرباء', 'كهربا', 'electricity', 'مقبس', 'فيشه', 'فيشة', 'فيش']
+  electricWaterHeater: ['سخان ماء', 'كويزر', 'بويلر', 'سخان كهربائي', 'waterheater'],
+  electricHeater: ['مدفاه', 'صوبه', 'دفايه', 'مدفاه كهربائيه', 'heater', 'spaceheater'],
+  blender: ['خلاط', 'عصاره', 'خلاط فواكه', 'خلاط كهربائي', 'blender'],
+
+  battery: ['بطاريه', 'حجر', 'بطاريه جافه', 'battery'],
+  electricity: ['كهرباء', 'كهربا', 'مقبس', 'فيشه', 'فيش', 'بريز', 'electricity', 'mains']
 };
 
-const has = (q, words) => words.some(w => q.includes(w));
+const has = (q, words) => words.some(w => {
+  if (w instanceof RegExp) return w.test(q);
+  if (q.includes(w)) return true;
+  // تسامح خطأ إملائي واحد إذا كانت الكلمة أطول من 4 حروف
+  if (w.length >= 5) {
+    const qTokens = q.split(/\s+/);
+    return qTokens.some(tok => Math.abs(tok.length - w.length) <= 1 && levenshteinDistance(tok, w) <= 1);
+  }
+  return false;
+});
 
 export const deviceIn = (q, s) => {
-  const activeIds = s?.devices ? Object.keys(s.devices) : ['car', 'radio', 'fridge'];
+  const activeIds = s?.devices ? Object.keys(s.devices) : Object.keys(DEVICE_MAP).slice(0, 4);
   const allKnown = Object.keys(synonyms).filter(k => k !== 'battery' && k !== 'electricity');
   const matched = allKnown.filter(k => has(q, synonyms[k]));
   if (matched.length) {
@@ -91,9 +131,19 @@ export const knowledge = [
       [['اجرب في البيت', 'اجرب بالبيت', 'تجرب في البيت', 'experiment at home']],
       [['المس المقبس', 'المس الفيش', 'touch socket']]
     ],
-    ar: 'نجرب هنا على الشاشة. اطلب مساعدة شخص بالغ، ولا تعبث بمقابس الكهرباء أو الأسلاك.',
-    en: 'We experiment on screen. Ask an adult for help and do not play with sockets or wires.',
+    ar: 'نجرب هنا على الشاشة بأمان تام. اطلب مساعدة شخص بالغ في المنزل دائماً، ولا تعبث بمقابس الكهرباء أو الأسلاك إطلاقاً.',
+    en: 'We experiment on screen safely. Always ask an adult at home and never touch wall sockets or wires.',
     examples: ['هل أجرب في البيت؟', 'هل ألمس المقبس؟', 'can I touch a socket?']
+  },
+  {
+    id: 'safety_rules',
+    patterns: [/قواعد السلامه|ارشادات الامان|كيف احمي نفسي|مخاطر الكهربا|safety rules/],
+    concepts: [
+      [['سلامه', 'امان', 'ارشادات', 'قواعد', 'احمي', 'مخاطر', 'safety', 'rules', 'danger'], ['كهربا', 'كهرباء', 'electricity']]
+    ],
+    ar: 'قواعد السلامة الذهبية: 1) لا تلمس المقبس أو الفيش بأيدٍ مبللة. 2) لا تشد السلك بقوة. 3) اطلب مساعدة الكبار عند تشغيل الأجهزة الكبيرة.',
+    en: 'Golden safety rules: 1) Never touch plugs with wet hands. 2) Do not pull wires. 3) Ask adults to operate large appliances.',
+    examples: ['ما هي قواعد السلامة؟', 'كيف أتعامل مع الكهرباء بأمان؟', 'safety rules']
   },
   {
     id: 'recycle',
@@ -101,30 +151,40 @@ export const knowledge = [
     concepts: [
       [['مستعمل', 'التخلص', 'تخلص من', 'نتخلص', 'نرمي', 'ارمي', 'نفايات', 'زبال', 'قمام', 'سله', 'تدوير', 'اعاده تدوير', 'dispose', 'recycle', 'throw'], ['بطاري', 'حجر', 'battery']]
     ],
-    ar: 'أعط البطارية المستعملة لشخص بالغ ليجمعها أو يتخلص منها بالطريقة المناسبة. لا تفتحها.',
-    en: 'Give used batteries to an adult for proper collection or disposal. Do not open them.',
+    ar: 'أعط البطارية المستعملة لشخص بالغ ليضعها في حاويات إعادة التدوير المخصصة. لا تفتحها ولا ترمِها في سلة المهملات العادية.',
+    en: 'Give used batteries to an adult for proper battery recycling bins. Do not open or discard in regular trash.',
     examples: ['ماذا أفعل بالبطارية المستعملة؟', 'أين أرمي الحجر؟', 'dispose of battery']
   },
   {
     id: 'charge',
-    patterns: [/اشحن|شحن|charge/],
+    patterns: [/اشحن|شحن|قابل للشحن|charge|recharge/],
     concepts: [
-      [['اشحن', 'شحن', 'شاحن', 'ينشحن', 'تنشحن', 'بنشحن', 'اعيد شحن', 'charge', 'recharge']]
+      [['اشحن', 'شحن', 'شاحن', 'ينشحن', 'تنشحن', 'بنشحن', 'اعيد شحن', 'قابله للشحن', 'charge', 'recharge']]
     ],
-    ar: 'البطارية العادية هنا غير قابلة للشحن. يُشحن فقط النوع المخصص للشحن بشاحنه المناسب، مع شخص بالغ.',
-    en: 'This ordinary battery is not rechargeable. Only rechargeable types use their matching charger, with an adult.',
+    ar: 'البطارية الجافة العادية ذات الاستخدام الواحد غير قابلة للشحن ويُمنع شحنها. يُشحن فقط النوع المخصص لذلك بشاحنه الخاص تحت إشراف بالغ.',
+    en: 'Disposable dry batteries cannot be recharged. Only specifically labeled rechargeable batteries can be charged by an adult.',
     examples: ['هل أشحن هذه البطارية؟', 'ممكن شحن الحجر؟', 'can I recharge?']
   },
   {
+    id: 'power_bank',
+    patterns: [/باور بانك|بنك.*طاق|power bank|usb|شاحن متنقل/i],
+    concepts: [
+      [['باور بانك', 'بنك طاقه', 'بنك الطاقه', 'شاحن متنقل', 'power bank', 'usb', 'powerbank']]
+    ],
+    ar: 'بنك الطاقة (Power Bank) يحتوي بطاريات قابلة للشحن تخزن طاقة لتغذية الهواتف والأجهزة المحمولة بجهد 5V آمن.',
+    en: 'A power bank contains rechargeable batteries storing energy to charge mobile devices at a safe 5V.',
+    examples: ['ما هو بنك الطاقة؟', 'هل الباور بانك بطارية؟', 'what is a power bank?']
+  },
+  {
     id: 'large_battery',
-    patterns: [/(ثلاج|تلاج|براد|fridge).*(كبير|رحلات|سياره|بطاري|حجر|battery)/, /(بطاري|battery).*(كبير|big).*(ثلاج|fridge)/, /(big|large|camping).*(battery|fridge)/],
+    patterns: [/(ثلاج|تلاج|براد|غسال|مكيف|fridge|washer|ac).*(كبير|رحلات|سياره|بطاري|حجر|battery)/, /(بطاري|battery).*(كبير|big).*(ثلاج|غسال|fridge)/, /(big|large|camping).*(battery|fridge)/],
     when: q => /كبير|رحلات|camp|big|large/.test(q),
     concepts: [
-      [['كبير', 'ضخم', 'رحلات', 'camping', 'big', 'large'], ['ثلاج', 'تلاج', 'براد', 'fridge']],
+      [['كبير', 'ضخم', 'رحلات', 'camping', 'big', 'large'], ['ثلاج', 'تلاج', 'براد', 'غسال', 'مكيف', 'fridge', 'washer']],
       [['رحلات', 'camping']]
     ],
-    ar: 'نعم، توجد ثلاجات رحلات وأنظمة مصممة لبطاريات مناسبة. هذا يختلف عن البطارية الصغيرة وثلاجة المنزل في نشاطنا.',
-    en: 'Yes, camping refrigerators and suitable battery systems exist. They are different from this small battery and our home refrigerator.',
+    ar: 'نعم، توجد ثلاجات رحلات وأجهزة مخصصة تعمل ببطاريات ضخمة ومحولات خاصة. هذا يختلف عن أجهزتنا المنزلية التي تحتاج تيار 220V مباشر.',
+    en: 'Yes, special camping refrigerators exist that run on large vehicle battery packs. Home appliances require standard 220V grid power.',
     examples: ['هل يمكن تشغيل ثلاجة ببطارية كبيرة؟', 'وثلاجات الرحلات؟', 'big battery for fridge']
   },
   {
@@ -134,8 +194,8 @@ export const knowledge = [
       [['حجم', 'كل صغير', 'كل كبير', 'الحجم بيحدد', 'size', 'all small', 'all big']],
       [['صغير', 'كبير', 'small', 'big'], ['بطاري', 'كهرب', 'تغذي', 'جهاز', 'battery', 'device']]
     ],
-    ar: 'الحجم وحده لا يحدد المصدر. تصميم الجهاز ومتطلباته يحددان التغذية المناسبة، وتوجد أجهزة كبيرة تعمل ببطاريات مناسبة.',
-    en: 'Size alone does not decide the source. A device’s design and requirements matter; some large devices use suitable batteries.',
+    ar: 'الحجم وحده لا يحدد المصدر دائماً! فالمكواة صغيرة الحجم لكنها تحتاج كهرباء 220V قوية لتوليد الحرارة، بينما أجهزة أخرى خفيفة تكتفي ببطارية.',
+    en: 'Size alone does not decide the source! An iron is small but needs 220V mains for heat, while portable devices use batteries.',
     examples: ['هل كل جهاز صغير يعمل ببطارية؟', 'هل كل جهاز كبير لا يعمل ببطارية؟', 'does size decide?']
   },
   {
@@ -153,19 +213,19 @@ export const knowledge = [
     concepts: [
       [['راديو', 'مذياع', 'radio'], ['يصنع', 'ينتج', 'يولد', 'بولد', 'بصنع', 'بنتج', 'يعطي', 'صنع', 'توليد', 'انتاج', 'make', 'produce', 'generate']]
     ],
-    ar: 'الراديو يستهلك الطاقة الكهربائية ويحوّل جزءًا منها إلى صوت. لا يصنع مصدر الكهرباء.',
-    en: 'The radio uses electrical energy and converts some into sound. It does not produce its power supply.',
+    ar: 'الراديو مستهلك للطاقة الكهربائية؛ فهو يحول الطاقة الكهربائية القادمة من البطارية إلى طاقة صوتية، ولا ينتج الكهرباء بنفسه.',
+    en: 'The radio consumes electrical energy and converts it into sound waves. It does not produce electricity.',
     examples: ['هل الراديو يصنع الكهرباء؟', 'هل المذياع يولد كهربا؟', 'does radio produce electricity?']
   },
   {
     id: 'together',
-    patterns: [/معا|مع بعض|نفس الوقت|together|same time|الاثنين مع|التنتين مع|الجهازين مع/],
+    patterns: [/معا|مع بعض|نفس الوقت|together|same time|الاثنين مع|التنتين مع|الجهازين مع|كلهم مع/],
     concepts: [
       [['معا', 'مع بعض', 'سوا', 'بنفس الوقت', 'الاثنين', 'التنتين', 'الجهازين', 'together', 'same time', 'both'], ['شغل', 'اشغل', 'نشغل', 'اشتغل', 'شتغل', 'نفس الوقت', 'بطاري', 'سيار', 'راديو', 'جهاز']]
     ],
-    ar: 'لدينا بطارية واحدة ننقلها بين الجهازين. عندما ننزعها من الأول يتوقف، ثم يمكن أن يعمل الثاني.',
-    en: 'We have one battery to move between these devices. Removing it stops the first, then it can power the second.',
-    examples: ['لماذا لا تعمل السيارة والراديو معًا؟', 'الجهازين بنفس الوقت؟', 'why not together?']
+    ar: 'في مختبرنا أداة بطارية واحدة وقابس واحد لنركز على فحص كل جهاز على حدة. عندما تنقل المصدر إلى جهاز جديد يتوقف الجهاز السابق.',
+    en: 'In our lab, we have one test battery and one plug to inspect one device at a time. Moving the source transfers power.',
+    examples: ['لماذا لا تعمل الأجهزة معًا؟', 'الجهازين بنفس الوقت؟', 'why not together?']
   },
   {
     id: 'remove',
@@ -173,8 +233,8 @@ export const knowledge = [
     concepts: [
       [['نزع', 'ازال', 'شلت', 'شيل', 'فكيت', 'فك', 'فصل', 'قطعت', 'remove', 'disconnect', 'take off'], ['بطاري', 'حجر', 'سلك', 'توقف', 'وقفت', 'طفى', 'طفت', 'battery']]
     ],
-    ar: 'عند نزع البطارية ينقطع مصدر الطاقة عن الدائرة، فيتوقف الجهاز. يمكن إعادة تركيبها في حجرتها.',
-    en: 'Removing the battery breaks the circuit’s power supply, so the device stops. You can put it back in its compartment.',
+    ar: 'عند نزع البطارية تفتح الدائرة الكهربائية وينقطع سريان التيار، فيتوقف الجهاز عن العمل فوراً.',
+    en: 'Removing the battery opens the circuit and stops the current flow, so the device immediately turns off.',
     examples: ['لماذا تتوقف السيارة عند نزع البطارية؟', 'إذا شلت الحجر؟', 'remove the battery']
   },
   {
@@ -183,18 +243,19 @@ export const knowledge = [
     concepts: [
       [['تفرغ', 'تخلص', 'تنفد', 'تفضى', 'فضيت', 'خلصت', 'تنتهي', 'نفاد', 'تموت', 'عمر', 'بتضل شغال', 'بتخلص', 'بتفضي', 'فاضيه', 'خالصه', 'run out', 'empty', 'deplet', 'drain', 'die'], ['بطاري', 'حجر', 'طاق', 'شحن', 'battery']]
     ],
-    ar: 'طاقة البطارية محدودة وقد تنفد مع الاستخدام. في نشاطنا لا نحاكي نفادها، فلا نفسر التوقف بأنها فرغت.',
-    en: 'A battery has limited energy that can run out with use. This activity does not simulate depletion.',
+    ar: 'طاقة البطارية محدودة وتنفد عند استهلاك المواد الكيميائية بداخلها. في محاكاتنا هنا نفترض أنها ممتلئة وجاهزة دائماً.',
+    en: 'Battery energy is finite and depletes as chemical reactants are consumed. In our lab simulation, we assume full charge.',
     examples: ['هل البطارية تفرغ؟', 'هل طاقتها تنفد؟', 'can it run out?']
   },
   {
     id: 'poles',
-    patterns: [/قطب|علامت|موجب|سالب|\+|−|-|poles|positive|negative|عكست.*بطاري|قلبت.*بطاري|بالمقلوب/],
+    patterns: [/قطب|علامت|موجب|سالب|\+|−|poles|positive|negative|عكست.*بطاري|قلبت.*بطاري|بالمقلوب/],
+    when: q => /قطب|موجب|سالب|\+|−|poles|positive|negative/.test(q) && q.trim() !== '-',
     concepts: [
-      [['قطب', 'قطبين', 'موجب', 'سالب', 'زائد', 'ناقص', '+', '−', '-', 'علامت', 'عكست', 'قلبت', 'بالمقلوب', 'وجهين', 'طرفين', 'طرفي', 'pole', 'positive', 'negative', 'terminal']]
+      [['قطب', 'قطبين', 'موجب', 'سالب', 'زائد', 'ناقص', '+', '−', 'علامت', 'عكست', 'قلبت', 'بالمقلوب', 'وجهين', 'طرفين', 'طرفي', 'pole', 'positive', 'negative', 'terminal']]
     ],
-    ar: 'علامتا + و− تدلان على قطبي البطارية. في المحاكاة نركبها حسب علامات الحجرة، حتى يكتمل اتصال القطبين.',
-    en: 'The + and − symbols mark the two battery terminals. The simulation matches the compartment markings to connect both terminals.',
+    ar: 'علامتا (+) و (−) تدلان على القطبين الموجب والسالب. يجب وضع القطب الموجب مع علامة (+) والقطب السالب مع الزنبرك (−) لتكتمل الدائرة.',
+    en: 'The (+) and (−) symbols mark the positive and negative poles. Matching them correctly completes the circuit.',
     examples: ['ما علامتا + و−؟', 'ما معنى موجب وسالب؟', 'battery poles']
   },
   {
@@ -203,8 +264,8 @@ export const knowledge = [
     concepts: [
       [['نشوف', 'اشوف', 'نري', 'نراها', 'شايف', 'بنشوف', 'مرئي', 'تري', 'عين', 'لون', 'شكل', 'شرار', 'خطوط', 'نجوم', 'see', 'visible', 'look'], ['كهرب', 'تيار', 'شحن', 'طاق', 'electricity', 'current']]
     ],
-    ar: 'لا نرى الكهرباء مباشرة، لكن نلاحظ أثرها كالحركة والصوت والتبريد. الخطوط في النشاط تمثيل تعليمي.',
-    en: 'We do not see electricity directly; we observe movement, sound and cooling. The lines here are teaching symbols.',
+    ar: 'الكهرباء لا تُرى بالعين المجردة، لكننا نستدل عليها بآثارها: كالضوء، والحركة، والصوت، والحرارة.',
+    en: 'Electricity cannot be seen directly with our eyes, but we observe its effects: light, motion, sound, and heat.',
     examples: ['هل الكهرباء تُرى؟', 'هل نشوف كهربا؟', 'can we see electricity?']
   },
   {
@@ -213,8 +274,8 @@ export const knowledge = [
     concepts: [
       [['كيف', 'من وين', 'من اين', 'وين', 'شو مصدر', 'ايش مصدر', 'مصدر', 'توليد', 'انتاج', 'بتيجي', 'تاتي', 'توصل', 'تصل', 'بتدخل', 'تدخل', 'نجيب', 'where', 'how', 'source', 'generate', 'produce'], ['كهرب', 'تيار', 'شبك', 'power', 'electric']]
     ],
-    ar: 'تُولّد الكهرباء بطرق مختلفة، منها الشمس والرياح وطرق أخرى، وتنقلها الشبكة إلى المنازل.',
-    en: 'Electricity is generated in several ways, including sunlight and wind, and the grid carries it to homes.',
+    ar: 'تُولّد كهرباء المنازل في محطات توليد ضخمة (باستخدام الرياح، أو الشمس، أو المياه، أو الوقود) وتصلنا عبر شبكة الأسلاك والمقابس.',
+    en: 'Household electricity is produced in power plants (using wind, solar, hydro, or fuels) and delivered through grid wires to wall sockets.',
     examples: ['من أين تأتي كهرباء المنزل؟', 'من وين الكهربا؟', 'where does electricity come from?']
   },
   {
@@ -223,8 +284,8 @@ export const knowledge = [
     concepts: [
       [['كل', 'ليش مش كل', 'ليش ما', 'محول', 'ادابتر', 'adapter'], ['مقبس', 'فيش', 'بريز', 'socket']]
     ],
-    ar: 'لكل جهاز تغذية تناسب تصميمه. بعض الأجهزة تحتاج محولًا مخصصًا؛ لا نجرّب توصيلات حقيقية هنا.',
-    en: 'Each device needs a supply suited to its design. Some need a dedicated adapter. We use virtual connections here.',
+    ar: 'مقبس الجدار يعطي تيار 220V عالي القوة. الأجهزة الصغيرة كألعاب الأطفال تحترق إذا وصلناها مباشرة بالمقبس دون محول مناسب.',
+    en: 'Wall sockets deliver powerful 220V current. Small toys would be damaged if directly connected without proper adapters.',
     examples: ['لماذا لا تشتغل كل الأجهزة من المقبس؟', 'هل تحتاج محول؟', 'why not all use sockets?']
   },
   {
@@ -233,8 +294,8 @@ export const knowledge = [
     concepts: [
       [['افضل', 'احسن', 'اقوي', 'مين احسن', 'مين افضل', 'مين اقوى', 'better', 'best', 'stronger'], ['بطاري', 'حجر', 'كهرب', 'فيش', 'مقبس', 'منزل', 'بيت', 'mains', 'battery']]
     ],
-    ar: 'يعتمد على الجهاز والحاجة. البطارية مفيدة للحركة، وكهرباء المنزل مناسبة لأجهزة معينة.',
-    en: 'It depends on the device and the need. Batteries are portable; household power suits certain devices.',
+    ar: 'لكل مصدر ميزته! البطارية الجافة تمنحنا الأمان وسهولة الحركة والتنقل، بينما كهرباء المنزل تعطينا طاقة قوية ومستمرة للأجهزة الثقيلة.',
+    en: 'Both have distinct advantages! Batteries provide safe mobility, while mains power provides high, continuous energy.',
     examples: ['أيهما أفضل؟', 'البطارية أحسن؟', 'which is better?']
   },
   {
@@ -243,8 +304,8 @@ export const knowledge = [
     concepts: [
       [['فرق', 'شو الفرق', 'ايش الفرق', 'بيختلف', 'مقارن', 'difference', 'compare', 'داخلي']]
     ],
-    ar: 'نقول «كهرباء المنزل». البطارية وكهرباء المنزل كلاهما يزوّد الأجهزة بالطاقة الكهربائية، لكن التغذية ومتطلبات الأجهزة تختلف.',
-    en: 'We call it household electricity. Both a battery and the household supply provide electrical energy, with different supply characteristics and device needs.',
+    ar: 'كلاهما يزودنا بالطاقة الكهربائية، لكن الفرق الرئيسي: البطارية مصدر متنقل بجهد منخفض وآمن (1.5V - 9V)، وكهرباء المنزل مصدر ثابت بجهد عالي وقوي (220V) للأجهزة الكبيرة.',
+    en: 'Both supply electrical energy, but the key difference: Batteries are portable, low-voltage, and safe (1.5V - 9V), while mains power is stationary and high-voltage (220V).',
     examples: ['ما الفرق بين البطارية والكهرباء الداخلية؟', 'الكهرباء الداخلية؟', 'what is the difference?']
   },
   {
@@ -253,8 +314,8 @@ export const knowledge = [
     concepts: [
       [['جاف', 'جافه', 'dry'], ['بطاري', 'حجر', 'خليه', 'battery', 'cell']]
     ],
-    ar: 'البطارية الجافة مصدر صغير محمول للطاقة. كلمة «جافة» لا تعني أنها بلا مواد كيميائية.',
-    en: 'A dry cell is a small portable energy source. “Dry” does not mean it contains no chemicals.',
+    ar: 'سُميت «جافة» لأن مادتها الكيميائية تكون على هيئة معجون متماسك غير سائل، فلا تسيل أو تتسرب أثناء الحركة والنقل.',
+    en: 'Called a “dry cell” because its electrolyte is a moist paste rather than a free liquid, making it safe to move.',
     examples: ['ما البطارية الجافة؟', 'يعني إيه جافة؟', 'what is a dry cell?']
   },
   {
@@ -263,8 +324,8 @@ export const knowledge = [
     concepts: [
       [['جوا', 'جوه', 'جوات', 'داخل', 'تخزن', 'مخزن', 'طاق', 'مواد', 'مكون', 'تركيب', 'من شو مصنوع', 'كيميائ', 'store', 'inside', 'chemical', 'contain'], ['بطاري', 'حجر', 'battery']]
     ],
-    ar: 'تخزن البطارية طاقة كيميائية تتحول إلى طاقة كهربائية عند تشغيل دائرة مناسبة.',
-    en: 'A battery stores chemical energy, which becomes electrical energy in a suitable operating circuit.',
+    ar: 'تخزن البطارية بداخلها طاقة كيميائية، وتتحول بالتفاعل الكيميائي إلى طاقة كهربائية تسري في الأسلاك عند غلق الدائرة.',
+    en: 'A battery stores chemical energy, converting it into electrical current when the circuit is closed.',
     examples: ['هل البطارية فيها كهرباء؟', 'هل الحجر يخزن طاقة؟', 'does a battery have electricity?']
   },
   {
@@ -273,8 +334,8 @@ export const knowledge = [
     concepts: [
       [['ما', 'شو', 'ايش', 'يعني', 'عرف', 'what is', 'what'], ['كهرباء المنزل', 'كهربا البيت', 'كهرباء الشبكه', 'household electricity', 'mains electricity']]
     ],
-    ar: 'كهرباء المنزل تغذية تصل عبر شبكة الكهرباء. في تجربتنا يعرض الروبوت البالغ تشغيل الثلاجة بهذا المصدر.',
-    en: 'Household electricity is supplied through the power grid. Our adult robot demonstrates it powering the refrigerator.',
+    ar: 'كهرباء المنزل هي تيار كهربائي قوي يصلنا بجهد 220 فولت عبر مقابس الجدار لتشغيل الأجهزة المنزلية الكبيرة.',
+    en: 'Household mains electricity is a high-power 220V current delivered through wall sockets for major appliances.',
     examples: ['ما كهرباء المنزل؟', 'ما هي كهربا البيت؟', 'what is mains electricity?']
   },
   {
@@ -283,8 +344,8 @@ export const knowledge = [
     concepts: [
       [['فشل', 'غبي', 'غلطت', 'انا غلطت', 'خربت', 'انا السبب', 'fail', 'stupid', 'mistake', 'wrong']]
     ],
-    ar: 'هذه نتيجة مفيدة! عندما لا يناسب المصدر الجهاز نتعلم شيئًا جديدًا. المحاولة ليست فشلًا شخصيًا.',
-    en: 'This is a useful result! Finding that a source does not suit a device teaches us something new.',
+    ar: 'لا يوجد فشل في العلم! معرفة أن الجهاز لا يعمل بهذا المصدر هي خطوة استكشافية صحيحة تثبت عدم التوافق وتزيدنا معرفة.',
+    en: 'There are no failures in science! Discovering that a power source does not fit is a valuable step toward truth.',
     examples: ['هل فشلت التجربة؟', 'أنا غلطت؟', 'did I fail?']
   },
   {
@@ -293,8 +354,8 @@ export const knowledge = [
     concepts: [
       [['اسحب', 'سحب', 'تحريك', 'انقل', 'مش عارف اسحب', 'كيف احرك', 'drag', 'move', 'how to drag']]
     ],
-    ar: 'اختر البطارية وحرّكها قرب الجهاز. أو انقر البطارية ثم اسم الجهاز؛ الطريقتان تنجزان التجربة نفسها.',
-    en: 'Choose the battery and move it near a device, or click the battery then the device name. Both work.',
+    ar: 'طريقتان سهلتان: إما سحب البطارية أو القابس بإصبعك إلى الجهاز وإفلاته، أو النقر على البطارية أولاً ثم النقر على الجهاز المستهدف.',
+    en: 'Two easy ways: Drag the battery or plug directly onto the device, or tap the tool then tap the target device.',
     examples: ['كيف أسحب؟', 'السحب صعب', 'how to drag?']
   },
   {
@@ -303,9 +364,9 @@ export const knowledge = [
     concepts: [
       [['اعاده', 'اعيد', 'من جديد', 'تصفير', 'صفر', 'نلعب كمان مره', 'من الاول', 'restart', 'reset', 'start over']]
     ],
-    ar: 'يمكننا البدء من جديد. سيطلب المختبر تأكيدك قبل مسح اكتشافات هذه الجولة.',
-    en: 'We can start again. The lab will ask you before clearing this round’s discoveries.',
-    actions: [{id: 'restart'}],
+    ar: 'يمكننا بدء جولة جديدة بأجهزة عشوائية من بنك الأجهزة الـ 24 عبر زر أجهزة جديدة.',
+    en: 'We can start a fresh round with new devices from our 24-device bank using the Reset button.',
+    actions: [{ id: 'restart' }],
     examples: ['أريد إعادة اللعب', 'نبدأ من جديد', 'restart please']
   },
   {
@@ -314,15 +375,16 @@ export const knowledge = [
     concepts: [
       [['الحل', 'اشرح مباشره', 'اعطني الجواب', 'اعطيني الحل', 'شو النتيجه', 'احكيلي الجواب', 'solution', 'give me answer', 'answer directly']]
     ],
-    ar: 'في تجربتنا تعمل سيارة اللعبة والراديو ببطاريتنا المناسبة لهما. الثلاجة تحتاج كهرباء المنزل؛ الحجم وحده لا يحدد ذلك.',
-    en: 'In our activity, the toy car and radio work with our suitable battery. The home refrigerator needs household electricity. Size alone does not determine this.',
+    ar: 'قاعدة الحل الذهبية: الأجهزة الخفيفة والمحمولة وألعاب الأطفال تعمل بالبطاريات الجافة الآمنة، بينما أجهزة التبريد والتسخين والمحركات الثقيلة تحتاج كهرباء المنزل 220V.',
+    en: 'Key rule: Portable devices and toys use safe dry batteries; heating, cooling, and heavy motor appliances require 220V mains.',
     examples: ['أريد الحل', 'اشرح مباشرة', 'give me the solution']
   },
   {
     id: 'hint',
-    patterns: [/تلميح|ساعد|hint|help/],
+    patterns: [/تلميح|ساعدني|ساعد|hint|help/],
+    when: q => !/مساعد/.test(q) || /بدي مساعده|طلب مساعده|help/.test(q),
     concepts: [
-      [['تلميح', 'ساعدني', 'ساعد', 'دلني', 'hint', 'help']]
+      [['تلميح', 'ساعدني', 'دلني', 'hint', 'help']]
     ],
     dynamic: 'hint',
     examples: ['أريد تلميحًا', 'ساعدني', 'a hint please']
@@ -342,8 +404,8 @@ export const knowledge = [
     concepts: [
       [['هذا النشاط', 'هاد النشاط', 'هادا النشاط', 'هذا المختبر', 'هاد المختبر', 'هادا المختبر', 'شو فكره', 'شو بنعمل', 'شو هاي اللعبه', 'نلعب شو', 'عن شو', 'شو بنتعلم', 'ما هذا', 'what is this', 'activity']]
     ],
-    ar: 'نجرّب مصادر الطاقة للأجهزة، ونلاحظ أي مصدر يناسب كل جهاز. توقعك بداية، والتجربة تساعدنا على الفهم.',
-    en: 'We try power sources for devices and observe which one suits each. Predictions begin our exploration; experiments help us understand.',
+    ar: 'مختبر شرارة المتحرك يتيح لك تجربة مصادر الكهرباء للأجهزة ثلاثية الأبعاد تفاعلياً، وتطبيق خطوات المنهج العلمي: أتوقع، أجرب، ألاحظ، وأفسر.',
+    en: 'Sharara 3D Lab lets you test power sources on 3D appliances interactively, following the scientific method: Predict, Test, Observe, and Explain.',
     examples: ['ما هذا النشاط؟', 'ما هذا المختبر؟', 'what is this activity?']
   },
   {
@@ -370,8 +432,8 @@ export const knowledge = [
     concepts: [
       [['ما هي البطاريه', 'ما هو الحجر', 'شو هي البطاريه', 'شو يعني بطاريه', 'عرف البطاريه', 'ايش البطاريه', 'what is a battery', 'what is battery']]
     ],
-    ar: 'البطارية مصدر محمول للطاقة الكهربائية. تخزن طاقة كيميائية تتحول إلى كهرباء في دائرة مناسبة.',
-    en: 'A battery is a portable source of electrical energy. Its stored chemical energy is converted in a suitable circuit.',
+    ar: 'البطارية هي مصدر محمول للطاقة الكهربائية، تخزن طاقة كيميائية وتولد تياراً كهربائياً آمناً في الدوائر المغلقة.',
+    en: 'A battery is a portable source of electrical energy, storing chemical energy to power closed circuits safely.',
     examples: ['ما هي البطارية؟', 'ما هو الحجر؟', 'what is a battery?']
   },
   {
@@ -399,116 +461,102 @@ export const knowledge = [
 ];
 
 export function hint(s) {
-  const activeIds = s?.devices ? Object.keys(s.devices) : ['car', 'radio', 'fridge'];
-  const explored = s?.exploredDevices || [];
-  const discovered = s?.discoveredFacts || [];
+  const activeIds = s?.devices ? Object.keys(s.devices) : Object.keys(DEVICE_MAP).slice(0, 4);
   const isAr = s?.language !== 'en';
 
-  if (explored.length === 0) {
-    if (s?.hintLevel < 2) {
-      return bi(s,
-        '🔍 توجيه شرارة: انظر إلى الأجهزة الثلاثة. أي جهاز تتوقع أن تستطيع حمله وتشغيله بعيدًا عن المنزل؟ اختر البطارية وجرّب توقعك!',
-        'Look at the devices. Which might you carry and use away from home? Try your prediction.'
-      );
-    }
+  const uncompleted = activeIds.filter(id => !s.devices[id] || s.devices[id].status !== 'running');
+  if (uncompleted.length === 0) {
     return bi(s,
-      '🔍 توجيه شرارة: اختر البطارية ثم ضعها في سيارة اللعبة أو الراديو لنبدأ الاستكشاف والملاحظة معاً!',
-      'Choose the battery, then place it in the car or radio to begin our experiment.'
+      '🏆 توجيه شرارة: رائع ومبهر! لقد استكشفت جميع الأجهزة وعرفت ما يعمل بالبطارية وما يحتاج كهرباء المنزل. افتح الآن لوحة تقرير المحقق لتتويج نجاحك!',
+      'All active devices have been discovered successfully! You can now view the Detective Report!'
     );
   }
 
-  const mainsDev = activeIds.find(id => DEVICE_MAP[id]?.type === 'mains') || 'fridge';
-  if ((discovered.includes(mainsDev + '_incompatible') || discovered.includes('fridge_incompatible')) && !discovered.includes(mainsDev + '_mains') && !discovered.includes('fridge_mains')) {
+  const targetDevId = uncompleted[0];
+  const dev = DEVICE_MAP[targetDevId];
+  const devName = (isAr ? deviceNames.ar[targetDevId] : deviceNames.en[targetDevId]) || targetDevId;
+
+  if (dev.type === 'battery') {
     return bi(s,
-      '🔌 توجيه شرارة: لاحظنا أن البطارية الصغيرة لا تكفي لتشغيل الثلاجة! جرّب الآن مشاهدة عرض شرارة على لوحة كهرباء المنزل لتشاهد مصدرها الحقيقي.',
-      'Try Sharara’s demonstration on the household electricity panel to see the refrigerator run on mains power.'
+      `💡 تلميح شرارة: جهاز «${devName}» مصمم ليكون خفيفاً ومحمولاً ويستهلك ${dev.watts}. اسحب البطارية الجافة إليه وشاهد ما سيحدث!`,
+      `Hint: "${devName}" is lightweight and uses ${dev.watts}. Drag the dry battery to it to test!`
+    );
+  } else {
+    return bi(s,
+      `🔌 تلميح شرارة: جهاز «${devName}» يحتاج طاقة قوية تتعدى ${dev.watts}. اسحب قابس كهرباء المنزل 220V إليه لتشغيله بنجاح!`,
+      `Hint: "${devName}" needs high power (${dev.watts}). Connect the 220V mains plug to power it!`
     );
   }
-
-  const unexplored = activeIds.filter(id => !explored.includes(id));
-  if (unexplored.length > 0) {
-    const nextDev = unexplored[0];
-    const nextName = (isAr ? deviceNames.ar[nextDev] : deviceNames.en[nextDev]) || nextDev;
-    const isMains = DEVICE_MAP[nextDev]?.type === 'mains';
-    return bi(s,
-      `💡 توجيه شرارة: أحسنت في استكشاف الأجهزة السابقة! حان دور «${nextName}». ${isMains ? 'هل تتوقع أن تكفيه بطاريتنا الصغيرة أم يحتاج كهرباء المنزل؟ جرّب وضعه عليه!' : 'اختر البطارية وجرب تركيبها فيه ولاحظ مكان القطبين.'}`,
-      `Choose the battery, then try "${nextName}". Observe its compartment and power source.`
-    );
-  }
-
-  return bi(s,
-    '🏆 توجيه شرارة: رائع ومبهر! لقد استكشفت جميع الأجهزة وعرفت ما يعمل بالبطارية وما يحتاج كهرباء المنزل. افتح الآن جدول المقارنة أو ابدأ الاختبار لتتويج نجاحك!',
-    'The car and radio are designed for this battery. The refrigerator needs household electricity. You can open the comparison or quiz now!'
-  );
 }
 
 export function why(s, q, now) {
   const normQ = normalize(q);
   const named = deviceIn(normQ, s);
   const activeIds = Object.keys(s?.devices || {});
-  const activeNames = (activeIds.length ? activeIds : ['car', 'radio', 'fridge']).map(id => deviceNames[s?.language === 'en' ? 'en' : 'ar'][id] || id);
+  const activeNames = (activeIds.length ? activeIds : Object.keys(DEVICE_MAP).slice(0, 4)).map(id => deviceNames[s?.language === 'en' ? 'en' : 'ar'][id] || id);
   const clarifyText = s?.language === 'en'
     ? `Do you mean ${activeNames.slice(0, 3).join(', ')}? Choose a device to understand what happened.`
     : (activeNames.length <= 3
         ? `تقصد ${activeNames.join(' أم ')}؟ اختر الجهاز لنفهم ما حدث.`
         : `تقصد ${activeNames.slice(0, 3).join(' أم ')}؟ اختر الجهاز لنفهم ما حدث.`);
 
-  if (named.length > 1) return {text: clarifyText, clarify: true};
+  if (named.length > 1) return { text: clarifyText, clarify: true };
   const recent = s.lastRelevantEvent && now - s.lastRelevantEvent.time < config.contextMaxAgeMs;
   let d = named[0] || (recent ? (s.lastRelevantEvent.device || s.lastAttempt?.device) : null);
-  if (!d) return {text: clarifyText, clarify: true};
+  if (!d) return { text: clarifyText, clarify: true };
 
-  const st = s.devices[d] || {status: 'off'};
-  const negative = /ما اشتغل|لم يعمل|لم تعمل|لا يعمل|متوقف|توقف|off|not work/.test(q);
+  const st = s.devices[d] || { status: 'off' };
+  const negative = /ما اشتغل|لم يعمل|لم تعمل|لا يعمل|متوقف|توقف|off|not work|طفت|طافي|خربان/.test(q);
   const meta = DEVICE_MAP[d];
   const devName = (s?.language === 'en' ? deviceNames.en[d] : deviceNames.ar[d]) || d;
 
   if (st.status === 'running') {
     return {
       text: negative
-        ? bi(s, `${devName} يعمل الآن. ${st.source === 'mains' || d === 'fridge' ? 'مصدره كهرباء المنزل، ويظهر مؤشر التبريد.' : 'البطارية متصلة بقطبي الحجرة وتزوّده بالطاقة.'}`,
-                `${devName} is running now. ${st.source === 'mains' || d === 'fridge' ? 'It uses household power and shows a cooling indicator.' : 'The battery is connected at both terminals and supplies energy.'}`)
-        : bi(s, d === 'car' ? 'الكهرباء من البطارية شغّلت محرك سيارة اللعبة. لهذا شاهدنا حركتها. 💡 جرّب الآن نقل البطارية إلى الراديو لنسمع صوته!' : d === 'radio' ? 'هذا الراديو المحمول مصمم لهذه البطارية المناسبة؛ حوّل جزءًا من طاقتها إلى صوت.' : (meta?.reason || 'الثلاجة تعمل لأن التغذية من شبكة المنزل تناسب متطلباتها.'),
-                d === 'car' ? 'Electrical energy from the battery powers the toy’s motor. That is why it moves.' : d === 'radio' ? 'This portable radio is designed for this suitable battery and converts some of its energy into sound.' : (meta?.reason || 'The refrigerator runs because household power meets its requirements.')),
+        ? bi(s, `${devName} يعمل الآن بنجاح وتصله الطاقة المناسبة.`, `${devName} is currently running with the proper power source.`)
+        : bi(s, meta?.reason || `${devName} يعمل لأن مصدر الطاقة متصل بشكل سليم.`, meta?.reason || `${devName} is running because power is supplied.`),
       d
     };
   }
 
-  if (d === 'fridge' && s.discoveredFacts.includes('fridge_incompatible') && st.reason !== 'demo_stopped') {
-    return {text: bi(s, 'جرّبت البطارية مع الثلاجة، لكنها لم تعمل بها. هذه البطارية الصغيرة لا توفر التغذية التي تحتاجها ثلاجة المنزل في تجربتنا. 💡 يمكنك الآن الضغط على عرض كهرباء المنزل لتشاهد كيف تعمل بأمان عبر شبكة المنزل!', 'You tried the battery with the refrigerator, but it did not power it. This small battery does not provide the supply our home refrigerator needs.'), d};
+  // إذا لم نقم بأي تجربة على الجهاز وسأل لماذا تحرك / اشتغل (سؤال إيجابي عن جهاز متوقف لم يجرب)
+  if (!negative && (s.attemptsByDevice?.[d] === 0 || !s.attemptsByDevice?.[d]) && !s.discoveredFacts?.includes(d + '_battery') && !s.discoveredFacts?.includes(d + '_mains')) {
+    return {
+      text: bi(s, `لم نسجل حركة أو تشغيلاً لجهاز ${devName} في تجربتنا بعد. جرّب توصيل مصدر الطاقة المناسب له أولاً!`, `We have not recorded an experiment for ${devName} yet. Try powering it first!`),
+      d
+    };
   }
-
-  if (st.reason === 'transferred') return {text: bi(s, 'توقف الجهاز لأنك نقلت البطارية منه. بقي اكتشافك محفوظًا؛ يمكنك إعادة البطارية إلى حجرته.', 'It stopped because you moved the battery away. Your discovery is saved; you can return the battery to its compartment.'), d};
-  if (st.reason === 'removed') return {text: msg(s, 'remove'), d};
-  if (st.reason === 'demo_stopped') return {text: msg(s, 'stopMains'), d};
 
   if (meta && (s.discoveredFacts.includes(d + '_incompatible') || (s.lastAttempt?.device === d && meta.type === 'mains')) && st.reason !== 'demo_stopped') {
-    const wrongMsg = meta.wrongReason || `جرّبت البطارية مع ${devName}، لكنها لم تعمل؛ لأن هذا الجهاز يحتاج لكهرباء المنزل الرئيسية.`;
-    return {text: bi(s, wrongMsg, `You tried the battery with ${devName}, but it did not work; this device needs household electricity.`), d};
+    const wrongMsg = d === 'fridge'
+      ? 'جرّبت البطارية مع الثلاجة، لكن هذه البطارية الصغيرة لا تناسب ثلاجة المنزل في تجربتنا. الثلاجة تعمل بالكهرباء لا بالبطارية.'
+      : (meta.wrongReason || `جرّبت البطارية مع ${devName}، لكنها لم تعمل؛ لأن هذا الجهاز يحتاج لكهرباء المنزل الرئيسية 220V.`);
+    return { text: bi(s, wrongMsg, `You tried the battery with ${devName}, but it did not work; this device needs 220V mains electricity.`), d };
   }
-  if (/لماذا|ليه|why/.test(q) && named.length && /تحرك|اشتغل|تعمل|عملت/.test(q) && !negative) {
-    return {text: bi(s, 'لم نسجل هذه التجربة بعد. تتوقع ماذا سيحدث؟ يمكنك التجربة ثم نلاحظ معًا.', 'We have not recorded that experiment yet. What do you predict? Try it and we can observe together.'), d};
-  }
+
+  if (st.reason === 'transferred') return { text: bi(s, `توقف ${devName} لأنك نقلت البطارية منه إلى جهاز آخر.`, `Device stopped because you transferred the battery to another device.`), d };
+  if (st.reason === 'removed') return { text: msg(s, 'remove'), d };
+  if (st.reason === 'demo_stopped') return { text: msg(s, 'stopMains'), d };
 
   const defaultExpl = meta
     ? (meta.type === 'mains'
-        ? `${devName} يحتاج إلى كهرباء المنزل (220V) لأن طاقته المطلوبة عالية ولا تكفيه البطارية الصغيرة. جرب توصيله بالفيشة!`
-        : `${devName} مصمم ليعمل بالبطارية الجافة الآمنة. جرب تركيب البطارية فيه!`)
-    : 'لم يتصل بالجهاز مصدر مناسب بعد. يمكنك اختيار البطارية ثم الجهاز وملاحظة النتيجة.';
+        ? `${devName} يحتاج إلى كهرباء المنزل (220V) لأن قدرته المطلوبة (${meta.watts}) عالية ولا تكفيه البطارية الصغيرة. جرب توصيله بالفيشة!`
+        : `${devName} مصمم ليعمل بالبطارية الجافة الآمنة (${meta.voltage}). جرب تركيب البطارية فيه!`)
+    : 'لم يتصل بالجهاز مصدر مناسب بعد. اختر البطارية أو القابس ثم الجهاز وملاحظة النتيجة.';
 
-  return {text: bi(s, defaultExpl, 'No suitable source has been connected yet. Choose the power source then the device and observe the result.'), d};
+  return { text: bi(s, defaultExpl, 'No suitable source has been connected yet. Choose the power source then the device.'), d };
 }
 
-export function answerQuestion(input, s, {now = Date.now(), repeat = 0, history = []} = {}) {
+export function answerQuestion(input, s, { now = Date.now(), repeat = 0, history = [] } = {}) {
   const q = normalize(input), actions = nextActions(s);
-  let intent = 'fallback', text = bi(s, 'أساعدك هنا في البطاريات والأجهزة. ماذا تريد أن تعرف عنها؟', 'I help with batteries and devices here. What would you like to know about them?'), ref = null, confidence = .2;
+  let intent = 'fallback', text = bi(s, 'أساعدك هنا في مصادر الكهرباء والأجهزة. ماذا تريد أن تسألني يا بطل؟', 'I help with batteries and appliances. What would you like to ask?'), ref = null, confidence = .2;
 
   if (!q) {
     intent = 'empty';
-    text = bi(s, 'ما سؤالك؟ يمكنك اختيار سؤال جاهز أو طلب تلميح.', 'What is your question? Choose a suggested question or ask for a hint.');
+    text = bi(s, 'ما سؤالك؟ يمكنك اختيار سؤال مقترح من الأسفل أو طلب تلميح.', 'What is your question? Choose a suggested question below or ask for a hint.');
   } else if (q.length > 400) {
     intent = 'long';
-    text = bi(s, 'لنسأل سؤالًا قصيرًا عن جهاز واحد، حتى أساعدك بوضوح.', 'Please ask a short question about one device so I can help clearly.');
+    text = bi(s, 'لنسأل سؤالاً قصيراً وواضحاً عن جهاز واحد لأساعدك بدقة.', 'Please ask a short question about one appliance.');
   } else {
     const namedDevices = deviceIn(q, s);
     const lastAssistantMsg = history?.filter?.(h => h.role === 'assistant').at(-1);
@@ -524,10 +572,10 @@ export function answerQuestion(input, s, {now = Date.now(), repeat = 0, history 
       if (k.actions) actions.splice(0, actions.length, ...k.actions);
       if (k.dynamic === 'hint') text = hint(s);
       if (k.dynamic === 'list_devices') {
-        const activeIds = s?.devices ? Object.keys(s.devices) : (config.devices || ['car', 'radio', 'fridge']);
+        const activeIds = s?.devices ? Object.keys(s.devices) : (config.devices || Object.keys(DEVICE_MAP).slice(0, 4));
         if (s.language === 'en') {
-          const names = activeIds.map(id => DEVICE_MAP[id]?.id || deviceNames.en[id] || id);
-          text = `The active appliances on our table right now (${activeIds.length} devices) are: ${names.join(', ')}. Some need the dry battery, and others need the mains socket!`;
+          const names = activeIds.map(id => DEVICE_MAP[id]?.nameEn || deviceNames.en[id] || id);
+          text = `The active appliances on our table right now (${activeIds.length} devices) are: ${names.join(', ')}. Some need the dry battery, and others need the 220V mains socket!`;
         } else {
           const names = activeIds.map(id => `«${DEVICE_MAP[id]?.name || deviceNames.ar[id] || id}»`);
           const formatted = names.length > 1
@@ -538,8 +586,8 @@ export function answerQuestion(input, s, {now = Date.now(), repeat = 0, history 
       }
       if (k.dynamic === 'where') {
         text = s.selectedDevice
-          ? bi(s, `اختر البطارية ثم ${deviceNames.ar[s.selectedDevice] || s.selectedDevice}. سنجرّب تركيبها في مكانها الصحيح على الشاشة.`, `Choose the battery then ${deviceNames.en[s.selectedDevice] || s.selectedDevice}. We will try it in its proper place on screen.`)
-          : bi(s, 'تقصد السيارة أم الراديو أم الثلاجة؟ اختر الجهاز أولًا.', 'Do you mean the car, radio or refrigerator? Choose a device first.');
+          ? bi(s, `اختر البطارية ثم ${deviceNames.ar[s.selectedDevice] || s.selectedDevice}. سنركبها في حجرتها الصحيحة على الشاشة.`, `Choose the battery then ${deviceNames.en[s.selectedDevice] || s.selectedDevice}. We will place it in its bay.`)
+          : bi(s, 'حدد الجهاز أولاً من الأجهزة المعروضة لنوجهك لمكان تركيبه.', 'Choose an active device first to guide you.');
       }
       if (k.dynamic === 'why') {
         const r = why(s, q, now);
@@ -549,11 +597,11 @@ export function answerQuestion(input, s, {now = Date.now(), repeat = 0, history 
         ref = !r.clarify && s.lastRelevantEvent?.id || null;
       }
       if (k.dynamic === 'sound') {
-        text = (s.devices.radio?.status !== 'running')
-          ? bi(s, 'الراديو متوقف الآن لأن البطارية غير متصلة به. جرّب تركيبها أولًا.', 'The radio is off because the battery is not connected. Try placing it first.')
+        text = (s.devices.radio && s.devices.radio.status !== 'running')
+          ? bi(s, 'الراديو متوقف الآن لأن البطارية غير متصلة به. جرّب تركيبها أولاً.', 'The radio is off because the battery is not connected.')
           : s.muted
-          ? bi(s, 'الراديو يعمل، لكن الصوت مكتوم. الموجات المرئية تؤكد تشغيله؛ يمكنك تفعيل الصوت.', 'The radio is running, but sound is muted. The visible waves show it is on; you can enable sound.')
-          : bi(s, 'الراديو يعمل ويعزف مقطعًا قصيرًا فقط. الموجات كافية للملاحظة؛ يمكنك إعادة تشغيل المقطع بزر الاستماع للراديو.', 'The radio is running and plays only a short tune. Its visible waves are enough to observe; use the radio replay button to hear it again.');
+          ? bi(s, 'الراديو يعمل، لكن الصوت مكتوم. يمكنك تفعيل الصوت عبر زر الصوت في الأعلى.', 'The radio is on, but master sound is muted. Enable it from the sound button.')
+          : bi(s, 'الراديو يعمل بنجاح ويعزف نغمات موسيقية واضحة.', 'The radio is running and playing clear musical notes.');
         ref = s.lastRelevantEvent?.id || null;
       }
       const second = matches.find(x => x.id !== k.id && !['why', 'battery', 'chemistry'].includes(x.id) && !x.dynamic);
@@ -561,29 +609,59 @@ export function answerQuestion(input, s, {now = Date.now(), repeat = 0, history 
         text += ' ' + second[s.language === 'en' ? 'en' : 'ar'];
       }
     } else if (namedDevices.length === 1) {
-      // The student answered with a single device name (or responded to clarification or asked about a device)
       const d = namedDevices[0];
       const r = why(s, wasClarifying ? ('لماذا لم يعمل ' + d) : ('لماذا ' + d), now);
       text = r.text;
       intent = wasClarifying ? 'why' : 'device_info';
       confidence = .9;
       ref = s.lastRelevantEvent?.id || null;
-      if (validAction(s, {id: 'select_device', device: d})) {
-        actions.unshift({id: 'select_device', device: d});
+      if (validAction(s, { id: 'select_device', device: d })) {
+        actions.unshift({ id: 'select_device', device: d });
       }
     }
   }
 
   if (repeat % 2 === 1 && !['empty', 'long', 'fallback', 'clarify'].includes(intent)) {
-    text = bi(s, 'لننظر إليها بطريقة أخرى: ', 'Let’s look at it another way: ') + text;
+    text = bi(s, 'لننظر إليها بطريقة أخرى: ', 'Let us look at it another way: ') + text;
+  }
+
+  // اقتراح 3 أسئلة جاهزة عند انخفاض الثقة
+  let suggestedQuestions = [];
+  if (confidence < 0.6) {
+    suggestedQuestions = [
+      'ما هي الأجهزة المعروضة؟',
+      'لماذا تختلف مصادر الكهرباء؟',
+      'أريد تلميحاً للمساعدة'
+    ];
   }
 
   return {
     intent,
     text,
     suggestedActions: actions.filter(a => validAction(s, a)).filter((a, i, arr) => arr.findIndex(b => JSON.stringify(a) === JSON.stringify(b)) === i).slice(0, 2),
+    suggestedQuestions,
     referencedEventId: ref,
     stateRevision: s.revision,
     confidence
   };
+}
+
+// دالة المحادثة الخارجية (Optional Remote AI Integration - Disabled by default)
+export async function askRemote(question, state, options = {}) {
+  if (!options.enabled || !options.endpoint) {
+    return answerQuestion(question, state);
+  }
+  try {
+    const res = await fetch(options.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, devices: Object.keys(state.devices || {}) }),
+      signal: AbortSignal.timeout(3500)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.text) return { intent: 'remote', text: data.text, confidence: 0.95 };
+    }
+  } catch {}
+  return answerQuestion(question, state);
 }

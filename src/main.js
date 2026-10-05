@@ -1,21 +1,27 @@
-import {config,copy,deviceNames,msg,DEVICE_MAP} from './config.js';
-import {initialState,reducer,explorationDone,quizDone,validAction,nextActions} from './state.js';
-import {answerQuestion,normalize} from './knowledge.js';
-import {icon,robotSvg} from './icons.js';
-import {stopAudio,radioTune,speak,speakIntro,speakToolPick,speakDropSuccess,speakDropIncompatible,speakHint} from './audio.js';
-import {launchArGateway} from './ar.js';
+// ═══════════════════════════════════════════════════════════════════════════
+// src/main.js — المتحكم الرئيسي لمختبر شرارة المتحرك 3D
+// كاميرا الكشف (Viewfinder HUD)، محرك التوجيه الذكي، مقياس القدرة، ولوحة تقرير المحقق
+// ═══════════════════════════════════════════════════════════════════════════
 
-// التأكد من استرجاع التفضيلات العامة فقط (الصوت، تقليل الحركة، اللغة) دون حفظ حالة الأجهزة أو التوصيل
+import { config, copy, deviceNames, msg, DEVICE_MAP, ALL_DEVICES, pickRandomDevices } from './config.js';
+import { initialState, reducer, explorationDone, quizDone, validAction, nextActions } from './state.js';
+import { answerQuestion, normalize } from './knowledge.js';
+import { icon, robotSvg } from './icons.js';
+import { stopAudio, radioTune, speak, speakIntro, speakToolPick, speakDropSuccess, speakDropIncompatible, speakHint, speakKey, getAudioDiagnostics } from './audio.js';
+import { launchArGateway } from './ar.js';
+import { coach } from './coach.js';
+
+// استرجاع التفضيلات العامة فقط
 let rawPrefs = {};
 try { rawPrefs = JSON.parse(localStorage.getItem('sharara-preferences') || '{}'); } catch {}
 const prefs = {
-  muted: typeof rawPrefs.muted === 'boolean' ? rawPrefs.muted : true,
+  muted: typeof rawPrefs.muted === 'boolean' ? rawPrefs.muted : false,
   reducedMotion: typeof rawPrefs.reducedMotion === 'boolean' ? rawPrefs.reducedMotion : (typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)').matches : false),
   language: rawPrefs.language === 'en' ? 'en' : 'ar',
   ageRange: Array.isArray(rawPrefs.ageRange) ? rawPrefs.ageRange : [6, 9]
 };
 
-// تفريغ أي تخزين مؤقت قديم للتوصيل لضمان بدء التجربة نظيفة تماماً في كل Reload
+// تفريغ أي تخزين مؤقت قديم لضمان بدء تجربة نظيفة تماماً
 try {
   sessionStorage.removeItem('sharara-session');
   sessionStorage.removeItem('sharara-state');
@@ -25,11 +31,14 @@ try {
 
 let state = initialState(prefs);
 let scene = null, seq = 0, pendingDevice = null, drag = null, idleTimer = null, modalOpener = null, tutorial = false;
+let isCameraPassthroughActive = false;
+let showPowerMeterManual = false;
+let powerMeterTargetDev = null;
 const history = [], counts = new Map(), app = document.querySelector('#app');
 
 const $ = s => document.querySelector(s);
 const t = () => copy[state.language];
-const name = id => deviceNames[state.language][id] || id;
+const name = id => (state.language === 'en' ? (DEVICE_MAP[id]?.nameEn || id) : (DEVICE_MAP[id]?.name || id));
 const shortName = id => {
   const shortMap = {
     car: 'السيارة', toyCar: 'سيارة ألعاب', radio: 'الراديو', flashlight: 'شعلة جيب',
@@ -65,14 +74,14 @@ function playClickSound() {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
-    const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime;
+    const osc = ctx.createOscillator(), gain = ctx.createGain(), tm = ctx.currentTime;
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(620, t);
-    osc.frequency.exponentialRampToValueAtTime(260, t + 0.05);
-    gain.gain.setValueAtTime(0.18, t);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    osc.frequency.setValueAtTime(620, tm);
+    osc.frequency.exponentialRampToValueAtTime(260, tm + 0.05);
+    gain.gain.setValueAtTime(0.18, tm);
+    gain.gain.exponentialRampToValueAtTime(0.001, tm + 0.05);
     osc.connect(gain); gain.connect(ctx.destination);
-    osc.start(t); osc.stop(t + 0.05);
+    osc.start(tm); osc.stop(tm + 0.05);
   } catch {}
 }
 
@@ -81,9 +90,9 @@ function playSuccessSound() {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
-    const notes = [523.25, 659.25, 783.99, 1046.50], t = ctx.currentTime;
+    const notes = [523.25, 659.25, 783.99, 1046.50], tm = ctx.currentTime;
     notes.forEach((freq, idx) => {
-      const osc = ctx.createOscillator(), gain = ctx.createGain(), start = t + idx * 0.07, dur = 0.28;
+      const osc = ctx.createOscillator(), gain = ctx.createGain(), start = tm + idx * 0.07, dur = 0.28;
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, start);
       gain.gain.setValueAtTime(0.001, start);
@@ -100,9 +109,9 @@ function playErrorSound() {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
-    const freqs = [240, 180], t = ctx.currentTime;
+    const freqs = [240, 180], tm = ctx.currentTime;
     freqs.forEach((freq, idx) => {
-      const osc = ctx.createOscillator(), gain = ctx.createGain(), start = t + idx * 0.09, dur = 0.12;
+      const osc = ctx.createOscillator(), gain = ctx.createGain(), start = tm + idx * 0.09, dur = 0.12;
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, start);
       gain.gain.setValueAtTime(0.16, start);
@@ -178,6 +187,7 @@ function shell() {
   const c = t();
   const currentIds = Object.keys(state.devices);
   const navBase = typeof window !== 'undefined' && window.location.pathname.includes('/public/') ? '../' : './';
+  const isDebugAudio = typeof window !== 'undefined' && window.location.search.includes('debugAudio=1');
 
   app.innerHTML = `
    <header class="header compact-header">
@@ -200,6 +210,31 @@ function shell() {
      <div class="workspace">
        <div class="scene-wrap">
          <div id="scene" role="img" aria-label="${c.lab}"></div>
+
+         <!-- كاميرا الكشف الافتتاحية (Viewfinder HUD) -->
+         <div class="viewfinder-hud" id="viewfinder-hud">
+           <div class="viewfinder-corner tl"></div>
+           <div class="viewfinder-corner tr"></div>
+           <div class="viewfinder-corner bl"></div>
+           <div class="viewfinder-corner br"></div>
+           <div class="scan-laser-line"></div>
+
+           <div class="viewfinder-top-bar">
+             <span class="viewfinder-status-tag">
+               <i class="hud-pulse-dot"></i>
+               <span>كاميرا الكشف الذكية: ${currentIds.length} أجهزة</span>
+             </span>
+             <div class="viewfinder-actions">
+               <button type="button" class="viewfinder-btn" data-action="togglePassthrough" id="camera-passthrough-btn" title="تبديل بين كاميرا الجوال والخلفية الافتراضية">
+                 📷 <span>كاميرا الجهاز</span>
+               </button>
+               <button type="button" class="viewfinder-btn" data-action="skipIntro" title="تخطي الحركة الافتتاحية">
+                 ⏩ <span>تخطي</span>
+               </button>
+             </div>
+           </div>
+         </div>
+
          <div class="scene-top">
            <span class="room-tag"><i></i>${c.available}</span>
            <div class="camera-tools">
@@ -208,29 +243,67 @@ function shell() {
              ${button('resetView', c.resetView, 'refresh', 'icon-only')}
            </div>
          </div>
+
+         <!-- شريط بطاقات الأجهزة للتصنيف والتوقع السريع -->
          <div id="scene-labels" class="scene-labels-stack">
-            ${currentIds.map(id => `<button class="scene-label-stack-item" data-action="device" data-device="${id}" data-target="${id}" id="label-${id}"><span class="label-status-dot" id="dot-${id}">○</span><strong class="label-name">${shortName(id)}</strong><span class="label-badge badge-off" id="badge-${id}">متوقف</span></button>`).join('')}
-          </div>
+           ${currentIds.map((id, index) => {
+             const pred = state.predictionByDevice?.[id];
+             const predIcon = pred === true ? '🔋' : pred === false ? '🔌' : '❓';
+             return `
+               <div class="scene-label-stack-item" id="label-${id}">
+                 <button class="label-main-tap" data-action="device" data-device="${id}" data-target="${id}">
+                   <span class="label-status-dot" id="dot-${id}">○</span>
+                   <strong class="label-name">#${index + 1} ${shortName(id)}</strong>
+                   <span class="label-badge badge-off" id="badge-${id}">متوقف</span>
+                 </button>
+                 <div class="label-prediction-btns">
+                   <button type="button" class="label-pred-btn ${pred === true ? 'active-battery' : ''}" data-action="quickPredict" data-device="${id}" data-val="battery" title="أتوقع: بطارية جافة">🔋</button>
+                   <button type="button" class="label-pred-btn ${pred === false ? 'active-mains' : ''}" data-action="quickPredict" data-device="${id}" data-val="mains" title="أتوقع: كهرباء المنزل">🔌</button>
+                 </div>
+               </div>
+             `;
+           }).join('')}
+         </div>
+
          <div id="fallback-panel" hidden>
            <div class="fallback-illustration">${icon('battery')}${icon('car')}${icon('radio')}${icon('fridge')}</div>
            <h2>${c.fallback}</h2>
            <p>${c.guide}</p>
          </div>
+
          <div class="scene-caption">${icon('hand')}<span id="scene-guide">${c.guide}</span></div>
 
-         <!-- أدوات الطاقة المباشرة المبسطة بملصقات واضحة وإيموجي للأطفال -->
-          <div class="table-power-dock" id="table-power-dock">
-            <button id="battery-button" data-action="pick" class="dock-power-btn battery-dock-btn" aria-pressed="false" title="اسحب البطارية لأي جهاز لتجربتها">
-              <span class="power-emoji">🔋</span>
-              <span class="power-title">بطارية جافة</span>
-            </button>
-            <button id="mains-button" data-action="pickMains" class="dock-power-btn mains-dock-btn" aria-pressed="false" title="اسحب الفيشة لأي جهاز لتجربتها">
-              <span class="power-emoji">🔌</span>
-              <span class="power-title">فيشة الكهرباء الرئيسية</span>
-            </button>
-          </div>
+         <!-- مقياس القدرة المدمج (Power Meter Widget) -->
+         <div class="power-meter-container" id="power-meter-widget" hidden style="display:none;">
+           <div class="power-meter-header">
+             <span class="power-meter-title">⚡ مقياس مقارنة القدرة الكهربائية</span>
+             <button type="button" class="power-meter-close" data-action="closePowerMeter">✕</button>
+           </div>
+           <div class="power-meter-bars" id="power-meter-bars">
+             <div class="power-meter-row">
+               <span class="power-meter-label">🔋 طاقة البطارية:</span>
+               <div class="power-meter-track"><div class="power-meter-fill battery-fill"></div></div>
+               <span class="power-meter-val">1.5V – 3V (~2 واط)</span>
+             </div>
+             <div class="power-meter-row">
+               <span class="power-meter-label" id="power-meter-dev-label">🔌 حاجة الجهاز:</span>
+               <div class="power-meter-track"><div class="power-meter-fill device-fill"></div></div>
+               <span class="power-meter-val" id="power-meter-dev-val">220V (~2000 واط)</span>
+             </div>
+           </div>
+         </div>
 
-           
+         <!-- أدوات الطاقة المباشرة المبسطة بملصقات واضحة وإيموجي للأطفال -->
+         <div class="table-power-dock" id="table-power-dock">
+           <button id="battery-button" data-action="pick" class="dock-power-btn battery-dock-btn" aria-pressed="false" title="اسحب البطارية لأي جهاز لتجربتها">
+             <span class="power-emoji">🔋</span>
+             <span class="power-title">بطارية جافة</span>
+           </button>
+           <button id="mains-button" data-action="pickMains" class="dock-power-btn mains-dock-btn" aria-pressed="false" title="اسحب الفيشة لأي جهاز لتجربتها">
+             <span class="power-emoji">🔌</span>
+             <span class="power-title">فيشة الكهرباء الرئيسية</span>
+           </button>
+         </div>
 
          <div id="intro" class="intro-card">
            <span class="intro-bolt">${icon('bolt')}</span>
@@ -238,6 +311,7 @@ function shell() {
            <p>${c.intro}</p>
            ${button('start', c.start, 'arrow', 'primary')}
          </div>
+
          <div id="tutorial" class="tutorial-card" hidden>
            <div class="tutorial-path">${icon('battery')}<span>······</span>${icon('car')}</div>
            <h2>${c.tutorialTitle}</h2>
@@ -247,7 +321,7 @@ function shell() {
          </div>
        </div>
 
-       <!-- شريط التغذية الراجعة الحي والمباشر أسفل الطاولة (بديل الكروت والـ alert) -->
+       <!-- شريط التغذية الراجعة الحي والمباشر أسفل الطاولة -->
        <section class="bottom-feedback-bar" id="bottom-feedback-bar" aria-live="polite">
          <div class="feedback-avatar-wrap">
            <div class="feedback-spark-avatar">⚡</div>
@@ -264,6 +338,9 @@ function shell() {
            <p class="live-feedback-text" id="live-feedback-text">${state.message || c.intro}</p>
          </div>
          <div class="feedback-bar-actions">
+           <button type="button" class="bar-report-btn" data-action="openDetectiveReport" title="عرض لوحة تقرير المحقق">
+             📊 <span>تقرير المحقق</span>
+           </button>
            <button type="button" class="bar-reset-btn" data-action="reset" title="توليد 4 أجهزة عشوائية جديدة">
              🔄 <span>أجهزة جديدة</span>
            </button>
@@ -290,7 +367,6 @@ function shell() {
          </div>
        </div>
 
-       <!-- شريط تذييل مدمج وخفيف -->
        <footer class="compact-footer sr-only">
          <span>${icon('shield')}${c.safety}</span>
          ${button('reset', c.reset, 'refresh', 'text-button')}
@@ -298,7 +374,23 @@ function shell() {
      </div>
    </main>
 
-   <!-- النافذة المركزية المنبثقة للتغذية الراجعة المباشرة أمام الطالب -->
+   <!-- نافذة لوحة تقرير المحقق (Detective Report Modal) -->
+   <div id="detective-report-modal" class="detective-report-modal" hidden style="display:none;">
+     <div class="detective-report-card">
+       <div class="detective-report-header">
+         <div class="detective-report-badge">🕵️‍♂️ ⚡</div>
+         <h2 class="detective-report-title">لوحة تقرير المحقق الصغير</h2>
+         <p class="detective-report-subtitle">ملخص استكشاف الأجهزة الأربعة ومقارنة التوقعات بالنتائج العلمية</p>
+       </div>
+       <div id="detective-report-table-wrap"></div>
+       <div class="detective-report-actions">
+         <button type="button" class="primary" data-action="newRoundFromReport">🔄 جولة جديدة بأجهزة أخرى</button>
+         <button type="button" class="secondary" data-action="closeDetectiveReport">متابعة الاستكشاف</button>
+       </div>
+     </div>
+   </div>
+
+   <!-- النافذة المركزية المنبثقة للتغذية الراجعة المباشرة -->
    <div id="central-feedback" class="central-feedback-overlay" hidden style="display: none;">
      <div class="central-feedback-card" id="central-feedback-card">
        <div class="feedback-badge" id="feedback-badge">🎉 أحسنت بطلنا الصغير!</div>
@@ -319,7 +411,7 @@ function shell() {
      </div>
      <div id="chat-history" role="log" aria-live="polite"></div>
      <div class="quick-questions">
-       ${(state.language === 'ar' ? ['ماذا أفعل؟', 'لماذا لم يعمل؟', 'هل البطارية فيها كهرباء؟'] : ['What do I do next?', 'Why is it off?', 'Does a battery have electricity?']).map(q => button('quickQuestion', q, null, 'question-chip', `data-question="${q}"`)).join('')}
+       ${(state.language === 'ar' ? ['ما هي الأجهزة؟', 'لماذا لم يعمل؟', 'هل البطارية فيها كهرباء؟'] : ['What devices are here?', 'Why is it off?', 'Does a battery have electricity?']).map(q => button('quickQuestion', q, null, 'question-chip', `data-question="${q}"`)).join('')}
      </div>
      <form id="chat-form">
        <label class="sr-only" for="question">${c.ask}</label>
@@ -331,6 +423,8 @@ function shell() {
 
    <dialog id="dialog"><div id="dialog-content"></div></dialog>
    <div id="drag-ghost" hidden></div>
+
+   ${isDebugAudio ? `<div class="audio-diag-badge" id="audio-diag-badge">Audio: Initializing...</div>` : ''}
   `;
 
   document.documentElement.lang = state.language;
@@ -340,14 +434,108 @@ function shell() {
   $('#dialog').addEventListener('close', () => { modalOpener?.focus?.(); });
   $('#chat-form').addEventListener('submit', e => { e.preventDefault(); ask($('#question').value); $('#question').value = ''; });
   
-  // تفعيل سحب وإفلات البطاريات والفيشات باللمس الحقيقي للجوالات والماوس للديسكتوب
   initTouchDragSupport();
 
-  // إغلاق نافذة التغذية الراجعة المركزية
   $('#feedback-confirm-btn')?.addEventListener('click', hideCentralFeedback);
   $('#central-feedback')?.addEventListener('click', e => { if (e.target.id === 'central-feedback') hideCentralFeedback(); });
   
   render();
+}
+
+function renderDetectiveReport() {
+  const currentIds = Object.keys(state.devices || {});
+  const rows = currentIds.map(id => {
+    const meta = DEVICE_MAP[id] || {};
+    const pred = state.predictionByDevice?.[id];
+    const actualSource = meta.type === 'battery' ? 'battery' : 'mains';
+    const predSource = pred === true ? 'battery' : pred === false ? 'mains' : null;
+    const isMatch = predSource === actualSource;
+
+    const predChip = predSource === 'battery'
+      ? '<span class="report-chip match">🔋 بطارية</span>'
+      : predSource === 'mains'
+      ? '<span class="report-chip match">🔌 كهرباء 220V</span>'
+      : '<span class="report-chip">لم تتوقع</span>';
+
+    const actualChip = actualSource === 'battery'
+      ? '<span class="report-chip match">🔋 بطارية جافة</span>'
+      : '<span class="report-chip different">🔌 كهرباء المنزل 220V</span>';
+
+    const matchBadge = predSource === null
+      ? '—'
+      : isMatch
+      ? '<span style="color:#0E7C7B;font-weight:900;">✅ متطابق</span>'
+      : '<span style="color:#C05621;font-weight:900;">🔍 اكتشاف جديد</span>';
+
+    return `
+      <tr>
+        <td><strong>${meta.name || id}</strong></td>
+        <td>${predChip}</td>
+        <td>${actualChip}</td>
+        <td>${matchBadge}</td>
+        <td style="font-size:0.75rem;text-align:start;max-width:200px;">${meta.reason || '—'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const html = `
+    <table class="detective-report-table">
+      <thead>
+        <tr>
+          <th>الجهاز</th>
+          <th>توقعي 🔮</th>
+          <th>النتيجة العلمية 🧪</th>
+          <th>المطابقة</th>
+          <th>التفسير العلمي 💡</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+
+  const wrap = $('#detective-report-table-wrap');
+  if (wrap) wrap.innerHTML = html;
+}
+
+function openDetectiveReport() {
+  renderDetectiveReport();
+  const modal = $('#detective-report-modal');
+  if (modal) {
+    modal.hidden = false;
+    modal.style.display = 'flex';
+  }
+}
+
+function closeDetectiveReport() {
+  const modal = $('#detective-report-modal');
+  if (modal) {
+    modal.hidden = true;
+    modal.style.display = 'none';
+  }
+}
+
+function showPowerMeter(deviceId) {
+  const dev = DEVICE_MAP[deviceId];
+  const widget = $('#power-meter-widget');
+  if (!widget || !dev) return;
+
+  const lbl = $('#power-meter-dev-label');
+  const val = $('#power-meter-dev-val');
+  if (lbl) lbl.textContent = `🔌 حاجة ${dev.name}:`;
+  if (val) val.textContent = dev.type === 'battery' ? `${dev.voltage} (${dev.watts})` : `220V (${dev.watts})`;
+
+  widget.hidden = false;
+  widget.style.display = 'block';
+}
+
+function hidePowerMeter() {
+  const widget = $('#power-meter-widget');
+  if (widget) {
+    widget.hidden = true;
+    widget.style.display = 'none';
+  }
 }
 
 function dispatch(event) {
@@ -362,8 +550,11 @@ function dispatch(event) {
     pendingDevice = null;
     drag = null;
     tutorial = false;
+    coach.resetRound();
     $('#drag-ghost').hidden = true;
     hideCentralFeedback();
+    closeDetectiveReport();
+    hidePowerMeter();
     closeDialog();
     shell();
     scene?.reset();
@@ -378,12 +569,14 @@ function dispatch(event) {
     try { localStorage.setItem('sharara-preferences', JSON.stringify({muted: state.muted, reducedMotion: state.reducedMotion, language: state.language, ageRange: state.ageRange})); } catch {}
   }
 
-  render();
   if (event.type === 'DROP_ON_DEVICE') {
     const d = event.device;
     const isSuccess = state.devices[d]?.status === 'running';
     const tool = state.devices[d]?.source || event.tool || 'battery';
+    
+    coach.recordAttempt(d, isSuccess);
     showCentralFeedback(d, tool, isSuccess, state.message);
+
     if (!state.muted) {
       if (isSuccess) {
         speakDropSuccess(name(d), DEVICE_MAP[d]?.reason);
@@ -391,7 +584,26 @@ function dispatch(event) {
         speakDropIncompatible(name(d), DEVICE_MAP[d]?.wrongReason);
       }
     }
+
+    // تفعيل توجيه الكوتش وتحديث مقياس القدرة إذا لزم
+    const advice = coach.getAdvice(state);
+    if (advice.showPowerMeter && advice.targetDevice) {
+      showPowerMeter(advice.targetDevice);
+    }
+    if (advice.pointsToDevice && scene) {
+      scene.pointTo?.(advice.pointsToDevice);
+      scene.showTargetRing?.(advice.pointsToDevice);
+    }
   }
+
+  render();
+
+  if (explorationDone(state) && !old.discoveredFacts.includes('all_done')) {
+    setTimeout(() => {
+      openDetectiveReport();
+    }, 1200);
+  }
+
   if (!['IDLE', 'CHAT_RESPONSE'].includes(event.type)) resetIdle();
 }
 
@@ -433,7 +645,6 @@ function render() {
   $('#sound-button').innerHTML = icon(state.muted ? 'muted' : 'volume') + `<span>${state.muted ? c.muted : c.sound}</span>`;
   $('#sound-button').setAttribute('aria-pressed', String(!state.muted));
 
-  // حالة زر البطارية
   const heldBat = state.batteryLocation === 'held';
   const batBtn = $('#battery-button');
   if (batBtn) {
@@ -444,7 +655,6 @@ function render() {
     if (batTitle) batTitle.textContent = heldBat ? 'اسحب للجهاز ✋' : 'بطارية جافة';
   }
 
-  // حالة زر الفيشة
   const heldMains = state.mainsLocation === 'held';
   const mainsBtn = $('#mains-button');
   if (mainsBtn) {
@@ -455,7 +665,6 @@ function render() {
     if (mainsTitle) mainsTitle.textContent = heldMains ? 'اسحب للجهاز ✋' : 'فيشة الكهرباء الرئيسية';
   }
 
-  // تحديث عداد الأجهزة المشغلة على شريط التغذية الراجعة
   const runningDevs = Object.values(state.devices).filter(d => d.status === 'running');
   const countNumEl = $('#running-count-num');
   if (countNumEl) countNumEl.textContent = runningDevs.length;
@@ -517,6 +726,12 @@ function render() {
   if (state.rendererStatus === 'fallback') $('#scene canvas')?.setAttribute('hidden', '');
 
   if (state.chatOpen) renderChat();
+
+  const diagBadge = $('#audio-diag-badge');
+  if (diagBadge) {
+    const d = getAudioDiagnostics();
+    diagBadge.textContent = `Unlocked: ${d.isUnlocked} | Key: ${d.lastKey} | Err: ${d.lastError || 'None'}`;
+  }
 }
 
 function openDialog(html) {
@@ -535,10 +750,6 @@ function dialogHeader(title) {
 
 function testWithBattery(id) {
   closeDialog();
-  if (state.attemptsByDevice[id] === 0 && state.predictionByDevice[id] === null) {
-    showPrediction(id, true);
-    return;
-  }
   if (state.batteryLocation !== 'held') dispatch({type: 'PICK_BATTERY'});
   dispatch({type: 'DROP_ON_DEVICE', device: id, tool: 'battery'});
 }
@@ -550,7 +761,8 @@ function testWithMains(id) {
 }
 
 function showDevicePowerChoice(id) {
-  const dIcon = DEVICE_MAP[id]?.icon || 'bolt';
+  const meta = DEVICE_MAP[id] || {};
+  const dIcon = meta.icon || 'bolt';
   openDialog(`
     ${dialogHeader(name(id))}
     <div class="prediction-icon ${id}">${icon(dIcon)}</div>
@@ -568,7 +780,6 @@ function showDevicePowerChoice(id) {
 }
 
 function tryDevice(id) {
-  // إذا كان الجهاز يعمل بالفعل، نقرة عليه تقوم بإيقافه وفصله بأمان
   if (state.devices[id]?.status === 'running') {
     if (state.devices[id].source === 'battery') {
       dispatch({type: 'REMOVE_BATTERY', device: id});
@@ -581,38 +792,12 @@ function tryDevice(id) {
   const isHeld = state.batteryLocation === 'held' || state.mainsLocation === 'held';
   if (!isHeld) {
     dispatch({type: 'SELECT_DEVICE', device: id});
-    if (id === 'car' && state.attemptsByDevice.car === 0 && state.predictionByDevice.car === null) {
-      showPrediction('car', true);
-    } else {
-      showDevicePowerChoice(id);
-    }
+    showDevicePowerChoice(id);
     return;
   }
 
   const tool = state.mainsLocation === 'held' ? 'mains' : 'battery';
-  if (id === 'car' && tool === 'battery' && state.attemptsByDevice.car === 0 && state.predictionByDevice.car === null) {
-    showPrediction('car', true);
-    return;
-  }
   dispatch({type: 'DROP_ON_DEVICE', device: id, tool});
-}
-
-function showPrediction(id, drop) {
-  pendingDevice = {id, drop};
-  const dIcon = DEVICE_MAP[id]?.icon || 'car';
-  openDialog(`${dialogHeader(name(id))}<div class="prediction-icon ${id}">${icon(dIcon)}</div><h3>${t().prediction}</h3><p>${state.language === 'ar' ? 'لا بأس إن كانت النتيجة مختلفة. التجربة تساعدنا لنتعلم.' : 'It is okay if the result differs.'}</p><div class="dialog-actions">${button('predictYes', t().yes, null, 'primary')}${button('predictNo', t().no, null, 'secondary')}${button('predictSkip', t().skip, null, 'text-button')}</div>`);
-}
-
-function prediction(value) {
-  const p = pendingDevice;
-  pendingDevice = null;
-  if (!p) return;
-  if (value !== null) dispatch({type: 'PREDICT', device: p.id, value});
-  closeDialog();
-  if (p.drop) {
-    if (state.batteryLocation !== 'held') dispatch({type: 'PICK_BATTERY'});
-    dispatch({type: 'DROP_ON_DEVICE', device: p.id, tool: 'battery'});
-  }
 }
 
 function compare() {
@@ -622,7 +807,6 @@ function compare() {
 
   let html = `${dialogHeader(c.compare)}<p class="comparison-intro">${c.sourceNote}</p><div class="comparison-grid">${currentIds.map(id => {
     const meta = DEVICE_MAP[id];
-    const isBattery = meta?.type === 'battery';
     const factText = state.discoveredFacts.includes(id + '_battery') ? c.batteryFits : (state.discoveredFacts.includes(id + '_mains') ? c.mainsFact : (state.discoveredFacts.includes(id + '_incompatible') ? 'البطارية غير مناسبة' : c.notYet));
     return `<article>${icon(meta?.icon || 'car')}<h3>${name(id)}</h3><small>${c.now}</small><strong>${c[state.devices[id].status] || state.devices[id].status}${state.devices[id].source ? ' · ' + (state.devices[id].source === 'battery' ? c.battery : 'فيشة رئيسية') : ''}</strong><hr/><small>${c.discovered}</small><p>${factText}</p></article>`;
   }).join('')}</div><p class="fine-print">${c.symbolic}</p>`;
@@ -717,6 +901,10 @@ function runSuggested(a) {
 
 function showHint() {
   dispatch({type: 'REQUEST_HINT'});
+  const advice = coach.getAdvice(state);
+  if (advice.targetDevice) {
+    showPowerMeter(advice.targetDevice);
+  }
   ask(state.language === 'ar' ? 'أريد تلميحًا' : 'I need a hint');
 }
 
@@ -728,7 +916,6 @@ async function playRadio() {
 
 let lastToolDownTime = 0;
 
-// محرك السحب والإفلات المزدوج المتطور لشاشات اللمس (Mobile/Tablet Touch) والماوس (Desktop)
 function initTouchDragSupport() {
   const batBtn = $('#battery-button');
   const mainsBtn = $('#mains-button');
@@ -737,7 +924,6 @@ function initTouchDragSupport() {
     if (!btn) return;
     btn.style.touchAction = 'none';
 
-    // 1. معالجة أحداث اللمس الأصلية المتجاوبة (Mobile Touch Events)
     btn.addEventListener('touchstart', e => {
       if (['intro', 'loading', 'recoverable_error'].includes(state.phase)) return;
       lastToolDownTime = Date.now();
@@ -768,9 +954,8 @@ function initTouchDragSupport() {
       }
     }, { passive: false });
 
-    // 2. أحداث المؤشر والماوس لأجهزة الديسكتوب
     btn.addEventListener('pointerdown', e => {
-      if (e.pointerType === 'touch') return; // تم التعامل معه مسبقاً عبر touchstart
+      if (e.pointerType === 'touch') return;
       toolDown(tool, e);
     });
   };
@@ -779,7 +964,6 @@ function initTouchDragSupport() {
   setupBtn(mainsBtn, 'mains');
 }
 
-// السحب والإفلات للماوس على الديسكتوب
 function toolDown(tool, e) {
   if (['intro', 'loading', 'recoverable_error'].includes(state.phase)) return;
   lastToolDownTime = Date.now();
@@ -797,13 +981,11 @@ function toolDown(tool, e) {
   }
 }
 
-// حركة اللمس المباشرة للجوالات (تمنع التمرير وتحدث موقع الشبح بسلاسة 100%)
 window.addEventListener('touchmove', e => {
   if (!drag || !drag.isTouch) return;
   const touch = e.touches[0];
   if (!touch) return;
 
-  // منع تمرير الصفحة أثناء سحب المصدر لمنع التقطيع أو الإلغاء
   e.preventDefault();
 
   if (Math.hypot(touch.clientX - drag.startX, touch.clientY - drag.startY) > 6) {
@@ -820,13 +1002,11 @@ window.addEventListener('touchmove', e => {
     g.style.top = touch.clientY + 'px';
   }
 
-  // تحديث موقع العنصر وسلك الكهرباء التفاعلي ثلاثي الأبعاد مباشرة
   if (drag.moved && scene?.setDragWorld) {
     scene.setDragWorld(drag.tool, touch.clientX, touch.clientY);
   }
 }, { passive: false });
 
-// نهاية اللمس على شاشات الجوال والتابلت
 window.addEventListener('touchend', e => {
   if (!drag || !drag.isTouch) return;
   const touch = e.changedTouches[0] || e.touches[0];
@@ -841,12 +1021,10 @@ window.addEventListener('touchend', e => {
   scene?.clearDragWorld?.();
 
   if (!moved) {
-    // لمسة سريعة بدون سحب: نطق التوجيه الصوتي للطفل
     if (!state.muted) speakToolPick(tool);
     return;
   }
 
-  // فحص الهدف المسقط عليه الجهاز
   const el = document.elementFromPoint(dropX, dropY);
   let id = el?.closest('[data-target]')?.dataset.target;
   if (!id && el?.closest('#scene')) id = scene?.at(dropX, dropY);
@@ -870,7 +1048,6 @@ window.addEventListener('touchcancel', () => {
   }
 });
 
-// أحداث الماوس على أجهزة الكمبيوتر والمؤشر
 document.addEventListener('pointermove', e => {
   if (!drag || drag.isTouch) return;
   if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 8) drag.moved = true;
@@ -953,6 +1130,35 @@ app.addEventListener('click', e => {
         }
       });
       break;
+    case 'togglePassthrough':
+      isCameraPassthroughActive = !isCameraPassthroughActive;
+      scene?.setCameraPassthrough?.(isCameraPassthroughActive);
+      b.innerHTML = isCameraPassthroughActive ? '🎨 <span>بيئة افتراضية</span>' : '📷 <span>كاميرا الجهاز</span>';
+      break;
+    case 'skipIntro':
+      scene?.skipRevealIntro?.();
+      break;
+    case 'quickPredict':
+      {
+        const devId = b.dataset.device;
+        const val = b.dataset.val === 'battery';
+        dispatch({type: 'PREDICT', device: devId, value: val});
+        playClickSound();
+      }
+      break;
+    case 'openDetectiveReport':
+      openDetectiveReport();
+      break;
+    case 'closeDetectiveReport':
+      closeDetectiveReport();
+      break;
+    case 'newRoundFromReport':
+      closeDetectiveReport();
+      dispatch({type: 'RESET'});
+      break;
+    case 'closePowerMeter':
+      hidePowerMeter();
+      break;
     case 'start': dispatch({type: 'START'}); tutorial = true; render(); break;
     case 'doneTutorial': tutorial = false; render(); $('#battery-button').focus(); break;
     case 'help': tutorial = true; render(); break;
@@ -977,9 +1183,6 @@ app.addEventListener('click', e => {
     case 'remove': dispatch({type: 'REMOVE_BATTERY', device: b.dataset.device}); break;
     case 'stopMains': dispatch({type: 'REMOVE_MAINS', device: b.dataset.device}); break;
     case 'device': tryDevice(b.dataset.device); break;
-    case 'predictYes': prediction(true); break;
-    case 'predictNo': prediction(false); break;
-    case 'predictSkip': prediction(null); break;
     case 'power':
       dispatch({type: 'TRY_POWER', device: b.dataset.device});
       if (b.dataset.device === 'radio' && !state.muted && state.devices.radio?.status === 'running') playRadio();
@@ -1034,9 +1237,7 @@ async function loadScene() {
       onBattery: e => toolDown('battery', e),
       onMains: e => toolDown('mains', e),
       onDevice: tryDevice,
-      projectLabel: () => {
-        // Vertical stack layout prevents label collision
-      }
+      projectLabel: () => {}
     });
     if (scene) {
       dispatch({type: 'READY', sessionRevision: rev});
