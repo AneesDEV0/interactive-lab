@@ -27,6 +27,13 @@ for (const f of targets) {
 if (existsSync('index.html')) {
   await cp('index.html', 'dist/index.html');
 }
+if (existsSync('public/static-activity.html')) {
+  await cp('public/static-activity.html', 'dist/static-activity.html');
+}
+if (existsSync('public/favicon.svg')) {
+  await cp('public/favicon.svg', 'dist/favicon.svg');
+}
+await mkdir('docs', { recursive: true });
 
 async function walk(p) {
   const out = [];
