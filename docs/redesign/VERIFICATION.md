@@ -14,7 +14,7 @@
 
 ## Limits
 
-These tests do not establish classroom camera recognition accuracy, audible intelligibility for individual children, performance on low-end physical phones, or actual headset/phone WebXR compatibility. AR/VR scene logic is tested with synthetic inputs; physical surface tracking, headset controller behavior and voice output must still be checked on compatible hardware via HTTPS. The assistant is deliberately a bounded local simulator. Photos map to prepared models rather than reconstructing arbitrary 3D geometry.
+These tests do not establish classroom camera recognition accuracy, audible intelligibility for individual children, performance on low-end physical phones, or actual headset/phone WebXR compatibility. AR/VR scene logic is tested with synthetic inputs; physical surface tracking, headset controller behavior and voice output must still be checked on compatible hardware via HTTPS. The assistant is deliberately a bounded local simulator. Photos map to prepared models.
 
 ## Reports
 

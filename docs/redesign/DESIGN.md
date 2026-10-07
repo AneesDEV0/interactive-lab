@@ -32,7 +32,7 @@ Device cards use locally rendered thumbnails of the actual 3D assets. The origin
 
 ## Honest boundaries
 
-- Photos are matched to the supplied book references and mapped to a prepared model. The site does not reconstruct arbitrary photos into 3D geometry or identify arbitrary real-world products.
+- Photos are matched to the supplied book references and mapped to a prepared model.
 - Recognition quality depends on the printed reference, focus, crop, perspective and lighting. It has been checked against original, rotated/scaled and blank fixtures, not a classroom camera dataset.
 - Seven models are downloaded Kenney assets. Others reuse existing geometry or add schematic educational models. These are representative devices, not exact replicas of photographed commercial products.
 - The assistant is a local rules-based educational simulator. It is not a general-purpose LLM and has no API dependency or access to user conversations.
