@@ -25,7 +25,7 @@ $('#app').innerHTML = `<div class="shell">
   <div class="stage" id="stage"><div id="scene" class="scene-container"></div><div class="stage-badge">${icon('cube')} مجسّم ثلاثي الأبعاد</div><div class="stage-tools"><button class="icon-button" data-action="reset-view" aria-label="إعادة زاوية العرض" title="إعادة زاوية العرض">${icon('reset')}</button><button class="icon-button" data-action="zoom-in" aria-label="تقريب" title="تقريب">+</button><button class="icon-button" data-action="zoom-out" aria-label="إبعاد" title="إبعاد">−</button></div><p id="model-status" class="model-status" role="status">نجهّز جهازك…</p><button id="door" class="door-button" hidden>افتح باب الثلاجة</button><h3 class="device-title" id="device-title"></h3><div class="stage-caption"><span>${icon('hand')} اسحب لتدوير الجهاز</span><span id="device-state" class="state-pill">جاهز للتجربة</span></div></div>
   <div class="xr-row"><button data-xr="ar">${icon('expand')}ضعه على طاولتك <small>AR</small></button><button data-xr="vr">${icon('glasses')}شاهد بالنظارة <small>VR</small></button></div>
   <div class="power-panel" id="play-panel"><h3 class="power-heading"><span class="step-number">٣</span> من أين تأتي طاقته؟ <small>اختر ثم جرّب</small></h3><div class="power-actions"><div class="source-options" id="source-options"></div><button class="primary" id="try-power">${icon('play')}جرّب التشغيل</button></div><div class="source-extra" id="source-extra"></div></div><div class="power-panel" id="learn-panel" hidden><h3 class="power-heading">${icon('info')}هل تعلم؟</h3><p id="device-fact" class="fact-box"></p><button class="text-button" data-action="fact">${icon('sound')}استمع إلى المعلومة</button></div>
-  </section><aside class="guide-column" aria-label="مساعدك شرارة"><section class="guide-card"><div class="guide-mascot">${mascot}<div><h3>أهلًا، أنا شرارة!</h3><p>صديقك في كل تجربة</p></div></div><div class="guide-bubble" id="guide-bubble"><p id="guide-text" aria-live="polite"></p></div><button class="guide-listen" id="listen">${icon('sound')}اسمعني</button><div class="guide-suggestions"><button data-question="تلميح">${icon('bolt')}أعطني تلميحًا</button><button data-question="كيف يعمل هذا الجهاز">${icon('help')}كيف يعمل؟</button></div><form class="ask-form" id="ask-form"><input id="ask-input" maxlength="180" aria-label="اسأل شرارة" placeholder="اسألني عن الجهاز…" autocomplete="off"><button type="submit" aria-label="إرسال السؤال">${icon('send')}</button></form><p class="guide-note">مساعد تعليمي بإجابات مُعدّة لهذا النشاط</p><p id="sound-status" class="sound-status" role="status"></p></section><div class="safety-card">${icon('shield')}<div><strong>نكتشف بأمان</strong><p>الكهرباء هنا على الشاشة فقط.<br>المقابس الحقيقية للكبار.</p></div></div></aside></div>
+  </section><aside class="guide-column" aria-label="مساعدك شرارة"><section class="guide-card"><div class="guide-mascot">${mascot}<div><h3>أهلًا، أنا شرارة!</h3><p>صديقك في كل تجربة</p></div></div><div class="guide-bubble" id="guide-bubble"><p id="guide-text" aria-live="polite"></p></div><button class="guide-listen" id="listen">${icon('sound')}اسمعني</button><div class="guide-suggestions"><button data-question="تلميح">${icon('bolt')}أعطني تلميحًا</button><button data-question="كيف يعمل هذا الجهاز">${icon('help')}كيف يعمل؟</button></div><form class="ask-form" id="ask-form"><input id="ask-input" maxlength="180" aria-label="اسأل شرارة" placeholder="اسألني عن الجهاز…" autocomplete="off"><button type="button" id="mic-btn" class="speech-btn" aria-label="تحدث بالصوت" title="تحدث بالصوت">${icon('mic')}</button><button type="button" id="clear-btn" class="clear-btn" aria-label="مسح النص" title="مسح النص">${icon('trash')}</button><button type="submit" aria-label="إرسال السؤال">${icon('send')}</button></form><p class="guide-note">مساعد تعليمي بإجابات مُعدّة لهذا النشاط</p><p id="sound-status" class="sound-status" role="status"></p></section><div class="safety-card">${icon('shield')}<div><strong>نكتشف بأمان</strong><p>الكهرباء هنا على الشاشة فقط.<br>المقابس الحقيقية للكبار.</p></div></div></aside></div>
   <section class="journey">${icon('star')}<div><h3 id="journey-title">اكتشافك الأول بانتظارك!</h3><p id="journey-text">كل جهاز تفهمه يُضيف نجمة إلى رحلتك.</p></div><button data-open="notebook">دفتر اكتشافاتي ${icon('arrow')}</button></section><p class="footer">${icon('heart')} لا بأس بالمحاولة مرة أخرى. هكذا يتعلّم العلماء!</p></main></div></div>
   <dialog id="library" aria-labelledby="library-title">${dialogHead('library', 'أجهزة من كتابي')}<p class="dialog-description">أيّ جهاز تحب أن تستكشف اليوم؟</p><div class="filter-row" id="filters"><button class="active" data-filter="all">كل الأجهزة</button>${[...new Set(devices.map(d => d.page))].map(p => `<button data-filter="${p}">${p}</button>`).join('')}</div><div class="library-grid" id="library-grid">${devices.map(card).join('')}</div></dialog>
   <dialog id="camera" aria-labelledby="camera-title">${dialogHead('camera', 'من كتابك… إلى مختبرك!')}<p class="dialog-description">صوّر جهازًا واحدًا من الصور المرفقة في كتابك. قرّب الصورة وأبعد الظلال.</p><video id="camera-video" class="camera-preview" autoplay playsinline muted hidden></video><img id="photo-preview" class="camera-preview" alt="الصورة التي اخترتها" hidden><div class="camera-controls"><button class="primary" id="start-camera">${icon('camera')}افتح الكاميرا</button><button class="primary" id="capture" hidden>التقط الصورة</button><label class="secondary file-label" for="photo-file">${icon('book')}اختر صورة</label><input class="visually-hidden" id="photo-file" type="file" accept="image/*" capture="environment"></div><p id="camera-status" role="status"></p><div class="camera-result" id="camera-result" hidden><p id="recognition-text"></p><label for="confirmed-device">هذا هو الجهاز في صورتي:</label><select id="confirmed-device"><option value="">اختر اسم الجهاز</option>${devices.map(d => `<option value="${d.id}">${d.name}</option>`).join('')}</select><button class="primary" id="confirm-photo">افتح الجهاز في المختبر ${icon('arrow')}</button></div><p class="camera-hint"> </p></dialog>
@@ -104,7 +104,102 @@ $('#try-power').onclick = testPower; $('#xr-try').onclick = testPower; $('#xr-mo
 $('#listen').onclick = () => { if (soundState === 'playing') voice.stop(); else voice.say(guideKey, guideText, true); }; $('#xr-listen').onclick = () => voice.say(guideKey, guideText, true);
 $('#sound-toggle').onclick = () => { voice.enabled = !voice.enabled; $('#sound-toggle').classList.toggle('on', voice.enabled); $('#sound-toggle').setAttribute('aria-pressed', voice.enabled); $('#sound-toggle').innerHTML = icon(voice.enabled ? 'sound' : 'mute') + `<span>${voice.enabled ? 'الصوت يعمل' : 'تشغيل الصوت'}</span>`; if (voice.enabled) voice.say(guideKey, guideText); else voice.stop(); };
 $('#door').onclick = () => { state.doorOpen = !state.doorOpen; render(); };
-$('#ask-form').onsubmit = e => { e.preventDefault(); const input = $('#ask-input'); if (!input.value.trim()) return; const a = answer(input.value, byId(state.id)); say(a.key, a.text); input.value = ''; };
+
+// Web Speech API - Speech-to-Text (ar-SA)
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null, isRecording = false, speechBaseText = '';
+
+function stopRecording() {
+  isRecording = false;
+  if (recognition) { try { recognition.stop(); } catch { } }
+  const micBtn = $('#mic-btn');
+  if (micBtn) {
+    micBtn.classList.remove('recording');
+    micBtn.setAttribute('title', 'تحدث بالصوت');
+    micBtn.setAttribute('aria-label', 'تحدث بالصوت');
+    micBtn.innerHTML = icon('mic');
+  }
+  const input = $('#ask-input');
+  if (input) input.placeholder = 'اسألني عن الجهاز…';
+}
+
+function startRecording() {
+  if (!SpeechRecognition) {
+    toast('تحويل الصوت إلى نص غير مدعوم في متصفحك.');
+    return;
+  }
+  if (isRecording) {
+    stopRecording();
+    return;
+  }
+  try {
+    if (!recognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'ar-SA';
+      recognition.interimResults = true;
+      recognition.continuous = true;
+
+      recognition.onstart = () => {
+        isRecording = true;
+        const micBtn = $('#mic-btn');
+        if (micBtn) {
+          micBtn.classList.add('recording');
+          micBtn.setAttribute('title', 'إيقاف التسجيل');
+          micBtn.setAttribute('aria-label', 'إيقاف التسجيل');
+          micBtn.innerHTML = icon('stop');
+        }
+        const input = $('#ask-input');
+        if (input) {
+          speechBaseText = input.value;
+          input.placeholder = 'جاري الاستماع... اتكلم الآن 🎙️';
+        }
+      };
+
+      recognition.onresult = event => {
+        let sessionText = '';
+        for (let i = 0; i < event.results.length; i++) {
+          sessionText += event.results[i][0].transcript;
+        }
+        const input = $('#ask-input');
+        if (input) {
+          const prefix = speechBaseText.trim() ? speechBaseText.trim() + ' ' : '';
+          input.value = prefix + sessionText.trimStart();
+        }
+      };
+
+      recognition.onerror = event => {
+        stopRecording();
+        if (event.error !== 'no-speech' && event.error !== 'aborted') {
+          toast('تعذّر التعرف على الصوت. تحقق من ميكروفون جهازك.');
+        }
+      };
+
+      recognition.onend = () => {
+        stopRecording();
+      };
+    }
+    recognition.start();
+  } catch (err) {
+    console.warn('Speech recognition error:', err);
+    stopRecording();
+  }
+}
+
+const micBtn = $('#mic-btn');
+if (micBtn) micBtn.onclick = e => { e.preventDefault(); if (isRecording) stopRecording(); else startRecording(); };
+
+const clearBtn = $('#clear-btn');
+if (clearBtn) clearBtn.onclick = e => { e.preventDefault(); const input = $('#ask-input'); if (input) { input.value = ''; input.focus(); } };
+
+$('#ask-form').onsubmit = e => {
+  e.preventDefault();
+  if (isRecording) stopRecording();
+  const input = $('#ask-input');
+  if (!input.value.trim()) return;
+  const a = answer(input.value, byId(state.id));
+  say(a.key, a.text);
+  input.value = '';
+};
 document.addEventListener('dragstart', e => { const b = e.target.closest('[data-source]'); if (b) e.dataTransfer.setData('text/plain', b.dataset.source); });
 $('#stage').addEventListener('dragover', e => { if (state.mode === 'play') e.preventDefault(); }); $('#stage').addEventListener('drop', e => { e.preventDefault(); const s = e.dataTransfer.getData('text/plain'); if (state.mode === 'play' && currentSources().some(x => x.id === s)) { selectSource(s); testPower(); } });
 $('#xr-ui').addEventListener('beforexrselect', e => { if (e.target.closest('button')) e.preventDefault(); });

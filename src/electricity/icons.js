@@ -29,6 +29,8 @@ const paths = {
  search:'M17 10a7 7 0 1 0-14 0 7 7 0 0 0 14 0Zm-2 5 7 7',
  stop:'M6 6h12v12H6Z',
  info:'M12 10v7m0-11v1M22 12a10 10 0 1 0-20 0 10 10 0 0 0 20 0Z',
+ mic:'M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v3 M8 22h8',
+ trash:'M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6 M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2',
 };
 export const icon = (name, cls='') => `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${paths[name]||paths.bolt}"/></svg>`;
 export const mascot = `<svg class="mascot" viewBox="0 0 110 120" aria-hidden="true"><path d="M20 18 13 11M54 10V2m34 18 8-8" fill="none" stroke="#efb637" stroke-width="5" stroke-linecap="round"/><path d="M29 72C7 43 25 18 54 18s48 27 25 55c-6 7-6 12-6 17H36c0-7-1-12-7-18Z" fill="#ffda67" stroke="#edbb3d" stroke-width="2"/><path d="M25 38q7-12 18-13" fill="none" stroke="#fff2bc" stroke-width="7" stroke-linecap="round"/><rect x="35" y="87" width="39" height="19" rx="6" fill="#8272b9"/><path d="M40 96h29m-23 14h17" stroke="#544279" stroke-width="5" stroke-linecap="round"/><ellipse cx="41" cy="53" rx="4" ry="6" fill="#473957"/><ellipse cx="68" cy="53" rx="4" ry="6" fill="#473957"/><path d="M47 66q8 9 16 0" fill="none" stroke="#473957" stroke-width="3" stroke-linecap="round"/><ellipse cx="31" cy="64" rx="7" ry="4" fill="#f1ae7e"/><ellipse cx="78" cy="64" rx="7" ry="4" fill="#f1ae7e"/><path d="M24 76 13 84 6 77m76-2 13 7 8-9" fill="none" stroke="#b68c3b" stroke-width="4" stroke-linecap="round"/></svg>`;

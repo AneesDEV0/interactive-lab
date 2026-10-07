@@ -11,3 +11,38 @@
 @media(min-width:901px){.shell{grid-template-columns:224px minmax(0,1fr)}.sidebar{padding-inline:18px}.brand strong{font-size:21px;white-space:nowrap}.brand small{font-size:10px;white-space:nowrap}.nav-item{font-size:14px;padding-inline:10px;gap:9px}.main{padding-inline:30px}.topbar{padding-inline:30px}}
 .guide-bubble p{font-size:16px}.device-card span{font-size:13px}.primary{font-size:15px}.source-card{font-size:14px}.stage{height:340px}.power-feedback{font-size:14px;color:var(--green);margin-top:12px;line-height:1.8}.device-card img{height:83px;object-fit:contain}.state-pill{font-size:11px!important}
 @media(max-width:650px){.device-card img{height:67px}.device-card span{font-size:12px}.stage{height:300px}.guide-bubble p{font-size:15px}}
+
+/* Speech-to-Text & Assistant Input Controls */
+.ask-form .speech-btn, .ask-form .clear-btn {
+  width: 35px;
+  background: var(--lilac);
+  color: var(--purple);
+  display: grid;
+  place-items: center;
+  border: 0;
+  transition: all 0.2s ease;
+  position: relative;
+}
+.ask-form .speech-btn:hover {
+  background: #e3daf5;
+  color: var(--deep);
+}
+.ask-form .speech-btn.recording {
+  background: #e03639 !important;
+  color: #ffffff !important;
+  animation: mic-pulse 1.3s infinite ease-in-out;
+}
+.ask-form .clear-btn {
+  background: #f4f1f8;
+  color: #9285a6;
+}
+.ask-form .clear-btn:hover {
+  background: #eae4f5;
+  color: #55447a;
+}
+@keyframes mic-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); background: #ff2a2d !important; }
+  100% { transform: scale(1); }
+}
+
