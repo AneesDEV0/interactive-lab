@@ -1,0 +1,20 @@
+{
+  "cameraCleanup": true,
+  "captureManualCorrection": true,
+  "cameraDeniedFallback": true,
+  "mobileTap": true,
+  "decodedArabicRecordings": [
+    {
+      "key": "welcome",
+      "duration": 12.624
+    },
+    {
+      "key": "car-result",
+      "duration": 7.344
+    },
+    {
+      "key": "fridge-fact",
+      "duration": 10.32
+    }
+  ]
+}

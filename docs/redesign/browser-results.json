@@ -1,0 +1,30 @@
+{
+  "checks": [
+    "Wrong source, retry, running, stop, and unique discovery",
+    "Local Arabic audio starts and stops",
+    "Static and interactive modes share selection and stop motion",
+    "Assistant safely handles unknown and HTML input",
+    "All 17 models load and run; refrigerator door opens",
+    "Discoveries survive reload; power resets",
+    "Library filters and discovery notebook",
+    "Unsupported AR has a clear fallback",
+    "Uploaded textbook image matched and confirmed as a 3D car",
+    "Rotated/scaled book photo matches; blank photo rejected",
+    "Responsive layout at 390 and 320 pixels without horizontal overflow",
+    "Reduced motion respected",
+    "No WebGL dependency: HTML experiment fallback remains usable"
+  ],
+  "errors": [],
+  "recognition": {
+    "matched": {
+      "id": "washer",
+      "score": 126,
+      "ratio": 0.8811188811188811
+    },
+    "blank": null
+  },
+  "limits": [
+    "Physical AR/VR hardware not available in automated tests",
+    "Recognition evaluated on supplied book references, rotated/scaled fixture and blank image; classroom lighting not verified"
+  ]
+}

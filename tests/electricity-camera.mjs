@@ -1,0 +1,16 @@
+import {chromium,expect} from '@playwright/test';
+import assert from 'node:assert/strict';
+import {writeFile} from 'node:fs/promises';
+const browser=await chromium.launch({channel:'chrome',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader','--use-fake-device-for-media-stream','--use-fake-ui-for-media-stream']});
+const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,permissions:['camera']});
+const page=await context.newPage();await page.goto('http://127.0.0.1:4173');await page.waitForFunction(()=>window.lab);
+await page.locator('.camera-card').tap();await page.locator('#start-camera').tap();await expect(page.locator('#camera-video')).toBeVisible();await page.waitForFunction(()=>document.querySelector('#camera-video').videoWidth>0);
+await page.evaluate(()=>{window.testTrack=document.querySelector('#camera-video').srcObject.getVideoTracks()[0];});
+await page.locator('[data-close="camera"]').tap();await page.waitForFunction(()=>testTrack.readyState==='ended',null,{timeout:1500});
+await page.locator('.camera-card').tap();await page.locator('#start-camera').tap();await page.waitForFunction(()=>document.querySelector('#camera-video').videoWidth>0);await page.locator('#capture').tap();await expect(page.locator('#camera-result')).toBeVisible({timeout:45000});await page.locator('#confirmed-device').selectOption('fan');await page.locator('#confirm-photo').tap();await expect(page.locator('#stage')).toHaveAttribute('data-loaded','fan');
+await page.locator('#source-options [data-source="mains"]').tap();await page.locator('#try-power').tap();assert.equal(await page.evaluate(()=>lab.state.running),true);
+const durations=await page.evaluate(async()=>Promise.all(['welcome','car-result','fridge-fact'].map(key=>new Promise((resolve,reject)=>{const a=new Audio('/assets/audio/electricity/'+key+'.mp3');a.onloadedmetadata=()=>resolve({key,duration:a.duration});a.onerror=()=>reject(new Error(key));}))));
+assert.ok(durations.every(d=>d.duration>1&&d.duration<35));
+await page.evaluate(()=>{navigator.mediaDevices.getUserMedia=()=>Promise.reject(new DOMException('Denied','NotAllowedError'));});
+await page.locator('.camera-card').tap();await page.locator('#start-camera').tap();await expect(page.locator('#camera-status')).toContainText('لم يُسمح');await page.locator('[data-close="camera"]').tap();
+const result={cameraCleanup:true,captureManualCorrection:true,cameraDeniedFallback:true,mobileTap:true,decodedArabicRecordings:durations};await writeFile('docs/redesign/camera-results.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));await browser.close();

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "researchDate": "2026-10-03",
+  "researchDate": "2026-10-07",
   "runtimeNetwork": "Local files only",
-  "researchRecord": "docs/asset-research.md",
+  "researchRecord": "docs/redesign/DESIGN.md",
   "attributions": "ATTRIBUTIONS.md",
   "assets": [
     {
@@ -34,16 +34,16 @@
       "localFiles": [
         {
           "path": "src/scene.js",
-          "bytes": 15602,
-          "sha256": "a4c7d5e9aafa17a3ed2203bb501b8b7c304838269996c308fc31257ced66aeb0"
+          "bytes": 26306,
+          "sha256": "2d0fca100804bc692fda45858fa780cb0eaeef82af1a3b023b45a273b9e7647e"
         },
         {
           "path": "assets/models/lab-design.json",
-          "bytes": 376,
-          "sha256": "f87c438bf3eafe1a2234bd585a13aea6656c79938d9c0458f6dfc12a27fe09b5"
+          "bytes": 384,
+          "sha256": "03c60e5a8343f2564a4ebf86bd07608c8f700b96490445afa0ed1c4f7199be34"
         }
       ],
-      "totalBytes": 15978
+      "totalBytes": 26690
     },
     {
       "id": "original-interface",
@@ -63,16 +63,16 @@
       "localFiles": [
         {
           "path": "src/icons.js",
-          "bytes": 2873,
-          "sha256": "aa1168d9a71e8bcb215466a5edef53ef3ce4ab6fdab05803d44c1bb62efd62af"
+          "bytes": 2975,
+          "sha256": "5e62f88675f1751f4689f73d5f483dc5f3371a786378544c02c45d7aead284bb"
         },
         {
           "path": "public/favicon.svg",
-          "bytes": 177,
-          "sha256": "51632424e4bd2fe7d4fdec02c600737970d0daae2a96ee0901238b1130f79083"
+          "bytes": 178,
+          "sha256": "74134265ac1a96ab52e933f643dd848c0e9a11f85646f8ff9e07f73289ac7cfe"
         }
       ],
-      "totalBytes": 3050
+      "totalBytes": 3153
     },
     {
       "id": "original-audio",
@@ -92,11 +92,11 @@
       "localFiles": [
         {
           "path": "src/audio.js",
-          "bytes": 1060,
-          "sha256": "14d63d0b97cb4a7fdba2de8bdb4fafa18edae9f8d8ea2eab3c88acfd471d2319"
+          "bytes": 24586,
+          "sha256": "b2829c13b493e5daf76b2087a06dd5f5e9efba15f0714317749d006a6539ce7f"
         }
       ],
-      "totalBytes": 1060
+      "totalBytes": 24586
     },
     {
       "id": "three",
@@ -118,21 +118,21 @@
       "localFiles": [
         {
           "path": "vendor/three.module.js",
-          "bytes": 338908,
-          "sha256": "e2b5ee6bccd38fd6d8a2428546b83c5f2426d84b152ef82be8055556e3b40eb6"
+          "bytes": 338914,
+          "sha256": "852c06b9fe936cf8ebc2870c86370d1015c310b04de98cdfc07f4efaf6afd2af"
         },
         {
           "path": "vendor/three.core.min.js",
-          "bytes": 381124,
-          "sha256": "61ba0df005b05991361d040d8ff670e1aadfd0ce7aeebd1fdb0725957a8957de"
+          "bytes": 381130,
+          "sha256": "4183cee05f0aa093682fdf551363a16bb20bd92b68e14f7576905f45c461ba82"
         },
         {
           "path": "vendor/addons/geometries/RoundedBoxGeometry.js",
-          "bytes": 6476,
-          "sha256": "c1b7c9bd2cddff2e3f3a0723f618a3d364a47450e3d25771d21faed88410bec8"
+          "bytes": 6692,
+          "sha256": "0bfc816555bffdd4b963ad654d11a5329f8d314264d63b2c4d2103f93990e176"
         }
       ],
-      "totalBytes": 726508
+      "totalBytes": 726736
     },
     {
       "id": "tajawal",
@@ -174,6 +174,817 @@
         }
       ],
       "totalBytes": 38240
+    },
+    {
+      "id": "kenney-book-models",
+      "creator": "Kenney",
+      "license": "CC0-1.0",
+      "sourcePage": "https://github.com/Hidencod/tge-assets",
+      "originalPacks": [
+        "https://kenney.nl/assets/furniture-kit",
+        "https://kenney.nl/assets/car-kit",
+        "https://kenney.nl/assets/city-kit-roads"
+      ],
+      "downloaded": true,
+      "format": "GLB",
+      "details": "Seven actual downloaded models; see ATTRIBUTIONS.md for exact mapping.",
+      "localFiles": [
+        {
+          "path": "assets/models/book/car.glb",
+          "bytes": 207584,
+          "sha256": "4532aa00b8c313b0d81d81b81ea9f56dca54ee99c909f610988b00f9deaf7996"
+        },
+        {
+          "path": "assets/models/book/fridge.glb",
+          "bytes": 20116,
+          "sha256": "8af4f4bbb1b5525ad8226e97926a5af60fa8fb20a3cb74dbda5328a9d320dbab"
+        },
+        {
+          "path": "assets/models/book/radio.glb",
+          "bytes": 25020,
+          "sha256": "1ba93d6ba6f049750853b4652b92f286f2898e527695a0705b75cc7615897fed"
+        },
+        {
+          "path": "assets/models/book/solarCar.glb",
+          "bytes": 184504,
+          "sha256": "36faef2dc604e12bac43dc15f39fe5d56d1c23bfe7a22ab03f43856de4a2db34"
+        },
+        {
+          "path": "assets/models/book/street.glb",
+          "bytes": 20940,
+          "sha256": "6d87248cef890381bef8b69eb07e43a18624f33807723f078cd8f349dde0a7bb"
+        },
+        {
+          "path": "assets/models/book/tv.glb",
+          "bytes": 6368,
+          "sha256": "d89519ad0a5f28b5b0dccb0d83209dccf610cda959578238dd21bbf9e219cfc6"
+        },
+        {
+          "path": "assets/models/book/washer.glb",
+          "bytes": 48104,
+          "sha256": "0c9704df1817d2699b72305b96cde097c9558bacabaef2fd5ab1ff4c03b81abf"
+        }
+      ],
+      "totalBytes": 512636
+    },
+    {
+      "id": "opencv",
+      "creator": "OpenCV contributors",
+      "license": "Apache-2.0",
+      "licenseFile": "licenses/OPENCV-APACHE-2.0.txt",
+      "sourcePage": "https://docs.opencv.org/4.13.0/opencv.js",
+      "downloaded": true,
+      "version": "4.13.0",
+      "localFiles": [
+        {
+          "path": "vendor/opencv.js",
+          "bytes": 10964323,
+          "sha256": "63366510248adf3a7eddf3e793dd825404efb7df3749f4d6f8557c7fa4ca8aa0"
+        }
+      ],
+      "totalBytes": 10964323
+    },
+    {
+      "id": "three-addons-redesign",
+      "creator": "Three.js contributors",
+      "license": "MIT",
+      "licenseFile": "licenses/THREE-MIT.txt",
+      "downloaded": true,
+      "localFiles": [
+        {
+          "path": "vendor/addons/controls/OrbitControls.js",
+          "bytes": 38703,
+          "sha256": "b97879c748170baadeb3fb84cea1ffdf4674e283dc06042f34e2acb95a76042c"
+        },
+        {
+          "path": "vendor/addons/loaders/GLTFLoader.js",
+          "bytes": 114739,
+          "sha256": "67ac5551fdafa6e349bd80c8f8e5e39c136d6b2fb1ad647db9abb21dc86f9e4a"
+        },
+        {
+          "path": "vendor/addons/utils/BufferGeometryUtils.js",
+          "bytes": 35539,
+          "sha256": "fda7e946b8e0b5ab39b779206589e7a1079a22eb24efb89d7223e03fdfb1f751"
+        }
+      ],
+      "totalBytes": 188981
+    },
+    {
+      "id": "book-references",
+      "creator": "User-supplied textbook illustrations",
+      "license": "Original textbook rights retained; not CC0",
+      "downloaded": false,
+      "format": "JPEG crops",
+      "purpose": "Local reference matching",
+      "localFiles": [
+        {
+          "path": "assets/book/bicycle.jpg",
+          "bytes": 10172,
+          "sha256": "61b275f6c672dff4337f60b0a3bb403d767e3c49319138b9fff68a0a96811854"
+        },
+        {
+          "path": "assets/book/calculator.jpg",
+          "bytes": 5961,
+          "sha256": "8d602773b9774afb9c6e07db37f6d2fe7df9dbeb4ef40c38fa1d20a222f80260"
+        },
+        {
+          "path": "assets/book/car.jpg",
+          "bytes": 5839,
+          "sha256": "4640b7ef4dfb8d2debcc2e0856d7714c6af55171835e2ba2e2d441af8cabed17"
+        },
+        {
+          "path": "assets/book/console.jpg",
+          "bytes": 6193,
+          "sha256": "c2781f1deed60d3052bf11a64d0da8301032f0dbe2fbe89dbec5576f3ad4dc34"
+        },
+        {
+          "path": "assets/book/electricHeater.jpg",
+          "bytes": 6956,
+          "sha256": "cae10ff0a27be88cce639f2b59517bb2a99757d4baf07ec4a9c4b0883e3e390e"
+        },
+        {
+          "path": "assets/book/fan.jpg",
+          "bytes": 3726,
+          "sha256": "72df45f8dbd0fad8f601ed374f8816f75d391b70c302e060e904999e2a294ab2"
+        },
+        {
+          "path": "assets/book/fridge.jpg",
+          "bytes": 3063,
+          "sha256": "139f6d7754736804d5522586d3ed0246d913ca122caf8d685481ce322f8f733a"
+        },
+        {
+          "path": "assets/book/hairDryer.jpg",
+          "bytes": 4183,
+          "sha256": "cae24c2b07646ba5bf79ce30ec7541545e670c8208df2903e98694e3ad475c10"
+        },
+        {
+          "path": "assets/book/iron.jpg",
+          "bytes": 5095,
+          "sha256": "84102ad3668d3bf787dfc79dc972b92034506f33837b3586500caf538acc9ef8"
+        },
+        {
+          "path": "assets/book/radio.jpg",
+          "bytes": 7391,
+          "sha256": "62cdaa500bb031eabe6494a980e21911e681993ee344045a10d77d66b620f850"
+        },
+        {
+          "path": "assets/book/solarCar.jpg",
+          "bytes": 7310,
+          "sha256": "a97d374a74e3ffe44de948837f8e24de294e7801a81cf59f9528a4a090bd1f1c"
+        },
+        {
+          "path": "assets/book/street.jpg",
+          "bytes": 7271,
+          "sha256": "359e267b095385bbc3dc961b6b381077d01d3e87052283bb6d91ac4607f3999f"
+        },
+        {
+          "path": "assets/book/tablet.jpg",
+          "bytes": 11153,
+          "sha256": "a20494a1e4b2032a123d94e3b2523ff44cf24006138e452628be075000d2640c"
+        },
+        {
+          "path": "assets/book/tv.jpg",
+          "bytes": 5756,
+          "sha256": "bf9cbf27040dfc654d4f2fe496f6cd1ba086e3b20a5afa2d4c32cb2fe5290401"
+        },
+        {
+          "path": "assets/book/washer.jpg",
+          "bytes": 6322,
+          "sha256": "28a63233020ad4941dff1e00236faebc1c78d30ab0283e3828fac2a3d50ccc98"
+        },
+        {
+          "path": "assets/book/watch.jpg",
+          "bytes": 5840,
+          "sha256": "4505c01509f1294230fc1dbebf5b8ac766abd201c67e04a13166619927dad4c8"
+        },
+        {
+          "path": "assets/book/wind.jpg",
+          "bytes": 6444,
+          "sha256": "8f64d8be6f074da36e3f7c131e9f8f6d70887cb852ff54b697c768c7b6f82665"
+        }
+      ],
+      "totalBytes": 108675
+    },
+    {
+      "id": "arabic-guide-recordings",
+      "creator": "Original educational script; ar-SA-ZariyahNeural synthesis",
+      "license": "See provider voice terms; no CC0 claim",
+      "downloaded": false,
+      "generated": true,
+      "format": "MP3 + transcript JSON",
+      "localFiles": [
+        {
+          "path": "assets/audio/electricity/ar.mp3",
+          "bytes": 57312,
+          "sha256": "dfcfc51f98d2cf3964f764b5fba23bd09e33f843114801a9472043236fb5fe7c"
+        },
+        {
+          "path": "assets/audio/electricity/battery.mp3",
+          "bytes": 71856,
+          "sha256": "eb0b9da4cce2de96c0450628a6a3ed65342215f3649ecd79b3fcd54000e2eb35"
+        },
+        {
+          "path": "assets/audio/electricity/bicycle-fact.mp3",
+          "bytes": 45936,
+          "sha256": "197e40a3221a3290896c4aefe9c2cc0e11b36094a7cb4732f961a9c94fc9719b"
+        },
+        {
+          "path": "assets/audio/electricity/bicycle-hint.mp3",
+          "bytes": 30816,
+          "sha256": "38d9db53d97aa0017238de6bce1fdbb303ae6f66b93c2923d12255ce7dd457bc"
+        },
+        {
+          "path": "assets/audio/electricity/bicycle-result.mp3",
+          "bytes": 41472,
+          "sha256": "bbf3a4957e7c7d195f6cac101f05f720df49feee0797c1059f1244aeb10cb1b9"
+        },
+        {
+          "path": "assets/audio/electricity/bicycle-select.mp3",
+          "bytes": 52416,
+          "sha256": "99cfef8e7db7dedf753b78c2e03d43a7a6a7590a8391855e8f27ef91c5d6b865"
+        },
+        {
+          "path": "assets/audio/electricity/bicycle-wrong.mp3",
+          "bytes": 52416,
+          "sha256": "9a872f87180759070fedca34a5e1b96fee1c7c23f9ea056af1618d611eacff7f"
+        },
+        {
+          "path": "assets/audio/electricity/calculator-fact.mp3",
+          "bytes": 59328,
+          "sha256": "426e4a65708bb839550e6a109a72cd3d5ea3fbe0e6482b1326b999b7cabb1d49"
+        },
+        {
+          "path": "assets/audio/electricity/calculator-hint.mp3",
+          "bytes": 33984,
+          "sha256": "5844697ccf16455520aed368f830d5e920e47f22b3dd3f94c23bc7c708e10008"
+        },
+        {
+          "path": "assets/audio/electricity/calculator-result.mp3",
+          "bytes": 43776,
+          "sha256": "f2e94f759f367840fccc936d54ba401a8ff5a31dc98f482c4bfe826ffc5e78bd"
+        },
+        {
+          "path": "assets/audio/electricity/calculator-select.mp3",
+          "bytes": 50976,
+          "sha256": "8614c772ab041d591900f7cd7944f4b776948d8a8c20b236650195dc4b22c552"
+        },
+        {
+          "path": "assets/audio/electricity/calculator-wrong.mp3",
+          "bytes": 55728,
+          "sha256": "20104e8f69ddca4b97bb115f333d8a46df9df8adbaa6ec79afd8322a9d8ccc54"
+        },
+        {
+          "path": "assets/audio/electricity/camera.mp3",
+          "bytes": 49680,
+          "sha256": "8794732f3df77dbcd48f8a442d630330168d69387c6642009fc542253b27bbd0"
+        },
+        {
+          "path": "assets/audio/electricity/car-fact.mp3",
+          "bytes": 49248,
+          "sha256": "d61c5cf049a2a0333697bbe7a36d9592eb3765ae890b2c96bec2bf4476eb7af2"
+        },
+        {
+          "path": "assets/audio/electricity/car-hint.mp3",
+          "bytes": 42336,
+          "sha256": "6962bde38abddf992827b40a872074a5f5d6b88cbfde3fc5a8e960bf74b37aa7"
+        },
+        {
+          "path": "assets/audio/electricity/car-result.mp3",
+          "bytes": 44064,
+          "sha256": "8b899d597636423d1a0ba8ec0931a6fc43436dd4f658cefaa2878c088e06890b"
+        },
+        {
+          "path": "assets/audio/electricity/car-select.mp3",
+          "bytes": 52128,
+          "sha256": "63825b7f8f81b4bf9f441c0c33712453fa08ea97f69977848c8b3a5cd67f8972"
+        },
+        {
+          "path": "assets/audio/electricity/car-wrong.mp3",
+          "bytes": 63936,
+          "sha256": "60eca02dcdc3abd15ec198e2851c1e08bea7a82f30469f8e5070cc0619fd7d22"
+        },
+        {
+          "path": "assets/audio/electricity/complete.mp3",
+          "bytes": 63216,
+          "sha256": "acad1240e30cf64326dc5c81855efce3010f966b83b9ad2c8d9cb9539899d3fd"
+        },
+        {
+          "path": "assets/audio/electricity/console-fact.mp3",
+          "bytes": 48528,
+          "sha256": "c79506432e54ce4d61f21b076013531cc945042921e98d248e0546c5ecbb908d"
+        },
+        {
+          "path": "assets/audio/electricity/console-hint.mp3",
+          "bytes": 33264,
+          "sha256": "650d5058a9fa3d99b7932f87712fc44e992ebd0320177f059a4f9068cf5f6f04"
+        },
+        {
+          "path": "assets/audio/electricity/console-result.mp3",
+          "bytes": 38160,
+          "sha256": "539aa5a57870b59bb95db98d0133ed6d8572e5fcb38c2ea0e9ef9b100eb24b64"
+        },
+        {
+          "path": "assets/audio/electricity/console-select.mp3",
+          "bytes": 51408,
+          "sha256": "7b32fcd3af800ab6d5fe2c882cb47f9a98a2c6c6ca656cb4c850ee6b20155cdc"
+        },
+        {
+          "path": "assets/audio/electricity/console-wrong.mp3",
+          "bytes": 54864,
+          "sha256": "f119ba80956f9f318d6c4785be464ba7acce69e7d331582ded9e49a274240e48"
+        },
+        {
+          "path": "assets/audio/electricity/electricHeater-fact.mp3",
+          "bytes": 38736,
+          "sha256": "4c7af01bf6dc832ff36a3c1a3cc6954ac64a441605d8e2e16422e86a88c28379"
+        },
+        {
+          "path": "assets/audio/electricity/electricHeater-hint.mp3",
+          "bytes": 38160,
+          "sha256": "cee4fa4346c2772ae673adfe5c22ab829a53f7f026efab9790598d84cc4ca34b"
+        },
+        {
+          "path": "assets/audio/electricity/electricHeater-result.mp3",
+          "bytes": 40032,
+          "sha256": "c5f101177389f0294024e813976d9656c8e33927fb328e81be66578ec7887bf2"
+        },
+        {
+          "path": "assets/audio/electricity/electricHeater-select.mp3",
+          "bytes": 49248,
+          "sha256": "bc1db5250d0876345b8c5334666d5c779ef45d1cf187d1e03e95d8d9891eb48b"
+        },
+        {
+          "path": "assets/audio/electricity/electricHeater-wrong.mp3",
+          "bytes": 59904,
+          "sha256": "6e3afa815f7871e1f2fcfbbe54283219c7594f4de06bdd8582cb4e9c5b0dc510"
+        },
+        {
+          "path": "assets/audio/electricity/fan-fact.mp3",
+          "bytes": 59328,
+          "sha256": "07179afb65d6a5023a15e58906b3ddf5df2c4365983bd5585c7ec404e5ae5b80"
+        },
+        {
+          "path": "assets/audio/electricity/fan-hint.mp3",
+          "bytes": 41040,
+          "sha256": "79b1cdd385c810caac9dcb3c361268ef9435985d0e3dc65e777b0d65f0d6466e"
+        },
+        {
+          "path": "assets/audio/electricity/fan-result.mp3",
+          "bytes": 43200,
+          "sha256": "f95a037206891fc96b8acbb6ac3dab753ed399da96a371c94e9cfadc3a955228"
+        },
+        {
+          "path": "assets/audio/electricity/fan-select.mp3",
+          "bytes": 48672,
+          "sha256": "f808aa68d33fb8014e71289f840b70b139f76eafaa7e5249c5fa7dcc734d79b8"
+        },
+        {
+          "path": "assets/audio/electricity/fan-wrong.mp3",
+          "bytes": 62640,
+          "sha256": "84d454c184992403f3fbc30a47cf28a3490a214fcc0f5ba296e27fd28939b6aa"
+        },
+        {
+          "path": "assets/audio/electricity/fridge-fact.mp3",
+          "bytes": 61920,
+          "sha256": "f31c2e1308763b37b85a6b78aa7636fa941367abe497eaff22d1f177a76d9ad0"
+        },
+        {
+          "path": "assets/audio/electricity/fridge-hint.mp3",
+          "bytes": 41472,
+          "sha256": "26d8e3ac224340117f2e39ae3c1ecf3c216d9771112bd4c4cecb034196a7b032"
+        },
+        {
+          "path": "assets/audio/electricity/fridge-result.mp3",
+          "bytes": 39168,
+          "sha256": "bc38ebd13a0074df0a50e41ded27da178052a50b43768031524f147f746cc74c"
+        },
+        {
+          "path": "assets/audio/electricity/fridge-select.mp3",
+          "bytes": 48096,
+          "sha256": "23a771a3662968df15b90f6520f929fee68dec9af963d29c9fa278235e6e08cb"
+        },
+        {
+          "path": "assets/audio/electricity/fridge-wrong.mp3",
+          "bytes": 63216,
+          "sha256": "a63b8b8ff443b0e418dda8411dfcd9b69c61090edbf3d07593a62c52d090ab4b"
+        },
+        {
+          "path": "assets/audio/electricity/hairDryer-fact.mp3",
+          "bytes": 50256,
+          "sha256": "63c7561ff7e70ce881c101e264c755e536fde61c8e714c4abd915b6ec7e77109"
+        },
+        {
+          "path": "assets/audio/electricity/hairDryer-hint.mp3",
+          "bytes": 37152,
+          "sha256": "7643eaf94226de0e0fa40740e437b56cb5d77821f77370ad791bc271ba2be4a0"
+        },
+        {
+          "path": "assets/audio/electricity/hairDryer-result.mp3",
+          "bytes": 42768,
+          "sha256": "05c1d466b33b1dfa62468bf7656cfb6c2361f57581bbae065bfa1b4e2ec1da3e"
+        },
+        {
+          "path": "assets/audio/electricity/hairDryer-select.mp3",
+          "bytes": 51264,
+          "sha256": "9e867a882793635b4fa2bac5ec1a2ca33b24cd57c45068ecd75b2ffa45e827ef"
+        },
+        {
+          "path": "assets/audio/electricity/hairDryer-wrong.mp3",
+          "bytes": 58896,
+          "sha256": "30ee0af4687027e3e249be9f8466eae15d3d7b5ea66d4aeab7f33499ee5e8501"
+        },
+        {
+          "path": "assets/audio/electricity/iron-fact.mp3",
+          "bytes": 41472,
+          "sha256": "cfe4a41fed2009309f1e6d9ad3a7a03da8dcdfd97ca4d6f8873b9a998a6612e0"
+        },
+        {
+          "path": "assets/audio/electricity/iron-hint.mp3",
+          "bytes": 40608,
+          "sha256": "3f090445eec5b1dba6376fa26b4832a85b3b6852ee1a27ab36b86d2f3517ec0e"
+        },
+        {
+          "path": "assets/audio/electricity/iron-result.mp3",
+          "bytes": 41904,
+          "sha256": "bd3cce144cd0234a70f93176c73223756af352e19f70194e75ca8849c6ba0e6c"
+        },
+        {
+          "path": "assets/audio/electricity/iron-select.mp3",
+          "bytes": 48528,
+          "sha256": "a9b9db76853e3f531c652a2748f94256e56d0de53442fa7d16ffa31ab5cb00f0"
+        },
+        {
+          "path": "assets/audio/electricity/iron-wrong.mp3",
+          "bytes": 62208,
+          "sha256": "672992381cd369fbfb1ce0d428ce3a9ee90f771258ffa0828e793eca7b80fa3e"
+        },
+        {
+          "path": "assets/audio/electricity/learn.mp3",
+          "bytes": 44064,
+          "sha256": "8f59bcd9a42b2549cc236debf3c406595257da9d9d4fa5d81ec2179c61836d5c"
+        },
+        {
+          "path": "assets/audio/electricity/mains.mp3",
+          "bytes": 52992,
+          "sha256": "cd860f7e0553b08d45291cd0e9a1deb0b9197a0edd65fc35151f8f65820dba66"
+        },
+        {
+          "path": "assets/audio/electricity/manifest.json",
+          "bytes": 13536,
+          "sha256": "1c0058e109bcbb44f2d47a76d10fd6df9458bb7806c3d580958ed0a278478ac2"
+        },
+        {
+          "path": "assets/audio/electricity/placed.mp3",
+          "bytes": 40320,
+          "sha256": "f9adaa9b23299901af6fdfb5f87952fe58e014a1063a260d62415d8be9b907b1"
+        },
+        {
+          "path": "assets/audio/electricity/play.mp3",
+          "bytes": 40896,
+          "sha256": "4f5225a96e2be474601f2fc6138173892c7b16e2d96c232f1d38395741a2d717"
+        },
+        {
+          "path": "assets/audio/electricity/radio-fact.mp3",
+          "bytes": 75600,
+          "sha256": "004f0eb6d177c6f3172efb4df08f6f34cf8de3737f847f748c8d9600af8fe412"
+        },
+        {
+          "path": "assets/audio/electricity/radio-hint.mp3",
+          "bytes": 49248,
+          "sha256": "3d18ae2b6bff8c4580f20e03bbe31ce9970310f66fabf7fedf33135c349962de"
+        },
+        {
+          "path": "assets/audio/electricity/radio-result.mp3",
+          "bytes": 39888,
+          "sha256": "4e1ce7457c897235ae9c0420708d93632b460dbbf8777fdca426bfea69870458"
+        },
+        {
+          "path": "assets/audio/electricity/radio-select.mp3",
+          "bytes": 47952,
+          "sha256": "3f1f327302b7bd0b5232bf44d63cfa8f2f12ab3d4540f7aa5512d874fa271f28"
+        },
+        {
+          "path": "assets/audio/electricity/radio-wrong.mp3",
+          "bytes": 70848,
+          "sha256": "095801adadaab5a24ea5b3bbcef3affe70d10d8612d21a5ec8c58b6004d4c32f"
+        },
+        {
+          "path": "assets/audio/electricity/safety.mp3",
+          "bytes": 63072,
+          "sha256": "2c89798fac8b4d4726db6696dfede6fda99a65d8a6af2eb2b86585806b463c6b"
+        },
+        {
+          "path": "assets/audio/electricity/solarCar-fact.mp3",
+          "bytes": 50544,
+          "sha256": "479baf6e9607f5a4dc8f63ede84720ded4bc50855677eb1de2e89cd51f491690"
+        },
+        {
+          "path": "assets/audio/electricity/solarCar-hint.mp3",
+          "bytes": 32832,
+          "sha256": "df0b084a28b1ca19afa8ca4afa43ea7c2ed2e8fb4f101aec299e4983a820462b"
+        },
+        {
+          "path": "assets/audio/electricity/solarCar-result.mp3",
+          "bytes": 39456,
+          "sha256": "d05c479b43cdb3faa0733dac9310f985815420dda7c7da060998dc7f0e014358"
+        },
+        {
+          "path": "assets/audio/electricity/solarCar-select.mp3",
+          "bytes": 52416,
+          "sha256": "277828e82914cb0783f037ceb78032266a53007af7aed36b20b44b8edfa1fb50"
+        },
+        {
+          "path": "assets/audio/electricity/solarCar-wrong.mp3",
+          "bytes": 54432,
+          "sha256": "e38d7f3939d7c38ab243846b473bb82ec3364fc490cce6643e95c0a344f3504f"
+        },
+        {
+          "path": "assets/audio/electricity/stopped.mp3",
+          "bytes": 47808,
+          "sha256": "93ea6b7d268d659185721d57da6d8099fa84373430f1fd161279b98b62bfe6e3"
+        },
+        {
+          "path": "assets/audio/electricity/street-fact.mp3",
+          "bytes": 51552,
+          "sha256": "487364f2dac56b6943ece73a8c38f6b0201d77391b323e62612a506ebd97e3c1"
+        },
+        {
+          "path": "assets/audio/electricity/street-hint.mp3",
+          "bytes": 33120,
+          "sha256": "5e19dc73ceb9be857dda56a107bd7915f2524cebfa40128c71abac9a46f4a4f4"
+        },
+        {
+          "path": "assets/audio/electricity/street-result.mp3",
+          "bytes": 37296,
+          "sha256": "be80b6a90a7fb9e959c7ec7ec4903b04c8a9944edf93a00892df474113ed55ab"
+        },
+        {
+          "path": "assets/audio/electricity/street-select.mp3",
+          "bytes": 50832,
+          "sha256": "076855d5b2e19c7d5cb36f1817e849b22e65af52bb8e761915c312302eeb2645"
+        },
+        {
+          "path": "assets/audio/electricity/street-wrong.mp3",
+          "bytes": 54864,
+          "sha256": "64e8cb7fd99899831cf5067afc70383e81d2f08822f27aacf02fbb9361fadfbc"
+        },
+        {
+          "path": "assets/audio/electricity/tablet-fact.mp3",
+          "bytes": 61920,
+          "sha256": "7ad5b3ff46abae8659cb3a31cfa43c92ed8a958f57e81ada37eb5166d8816afa"
+        },
+        {
+          "path": "assets/audio/electricity/tablet-hint.mp3",
+          "bytes": 30960,
+          "sha256": "bc0e81d0705f1d07606f2b340454ea11abe52b1d999b2536c835625f9957ab2c"
+        },
+        {
+          "path": "assets/audio/electricity/tablet-result.mp3",
+          "bytes": 45504,
+          "sha256": "bf473dca3dec09480041c654bcb40e8244db30ecd62d17887fbd9ec83144a345"
+        },
+        {
+          "path": "assets/audio/electricity/tablet-select.mp3",
+          "bytes": 51120,
+          "sha256": "dfa242ae802477b35b29f1562559caff37f52b004c255a7fde9c8460b117e863"
+        },
+        {
+          "path": "assets/audio/electricity/tablet-wrong.mp3",
+          "bytes": 52560,
+          "sha256": "4583051385a50e2adb919b8a5de3daee2efbc1a7a29000da025efcd86ab4cb29"
+        },
+        {
+          "path": "assets/audio/electricity/tv-fact.mp3",
+          "bytes": 46944,
+          "sha256": "ac53f6d2c9cdc0e3aa4ff1088ce82e9452e0a53f76334b08f116c1753ff87e00"
+        },
+        {
+          "path": "assets/audio/electricity/tv-hint.mp3",
+          "bytes": 34560,
+          "sha256": "668284c35002bd30978542c5526cc4ed6d8386afd24eaaefcdb61d9089919de8"
+        },
+        {
+          "path": "assets/audio/electricity/tv-result.mp3",
+          "bytes": 43200,
+          "sha256": "79ee043d8c59df661ca0231cfa83199164502503c148b472bad3b7f6902c26d4"
+        },
+        {
+          "path": "assets/audio/electricity/tv-select.mp3",
+          "bytes": 48384,
+          "sha256": "cba313f3c2c4517aa2ade56d2f66d691888eb59a2f574f505abd87b4b8a3f285"
+        },
+        {
+          "path": "assets/audio/electricity/tv-wrong.mp3",
+          "bytes": 56304,
+          "sha256": "7388a3954eb684f40f7c07efc46e8d84e250717aade51e8fbba14eca1ce048a3"
+        },
+        {
+          "path": "assets/audio/electricity/unknown.mp3",
+          "bytes": 76176,
+          "sha256": "20fa8d063dbaf5d9168ba328fbdcd544c57a71c6ca97b5b156c4558b7f9e19de"
+        },
+        {
+          "path": "assets/audio/electricity/vr.mp3",
+          "bytes": 57168,
+          "sha256": "dec95dff639f0f90ad12928b58959ff6fc02b4dc9f6415fd5a24120ee93cab26"
+        },
+        {
+          "path": "assets/audio/electricity/washer-fact.mp3",
+          "bytes": 56304,
+          "sha256": "c51701955a8bf0b4db212d3dff883420a287f7345e8002b432bc8c4d3ae0d3d8"
+        },
+        {
+          "path": "assets/audio/electricity/washer-hint.mp3",
+          "bytes": 48672,
+          "sha256": "5c61d290830899370606013a0b6c818da992519795fd035ec4d596c5a0fffc1a"
+        },
+        {
+          "path": "assets/audio/electricity/washer-result.mp3",
+          "bytes": 46800,
+          "sha256": "c78d22d149602c8cd6d8bb786ff26aad247296e3f4216c3801718da9d13ce389"
+        },
+        {
+          "path": "assets/audio/electricity/washer-select.mp3",
+          "bytes": 48672,
+          "sha256": "6bca40f105eeef8c4e2999c9e4dc5a738b408441cd537be55aa3a805ade15701"
+        },
+        {
+          "path": "assets/audio/electricity/washer-wrong.mp3",
+          "bytes": 70272,
+          "sha256": "bcf2177a02fe19864be32eddc0754e4c31bc1736b7a8ad1440417ce317ab19a2"
+        },
+        {
+          "path": "assets/audio/electricity/watch-fact.mp3",
+          "bytes": 64224,
+          "sha256": "a3b1b27057717d3491df1537b58cc5242bbe6eef47ec5ea6ce6276f7c1ab71f1"
+        },
+        {
+          "path": "assets/audio/electricity/watch-hint.mp3",
+          "bytes": 30096,
+          "sha256": "c0e87033b2f1fb2113977aa9a83c8f143d4695f0d37b01d6c634fc73913a8353"
+        },
+        {
+          "path": "assets/audio/electricity/watch-result.mp3",
+          "bytes": 47376,
+          "sha256": "f8aeca855e283c8deb38a9ce224bcb8705ec92556232c5361c347c84ac167c5e"
+        },
+        {
+          "path": "assets/audio/electricity/watch-select.mp3",
+          "bytes": 49680,
+          "sha256": "e788a47dcefef230ca0fc7bd53d2b8b20f4e76cf003b191d660c770585745acf"
+        },
+        {
+          "path": "assets/audio/electricity/watch-wrong.mp3",
+          "bytes": 51696,
+          "sha256": "e51c14635a02948d2795804fb9e48347974ec9f475bb4973166f8043be742e4b"
+        },
+        {
+          "path": "assets/audio/electricity/welcome.mp3",
+          "bytes": 75744,
+          "sha256": "d47f1277711b30894c4634f45df43e5d790e7d8edbf56268d14b316dc1d48118"
+        },
+        {
+          "path": "assets/audio/electricity/wind-fact.mp3",
+          "bytes": 49248,
+          "sha256": "6e0a47924f2e4e3df03d09bdb4569c5252a0f4004a31e3193a5e42252d41da32"
+        },
+        {
+          "path": "assets/audio/electricity/wind-hint.mp3",
+          "bytes": 26640,
+          "sha256": "348bf60ce2cef03548f5a3ebeb58fe9be1eac1f51785f4ca6c51b94f97c6f8cc"
+        },
+        {
+          "path": "assets/audio/electricity/wind-result.mp3",
+          "bytes": 41904,
+          "sha256": "f4a74b2fadf5ac25ba07e0cc1ffb53a72c54239cd6a35baedf4d95827cc1c440"
+        },
+        {
+          "path": "assets/audio/electricity/wind-select.mp3",
+          "bytes": 50976,
+          "sha256": "df7e9a8d452e2eb17b22a0e978108c1181c29dde329063a67bfa4f7765ca4422"
+        },
+        {
+          "path": "assets/audio/electricity/wind-wrong.mp3",
+          "bytes": 48240,
+          "sha256": "f5cfa694d1fcc8d5a2b5e608e9cee7bbc47d6cd3eda0bf38721aed65ce373c25"
+        }
+      ],
+      "totalBytes": 4851648
+    },
+    {
+      "id": "model-thumbnails",
+      "creator": "Local renders of Kenney/original models",
+      "license": "CC0-1.0",
+      "format": "PNG",
+      "generated": true,
+      "localFiles": [
+        {
+          "path": "assets/thumbnails/bicycle.png",
+          "bytes": 18185,
+          "sha256": "cbe67ed4afa9477b713b0e99af50d61999ee23f530f144251b1104f7453f5257"
+        },
+        {
+          "path": "assets/thumbnails/calculator.png",
+          "bytes": 20103,
+          "sha256": "e95b023a8ff820e48ee51b397cf028092a65852bc8130e23503a61507c805073"
+        },
+        {
+          "path": "assets/thumbnails/car.png",
+          "bytes": 16085,
+          "sha256": "8f4a01a52cbb98dfaa088f279673223892bca044600716e96ac6f6d354341f74"
+        },
+        {
+          "path": "assets/thumbnails/console.png",
+          "bytes": 10984,
+          "sha256": "19b719f1abf79f17041866ddfc69750f6be5e5c791f7a1644852af9d9335a13f"
+        },
+        {
+          "path": "assets/thumbnails/electricHeater.png",
+          "bytes": 18636,
+          "sha256": "1efc66a53276a71edcb8e41d66c62f68b237cc92ce6734aa647b41b2bf7ba789"
+        },
+        {
+          "path": "assets/thumbnails/fan.png",
+          "bytes": 15678,
+          "sha256": "a02751ef866cd2e7024e71d798a66563d7048c72166e5607e590eaaaafa839a1"
+        },
+        {
+          "path": "assets/thumbnails/fridge.png",
+          "bytes": 3333,
+          "sha256": "4fb086714b29d29ec3ae570817f8fe460e2e1a36a515963bc9ff2b832381e62f"
+        },
+        {
+          "path": "assets/thumbnails/hairDryer.png",
+          "bytes": 8334,
+          "sha256": "5d6633e73674c4d966db9dfcee7d10f77075ae2cc87ddb7dd6446dc66996980a"
+        },
+        {
+          "path": "assets/thumbnails/iron.png",
+          "bytes": 15298,
+          "sha256": "d79eff434ad2bdcb3ec005b45fe4394ea36d5386fde590e76b89052917c2cb9c"
+        },
+        {
+          "path": "assets/thumbnails/radio.png",
+          "bytes": 12486,
+          "sha256": "4c60488c6afb7d8fe0f2d7e5b4a4a48b8488d8c7df738507aad76be02f18777f"
+        },
+        {
+          "path": "assets/thumbnails/solarCar.png",
+          "bytes": 20960,
+          "sha256": "2cf3614bf220d4c5191826b540bc04a92d776decd81d890d50861205aac2db52"
+        },
+        {
+          "path": "assets/thumbnails/street.png",
+          "bytes": 4000,
+          "sha256": "cada81330e5f7d76ccc3d97289522c277cd1eea2231cdf52b26f90f8dfbadbfe"
+        },
+        {
+          "path": "assets/thumbnails/tablet.png",
+          "bytes": 4354,
+          "sha256": "931d5e4a4702350c56951c1a2f66727bdcb248efc52945a4f40e33432eab15b2"
+        },
+        {
+          "path": "assets/thumbnails/tv.png",
+          "bytes": 8589,
+          "sha256": "6d1c6fa2ee3e8e5345885a4f348a391fccacaad666a801ff9008751b00f05775"
+        },
+        {
+          "path": "assets/thumbnails/washer.png",
+          "bytes": 14792,
+          "sha256": "101b73dfa6b53f79457993bec27e10d3c3aad79ff7162a4b9c97551406405620"
+        },
+        {
+          "path": "assets/thumbnails/watch.png",
+          "bytes": 6266,
+          "sha256": "df258f03adbb5bd46380162864a7eb56778d0ea0c17859db18a5a9924cf15f53"
+        },
+        {
+          "path": "assets/thumbnails/wind.png",
+          "bytes": 4090,
+          "sha256": "26a09e3001d0f86d03758c64da69cda9bdd5301b32330f9041c6c8182d07d9b0"
+        }
+      ],
+      "totalBytes": 202173
+    },
+    {
+      "id": "redesign-original-artwork",
+      "creator": "Original educational geometry, effects, icons and mascot",
+      "license": "CC0-1.0",
+      "licenseFile": "licenses/ORIGINAL-ASSETS-CC0.txt",
+      "original": true,
+      "localFiles": [
+        {
+          "path": "src/electricity/models.js",
+          "bytes": 9208,
+          "sha256": "d49dd4e8b3dea29aee91f10078ce41b940e00502de44ed20326c888fff8a7e68"
+        },
+        {
+          "path": "src/electricity/icons.js",
+          "bytes": 3062,
+          "sha256": "e25c0994a5a50b480d4cc9cb53341606ad9ce856d9d094a4af698589ae387bf4"
+        }
+      ],
+      "totalBytes": 12270
     }
   ],
   "rejectedCandidatePolicy": "Candidate pages and unverified metadata are recorded in the research document; no rejected model is included or claimed as downloaded."

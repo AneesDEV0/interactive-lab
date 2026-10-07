@@ -3,8 +3,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-const hasParentIndex = existsSync(path.resolve('..', 'index.html'));
-const root = path.resolve(process.argv[2] || (hasParentIndex ? '..' : '.'));
+const root = path.resolve(process.argv[2] || '.');
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -15,6 +14,8 @@ const types = {
   '.woff2': 'font/woff2',
   '.glb': 'model/gltf-binary',
   '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.webp': 'image/webp',
   '.mp3': 'audio/mpeg',
   '.wav': 'audio/wav',
   '.md': 'text/plain; charset=utf-8'
@@ -28,6 +29,7 @@ async function tryResolve(targetPath) {
   return null;
 }
 
+const port = Number(process.env.PORT || 4173);
 http.createServer(async (req, res) => {
   try {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
@@ -40,7 +42,7 @@ http.createServer(async (req, res) => {
              await tryResolve(path.resolve(root, 'public' + rel));
     }
 
-    if (!file || !file.startsWith(root) || file.includes('node_modules') || file.includes('.git')) {
+    if (!file || !(file === root || file.startsWith(root + path.sep)) || file.includes('node_modules') || file.includes('.git')) {
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
       return res.end('Not found');
     }
@@ -55,4 +57,4 @@ http.createServer(async (req, res) => {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Not found');
   }
-}).listen(4173, '127.0.0.1', () => console.log('Battery Lab: http://127.0.0.1:4173'));
+}).listen(port, '127.0.0.1', () => console.log(`Sharara Lab: http://127.0.0.1:${port}`));

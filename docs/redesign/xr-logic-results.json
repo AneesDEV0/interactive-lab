@@ -1,0 +1,12 @@
+{
+  "result": {
+    "blockedBeforePlacement": true,
+    "placed": true,
+    "arRunning": true,
+    "vrRunning": true,
+    "vrStopped": true,
+    "staticMode": true,
+    "next": true
+  },
+  "limitation": "Synthetic controller/hit-test coordinates only. Physical AR/VR testing remains required."
+}

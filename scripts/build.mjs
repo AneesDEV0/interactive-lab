@@ -24,9 +24,7 @@ for (const f of targets) {
 }
 
 // Copy root index.html to dist/index.html
-if (existsSync('../index.html')) {
-  await cp('../index.html', 'dist/index.html');
-} else if (existsSync('index.html')) {
+if (existsSync('index.html')) {
   await cp('index.html', 'dist/index.html');
 }
 
