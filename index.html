@@ -6,17 +6,17 @@
   <meta name="theme-color" content="#7560af">
   <meta name="description" content="مختبر تفاعلي لطلبة الصف الرابع لاكتشاف الكهرباء والمغناطيسية من خلال التجربة والأنشطة التعليمية الممتعة.">
   <title>مختبر الكهرباء والمغناطيسية · الصف الرابع</title>
-  <link rel="icon" href="public/favicon.svg">
+  <link rel="icon" href="/public/favicon.svg">
   <style>
     @font-face {
       font-family: Tajawal;
-      src: url('assets/fonts/tajawal-arabic-400-normal.woff2') format('woff2');
+      src: url('/assets/fonts/tajawal-arabic-400-normal.woff2') format('woff2');
       font-weight: 400;
       font-display: swap;
     }
     @font-face {
       font-family: Tajawal;
-      src: url('assets/fonts/tajawal-arabic-700-normal.woff2') format('woff2');
+      src: url('/assets/fonts/tajawal-arabic-700-normal.woff2') format('woff2');
       font-weight: 700 900;
       font-display: swap;
     }
@@ -34,28 +34,33 @@
       --bg: #f8f7fc;
       --surface: #ffffff;
       --line: #e9e5f2;
-      --radius: 22px;
+      --radius: 24px;
+      --header-height: 76px;
       font-family: Tajawal, Arial, sans-serif;
       color: var(--ink);
       background: var(--bg);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
     body { line-height: 1.6; background: var(--bg); color: var(--ink); overflow-x: hidden; }
     a { color: inherit; text-decoration: none; }
 
     /* الهيدر العلوي */
     .site-header {
-      background: #ffffffd6;
-      backdrop-filter: blur(10px);
+      background: #ffffffeb;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--line);
       position: sticky;
       top: 0;
-      z-index: 100;
-      padding: 14px 28px;
+      z-index: 1000;
+      height: var(--header-height);
+      padding: 0 28px;
     }
     .header-inner {
       max-width: 1280px;
+      height: 100%;
       margin: auto;
       display: flex;
       align-items: center;
@@ -78,54 +83,89 @@
       font-size: 24px;
       transform: rotate(4deg);
       box-shadow: 0 4px 14px rgba(117, 96, 175, 0.25);
+      flex-shrink: 0;
     }
     .brand-text strong {
-      font-size: 20px;
+      font-size: 19px;
       display: block;
       line-height: 1.2;
       color: var(--deep);
+      white-space: nowrap;
     }
     .brand-text small {
       color: var(--muted);
-      font-size: 11.5px;
+      font-size: 11px;
+    }
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+    .header-nav a {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      transition: color .18s ease;
+    }
+    .header-nav a:hover {
+      color: var(--deep);
     }
     .header-badge {
       background: var(--lilac);
       color: var(--deep);
       padding: 6px 14px;
       border-radius: 20px;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
       display: flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
     }
 
-    /* البانر الترحيبي (Hero) */
+    /* البانر الترحيبي (Hero) - توسيط كامل ونظيف */
     .hero {
-      max-width: 1280px;
-      margin: 32px auto 20px;
-      padding: 0 24px;
+      width: 100%;
+      padding: 36px 20px 48px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background:
+        radial-gradient(ellipse at 15% 18%, #ffdb762e 0, transparent 35%),
+        radial-gradient(ellipse at 88% 80%, #c9f1e490 0, transparent 35%),
+        linear-gradient(145deg, #f8f7fc 0%, #f3eefa 100%);
+      position: relative;
     }
     .hero-card {
-      background: linear-gradient(135deg, #ffffff 0%, #fcfaff 60%, #f6efff 100%);
+      width: min(960px, 100%);
+      margin: 0 auto;
+      padding: clamp(34px, 5vw, 54px) clamp(20px, 4vw, 44px);
+      border-radius: 34px;
+      background: #ffffffec;
       border: 1.5px solid var(--line);
-      border-radius: 28px;
-      padding: 44px 40px;
+      box-shadow: 0 20px 60px rgba(85, 64, 142, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
       position: relative;
-      overflow: hidden;
-      box-shadow: 0 10px 40px rgba(117, 96, 175, 0.06);
+      animation: hero-arrive .65s ease-out both;
     }
-    .hero-card:before {
-      content: '';
-      position: absolute;
-      top: -80px;
-      left: -80px;
-      width: 260px;
-      height: 260px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #ffe99940 0%, transparent 70%);
-      pointer-events: none;
+    @keyframes hero-arrive {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-copy {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 1;
     }
     .hero-eyebrow {
       display: inline-flex;
@@ -136,48 +176,189 @@
       color: #936814;
       font-size: 13px;
       font-weight: 700;
-      padding: 5px 14px;
+      padding: 6px 16px;
       border-radius: 20px;
       margin-bottom: 16px;
     }
     .hero h1 {
-      font-size: 38px;
+      font-size: clamp(28px, 4.5vw, 44px);
       line-height: 1.3;
-      letter-spacing: -0.8px;
+      letter-spacing: -0.5px;
       color: var(--ink);
       margin-bottom: 14px;
+      max-width: 720px;
     }
     .hero h1 span {
       color: var(--deep);
+      position: relative;
+      white-space: nowrap;
       text-decoration: underline;
       text-decoration-color: var(--yellow);
       text-decoration-thickness: 6px;
       text-underline-offset: 6px;
     }
     .hero-desc {
-      font-size: 17px;
-      line-height: 1.85;
-      color: #4a4361;
-      max-width: 950px;
-      margin-bottom: 20px;
+      font-size: clamp(15px, 1.8vw, 17px);
+      line-height: 1.8;
+      color: #554e6d;
+      max-width: 620px;
+      margin: 0 auto 16px;
     }
     .hero-slogan {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: var(--mint);
       border: 1px solid #bfe8d7;
       color: var(--green);
-      padding: 10px 20px;
+      padding: 8px 18px;
       border-radius: 16px;
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 22px;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      width: 100%;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 50px;
+      padding: 12px 28px;
+      border-radius: 15px;
       font-size: 15px;
       font-weight: 700;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+      cursor: pointer;
+    }
+    .hero-cta:hover {
+      transform: translateY(-2px);
+    }
+    .hero-cta-primary {
+      color: #fff;
+      background: var(--purple);
+      box-shadow: 0 4px 14px rgba(117, 96, 175, 0.35);
+    }
+    .hero-cta-primary:hover {
+      background: var(--deep);
+      box-shadow: 0 8px 22px rgba(85, 64, 142, 0.45);
+    }
+    .hero-cta-secondary {
+      color: var(--deep);
+      background: #fff;
+      border: 1.5px solid var(--line);
+    }
+    .hero-cta-secondary:hover {
+      background: var(--lilac);
     }
 
-    /* قسم الأنشطة التعليمية الخمسة */
+    /* ══ الرسوم المتحركة في المنتصف (Hero Art Centered) ══ */
+    .hero-art {
+      width: 100%;
+      max-width: 360px;
+      margin: 36px auto 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .hero-orbit {
+      width: 220px;
+      height: 220px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 2px dashed #b8a9da;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 0%, #f7f3fd 48%, #eee6fa 100%);
+      box-shadow: 0 16px 40px rgba(85, 64, 142, 0.12);
+      position: relative;
+      animation: orbit-float 4.5s ease-in-out infinite;
+    }
+    @keyframes orbit-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+    .hero-orbit-core {
+      width: 90px;
+      height: 90px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 28px;
+      color: #fff;
+      background: linear-gradient(145deg, #8874c0, #55408e);
+      box-shadow: 0 12px 28px rgba(85, 64, 142, 0.35);
+      font-size: 46px;
+      transform: rotate(-6deg);
+    }
+    .hero-orbit-core span {
+      transform: rotate(6deg);
+      display: block;
+    }
+
+    /* أيقونات المدار الطافية */
+    .orbit-note {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      border: 4px solid #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 18px rgba(59, 42, 90, 0.14);
+      font-size: 26px;
+      animation: note-bob 3.8s ease-in-out infinite;
+    }
+    @keyframes note-bob {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-5px) scale(1.04); }
+    }
+    .orbit-note-one {
+      top: -6px;
+      right: 12px;
+      background: #fff8e4;
+    }
+    .orbit-note-two {
+      bottom: 26px;
+      right: -16px;
+      background: #e8f7f0;
+      animation-delay: -.8s;
+    }
+    .orbit-note-three {
+      bottom: 26px;
+      left: -16px;
+      background: #edf4ff;
+      animation-delay: -1.6s;
+    }
+
+    /* شارة "جرّب · لاحظ · اكتشف" مستقرة في المنتصف تماماً ولا تُقص */
+    .hero-art-label {
+      position: relative;
+      margin-top: -18px;
+      z-index: 5;
+      padding: 7px 22px;
+      border: 1.5px solid #dcd4ee;
+      border-radius: 20px;
+      background: #fff;
+      color: var(--deep);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 6px 18px rgba(85, 64, 142, 0.14);
+    }
+
+    /* ══ شبكة الأنشطة التعليمية الخمسة ══ */
     .activities-section {
       max-width: 1280px;
-      margin: 36px auto;
+      margin: 40px auto;
       padding: 0 24px;
     }
     .section-title {
@@ -206,11 +387,10 @@
       gap: 24px;
     }
 
-    /* بطاقة النشاط */
     .activity-card {
       background: var(--surface);
       border: 1.5px solid var(--line);
-      border-radius: 24px;
+      border-radius: var(--radius);
       padding: 28px 24px 22px;
       display: flex;
       flex-direction: column;
@@ -329,9 +509,10 @@
       background: #eeebf5;
       color: #9d93b1;
       cursor: not-allowed;
+      border: 0;
     }
 
-    /* مميزات المنصة */
+    /* ══ مميزات المنصة ══ */
     .features-strip {
       max-width: 1280px;
       margin: 20px auto 40px;
@@ -374,7 +555,7 @@
       display: block;
     }
 
-    /* الفوتر المخصص */
+    /* ══ الفوتر المخصص بأسماء الباحثة والمشرف ══ */
     .site-footer {
       background: #252038;
       color: #e5e0f5;
@@ -432,6 +613,7 @@
       place-items: center;
       font-weight: 700;
       font-size: 15px;
+      flex-shrink: 0;
     }
     .credit-info strong {
       display: block;
@@ -477,253 +659,43 @@
       gap: 12px;
     }
 
-    /* التجاوبية (Responsive Design) */
+    /* ══ التجاوبية (Responsive Design) ══ */
     @media (max-width: 1080px) {
       .activities-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .features-box { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .footer-top { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 768px) {
-      .hero-card { padding: 30px 22px; }
-      .hero h1 { font-size: 28px; }
-      .hero-desc { font-size: 15px; }
+      .hero { padding: 24px 14px 36px; }
+      .hero-card { padding: 30px 20px 24px; }
+      .hero h1 { font-size: 26px; }
+      .hero h1 span { text-decoration-thickness: 4px; }
+      .hero-desc { font-size: 14.5px; }
+      .hero-orbit { width: 195px; height: 195px; }
+      .hero-orbit-core { width: 80px; height: 80px; font-size: 40px; }
+      .orbit-note { width: 48px; height: 48px; font-size: 22px; }
+      .orbit-note-two { right: -10px; bottom: 20px; }
+      .orbit-note-three { left: -10px; bottom: 20px; }
       .activities-grid { grid-template-columns: 1fr; }
       .features-box { grid-template-columns: 1fr; }
       .footer-top { grid-template-columns: 1fr; gap: 24px; }
       .footer-bottom { flex-direction: column; text-align: center; }
+      .header-badge { display: none; }
     }
-
-    :root { --header-height: 76px; }
-    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
-    body { overflow-x: hidden; }
-    .site-header { height: var(--header-height); padding: 0 24px; }
-    .header-inner { height: 100%; }
-    .brand-symbol { flex: 0 0 44px; }
-    .header-nav { display: flex; align-items: center; gap: 22px; }
-    .header-nav a { color: var(--muted); font-size: 14px; font-weight: 700; transition: color .18s ease; }
-    .header-nav a:hover { color: var(--deep); }
-    .hero {
-      width: 100%;
-      max-width: none;
-      min-height: calc(100vh - var(--header-height, 76px));
-      min-height: calc(100svh - var(--header-height, 76px));
-      margin: 0;
-      padding: 32px 24px;
-      display: grid;
-      align-items: center;
-      background:
-        radial-gradient(ellipse at 15% 18%, #ffdb762e 0, transparent 30%),
-        radial-gradient(ellipse at 90% 84%, #c9f1e4b0 0, transparent 32%),
-        linear-gradient(145deg, #f8f7fc 5%, #f1ecfa 100%);
-      overflow: hidden;
-      position: relative;
-    }
-    .hero-card {
-      width: min(1280px, 100%);
-      min-height: min(600px, 100%);
-      margin: 0 auto;
-      padding: clamp(32px, 6vw, 76px);
-      border-radius: 34px;
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr);
-      align-items: center;
-      gap: clamp(28px, 6vw, 80px);
-      background: #ffffffdc;
-      border: 1px solid #ffffff;
-      box-shadow: 0 24px 70px #49357914;
-      animation: hero-arrive .65s ease-out both;
-    }
-    .hero-copy { position: relative; z-index: 1; }
-    .hero-eyebrow { margin-bottom: 20px; }
-    .hero h1 { max-width: 690px; font-size: clamp(34px, 5vw, 62px); line-height: 1.25; }
-    .hero h1 span { text-decoration: none; color: var(--deep); position: relative; white-space: nowrap; }
-    .hero h1 span::after {
-      content: "";
-      position: absolute;
-      z-index: -1;
-      right: 0;
-      bottom: 1px;
-      left: 0;
-      height: 13px;
-      border-radius: 12px;
-      background: var(--yellow);
-      opacity: .76;
-    }
-    .hero-desc { max-width: 590px; margin: 18px 0 22px; font-size: clamp(16px, 1.5vw, 19px); }
-    .hero-slogan { line-height: 1.65; }
-    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
-    .hero-cta {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-      min-height: 52px;
-      padding: 11px 22px;
-      border: 2px solid transparent;
-      border-radius: 15px;
-      font-size: 15px;
-      font-weight: 700;
-      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-    }
-    .hero-cta:hover { transform: translateY(-2px); }
-    .hero-cta-primary { color: #fff; background: var(--deep); box-shadow: 0 8px 18px #55408e30; }
-    .hero-cta-primary:hover { background: #463276; box-shadow: 0 12px 24px #55408e3d; }
-    .hero-cta-secondary { color: var(--deep); background: #fff; border-color: var(--line); }
-    .hero-cta-secondary:hover { background: var(--lilac); }
-    .hero-art {
-      min-height: 330px;
-      display: grid;
-      place-items: center;
-      position: relative;
-      isolation: isolate;
-    }
-    .hero-orbit {
-      width: min(31vw, 360px);
-      aspect-ratio: 1;
-      min-width: 250px;
-      display: grid;
-      place-items: center;
-      border: 1px dashed #b8a9da;
-      border-radius: 50%;
-      background: radial-gradient(circle, #fff 0 43%, #f4effc 44% 67%, #ede6f8 68% 100%);
-      box-shadow: 0 18px 45px #57428718;
-      animation: orbit-float 5s ease-in-out infinite;
-    }
-    .hero-orbit-core {
-      width: 43%;
-      aspect-ratio: 1;
-      display: grid;
-      place-items: center;
-      border-radius: 32%;
-      color: #fff;
-      background: linear-gradient(145deg, #8874c0, #55408e);
-      box-shadow: 0 16px 30px #55408e40;
-      font-size: clamp(60px, 8vw, 98px);
-      transform: rotate(-7deg);
-    }
-    .hero-orbit-core span { transform: rotate(7deg); }
-    .orbit-note {
-      position: absolute;
-      display: grid;
-      place-items: center;
-      width: 65px;
-      height: 65px;
-      border: 5px solid #fff;
-      border-radius: 22px;
-      background: #fff8e4;
-      box-shadow: 0 8px 20px #3b2a5a19;
-      font-size: 31px;
-      animation: note-bob 3.8s ease-in-out infinite;
-    }
-    .orbit-note-one { top: 7%; right: 11%; }
-    .orbit-note-two { right: 1%; bottom: 15%; background: #e8f7f0; animation-delay: -.8s; }
-    .orbit-note-three { left: 4%; bottom: 17%; background: #edf4ff; animation-delay: -1.5s; }
-    .hero-art-label {
-      position: absolute;
-      right: 50%;
-      bottom: 0;
-      transform: translateX(50%);
-      padding: 8px 15px;
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      background: #fff;
-      color: var(--deep);
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-      box-shadow: 0 6px 18px #3b2a5a12;
-    }
-    .activities-section, .features-strip, .site-footer { scroll-margin-top: 88px; }
-    .activities-section { padding-top: 12px; }
-    .section-title { align-items: center; margin-bottom: 22px; }
-    .section-title h2 { font-size: clamp(23px, 3vw, 30px); }
-    .section-title p { margin-top: 4px; }
-    .features-strip { margin-top: 40px; }
-    .features-heading { margin-bottom: 18px; }
-    .features-heading h2 { font-size: clamp(22px, 2.6vw, 28px); }
-    .site-footer { margin-top: 42px; }
-    .activity-card, .features-box, .credit-card { transition: transform .2s ease, box-shadow .2s ease; }
-    .activity-card:hover { transform: translateY(-4px); }
-    .activity-card:focus-within { outline: 3px solid #c9bceb; outline-offset: 3px; }
-    .btn-action { min-height: 48px; }
-    :focus-visible { outline: 3px solid #a692db; outline-offset: 4px; }
-    @keyframes hero-arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes orbit-float { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-9px) rotate(3deg); } }
-    @keyframes note-bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-7px) rotate(5deg); } }
-    @media (max-width: 900px) {
-      .header-nav { gap: 13px; }
-      .header-nav a { font-size: 13px; }
-      .header-badge { font-size: 11px; padding-inline: 10px; }
-      .hero-card { gap: 24px; }
-    }
-    @media (max-width: 680px) {
-      html { scroll-padding-top: 72px; }
-      :root { --header-height: 68px; }
-      .site-header { padding: 0 14px; }
-      .header-inner { gap: 10px; }
-      .brand { gap: 8px; min-width: 0; }
-      .brand-symbol { width: 38px; height: 42px; font-size: 21px; }
-      .brand-text strong { font-size: 16px; white-space: nowrap; }
-      .brand-text small { font-size: 9px; }
-      .header-nav { gap: 10px; }
-      .header-nav a { font-size: 11px; }
-      .header-nav a:last-child, .header-badge { display: none; }
-      .hero { padding: 22px 14px; }
-      .hero-card {
-        min-height: 0;
-        padding: 28px 22px 24px;
-        grid-template-columns: 1fr;
-        gap: 8px;
-        border-radius: 25px;
-      }
-      .hero-eyebrow { font-size: 11px; margin-bottom: 14px; }
-      .hero h1 { font-size: clamp(30px, 8vw, 42px); }
-      .hero h1 span { white-space: normal; }
-      .hero-desc { font-size: 15px; line-height: 1.8; margin: 14px 0; }
-      .hero-slogan { padding: 8px 12px; font-size: 12px; }
-      .hero-actions { margin-top: 18px; }
-      .hero-cta { flex: 1 1 100%; min-height: 48px; font-size: 14px; }
-      .hero-art { min-height: 205px; margin-top: 5px; }
-      .hero-orbit { width: 185px; min-width: 185px; }
-      .orbit-note { width: 48px; height: 48px; border-width: 4px; border-radius: 17px; font-size: 24px; }
-      .hero-art-label { bottom: -2px; font-size: 11px; }
-      .activities-section { margin-top: 28px; padding-inline: 14px; }
-      .section-title { margin-bottom: 16px; }
-      .section-title h2 { align-items: flex-start; font-size: 22px; }
-      .section-title p { font-size: 13px; }
-      .activity-card { padding: 24px 20px 20px; }
-      .activity-card h3 { font-size: 19px; }
-      .activity-card p { font-size: 14px; }
-      .features-strip { margin: 28px auto; padding-inline: 14px; }
-      .features-box { padding: 21px 18px; gap: 17px; }
-      .features-heading h2 { font-size: 22px; }
-      .site-footer { margin-top: 28px; padding: 36px 18px 24px; }
-      .footer-top { gap: 24px; }
-      .footer-credits h4, .footer-links h4 { margin-bottom: 10px; }
-      .credit-card { padding: 11px 12px; }
-      .credit-info strong { font-size: 13px; }
-      .footer-bottom { padding-top: 18px; font-size: 11px; }
-    }
-    @media (max-width: 370px) {
-      .header-nav { gap: 7px; }
-      .header-nav a { font-size: 10px; }
-      .header-nav a:nth-child(2) { display: none; }
-      .brand-text strong { font-size: 14px; }
-      .hero-card { padding-inline: 17px; }
-      .hero-eyebrow { align-items: flex-start; }
-      .hero-art { min-height: 95px; margin-top: 0; }
-      .hero-orbit { width: 108px; min-width: 108px; }
-      .orbit-note { width: 40px; height: 40px; font-size: 20px; }
-    }
-    @media (max-height: 680px) and (min-width: 681px) {
-      .hero { padding-block: 18px; }
-      .hero-card { padding-block: 30px; min-height: 0; }
-      .hero-art { min-height: 280px; }
-      .hero-orbit { width: min(26vw, 300px); }
+    @media (max-width: 480px) {
+      .site-header { padding: 0 16px; }
+      .brand-text strong { font-size: 16px; }
+      .brand-text small { font-size: 9.5px; }
+      .header-nav { gap: 14px; }
+      .header-nav a { font-size: 12px; }
+      .hero-cta { width: 100%; font-size: 14.5px; }
+      .hero-orbit { width: 180px; height: 180px; }
+      .hero-orbit-core { width: 72px; height: 72px; font-size: 36px; }
+      .orbit-note { width: 42px; height: 42px; font-size: 19px; }
+      .hero-art-label { font-size: 11.5px; padding: 6px 16px; margin-top: -15px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
     }
   </style>
 </head>
@@ -735,7 +707,7 @@
       <div class="brand">
         <div class="brand-symbol">⚡</div>
         <div class="brand-text">
-          <strong>مختبر الكهرباء والمغناطيسية</strong>
+          <strong>مختبر العلوم التفاعلي</strong>
           <small>الصف الرابع الأساسي · المنهاج الفلسطيني</small>
         </div>
       </div>
@@ -751,7 +723,7 @@
     </div>
   </header>
 
-  <!-- البانر الترحيبي والتعريف بالمنصة -->
+  <!-- البانر الترحيبي والتعريف بالمنصة - متناسق ومتوسط دائماً -->
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-card">
       <div class="hero-copy">
@@ -761,24 +733,26 @@
         </div>
         <h1 id="hero-title">جاهز تكتشف <span>الكهرباء والمغناطيسية؟</span></h1>
         <p class="hero-desc">
-          جرّب بنفسك، اكتشف أسرار الطاقة والمغناطيس، وتعلّم خطوة بخطوة من خلال أنشطة ممتعة ومجسّمات تفاعلية.
+          جرّب بنفسك، اكتشف أسرار الطاقة والمغناطيس، وتعلّم خطوة بخطوة من خلال أنشطة ممتعة ومجسّمات تفاعلية لمعالجة الفاقد التعليمي.
         </p>
         <div class="hero-slogan">
           <span>✨</span>
           <span>كل سؤال بداية اكتشاف جديد!</span>
         </div>
         <div class="hero-actions">
-          <a href="electricity.html" class="hero-cta hero-cta-primary">ابدأ الاستكشاف <span aria-hidden="true">←</span></a>
+          <a href="/electricity.html" class="hero-cta hero-cta-primary">ابدأ الاستكشاف <span aria-hidden="true">←</span></a>
           <a href="#activities" class="hero-cta hero-cta-secondary">شاهد الأنشطة <span aria-hidden="true">↓</span></a>
         </div>
       </div>
+
+      <!-- الرسوم المتحركة في المنتصف ع طول بدون أي قص -->
       <div class="hero-art" aria-hidden="true">
         <div class="hero-orbit">
           <div class="hero-orbit-core"><span>⚡</span></div>
+          <span class="orbit-note orbit-note-one">🧲</span>
+          <span class="orbit-note orbit-note-two">💡</span>
+          <span class="orbit-note orbit-note-three">🔋</span>
         </div>
-        <span class="orbit-note orbit-note-one">🧲</span>
-        <span class="orbit-note orbit-note-two">💡</span>
-        <span class="orbit-note orbit-note-three">🔋</span>
         <span class="hero-art-label">جرّب · لاحظ · اكتشف</span>
       </div>
     </div>
@@ -788,8 +762,8 @@
   <section class="activities-section" id="activities" aria-labelledby="activities-title">
     <div class="section-title">
       <div>
-        <h2 id="activities-title"><span aria-hidden="true">📚</span> اختر مغامرتك العلمية</h2>
-        <p>ابدأ بنشاط متاح، واكتشف الأنشطة الجديدة عند إطلاقها</p>
+        <h2 id="activities-title"><span aria-hidden="true">📚</span> الأنشطة التعليمية التفاعلية الخمسة</h2>
+        <p>انقر على أي نشاط للبدء بالتجربة والاستكشاف ثلاثي الأبعاد</p>
       </div>
     </div>
 
@@ -799,7 +773,7 @@
         <span class="activity-status status-live">نشط ومتاح الآن 🚀</span>
         <div class="activity-icon-wrap">⚡</div>
         <span class="activity-number">النشاط الأول</span>
-        <h3>مصادر الكهرباء والأجهزة</h3>
+        <h3>مختبر مصادر الكهرباء والأجهزة</h3>
         <p>
           استكشف أجهزة كتاب العلوم ثلاثية الأبعاد، وتعرف إلى مصادر الطاقة الكهربائية (البطارية، كهرباء المنزل، الطاقة الشمسية، الرياح، الدينامو) مع رفيقك التعليمي «شرارة».
         </p>
@@ -808,8 +782,8 @@
           <span class="tag">واقع معزز AR/VR</span>
           <span class="tag">الرفيق «شرارة»</span>
         </div>
-        <a href="electricity.html" class="btn-action btn-primary">
-          <span>افتح مختبر الكهرباء والمغناطيسية</span>
+        <a href="/electricity.html" class="btn-action btn-primary">
+          <span>افتح مختبر الكهرباء</span>
           <span>←</span>
         </a>
       </article>
@@ -828,7 +802,7 @@
           <span class="tag">كاميرا OpenCV</span>
           <span class="tag">المساعد «الخبير»</span>
         </div>
-        <a href="materials.html" class="btn-action btn-secondary">
+        <a href="/materials.html" class="btn-action btn-secondary">
           <span>افتح محطة فرز الخامات</span>
           <span>←</span>
         </a>
@@ -938,9 +912,9 @@
     <div class="footer-inner">
       <div class="footer-top">
         <div class="footer-about">
-          <h3 id="team-title"><span>⚡</span> مختبر الكهرباء والمغناطيسية</h3>
+          <h3 id="team-title"><span>⚡</span> منصة مختبر العلوم التفاعلي</h3>
           <p>
-            مشروع تعليمي تفاعلي لطلبة الصف الرابع، يجمع بين الاستكشاف العملي والتقنيات التفاعلية لفهم مفاهيم الكهرباء والمغناطيسية وخامات البيئة.
+            مشروع تعليمي تفاعلي يهدف إلى توظيف تكنولوجيا الواقع المعزز والذكاء الاصطناعي في تدريس مبحث العلوم لطلبة الصف الرابع الأساسي، ضمن وحدة الكهرباء والمغناطيسية وخامات البيئة لمعالجة الفاقد التعليمي وتعزيز التعلم الذاتي بالاستكشاف.
           </p>
         </div>
 
@@ -950,7 +924,7 @@
             <div class="credit-avatar">و</div>
             <div class="credit-info">
               <strong>إعداد الباحثة: ولاء حامد الصيداوي</strong>
-              <small>إعداد وبحث تربوي</small>
+              <small>باحثة ومصممة المنصة التفاعلية</small>
             </div>
           </div>
           <div class="credit-card">
@@ -965,17 +939,17 @@
         <div class="footer-links">
           <h4>روابط سريعة</h4>
           <ul>
-            <li><a href="electricity.html">⚡ النشاط 1: مختبر الكهرباء والمغناطيسية</a></li>
-            <li><a href="materials.html">📦 النشاط 2: فرز خامات البيئة</a></li>
+            <li><a href="/electricity.html">⚡ النشاط 1: مختبر الكهرباء</a></li>
+            <li><a href="/materials.html">📦 النشاط 2: فرز خامات البيئة</a></li>
             <li><a href="#activities">📚 قائمة الأنشطة الخمسة</a></li>
-            <li><a href="index.html">🏠 الصفحة الرئيسية للمنصة</a></li>
+            <li><a href="/">🏠 الصفحة الرئيسية للمنصة</a></li>
           </ul>
         </div>
       </div>
 
       <div class="footer-bottom">
-        <p>جميع الحقوق محفوظة © لمختبر الكهرباء والمغناطيسية · الصف الرابع الأساسي</p>
-        <p>صُنعت بحب لمستكشفي المستقبل 🌟</p>
+        <p>جميع الحقوق محفوظة © لمنصة العلوم التفاعلية · الصف الرابع الأساسي</p>
+        <p>صُممت وصُنعت بحب لأبطال وباحثي المستقبل 🌟</p>
       </div>
     </div>
   </footer>
