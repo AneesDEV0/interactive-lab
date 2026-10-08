@@ -1,0 +1,19 @@
+<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="clothShadow">
+      <feDropShadow dx="3" dy="6" stdDeviation="5" flood-color="#3d1e2e" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <g filter="url(#clothShadow)">
+    <!-- طبقة القماش السفلية (صفراء/بيج) -->
+    <path d="M50 85 L145 75 L155 125 L60 135 Z" fill="#fed672" stroke="#d5aa3d" stroke-width="1.2" rx="6"/>
+    <!-- طبقة القماش الوسطى (وردية ناعمة) -->
+    <path d="M42 70 L140 60 L148 112 L50 122 Z" fill="#fca5c6" stroke="#d67198" stroke-width="1.2"/>
+    <!-- طبقة القماش العلوية (سماوية تركوازية) -->
+    <path d="M35 55 L132 45 L140 98 L43 108 Z" fill="#91e1d2" stroke="#5cbfae" stroke-width="1.2"/>
+    <!-- درزات وثنيات الأقمشة الواقعية -->
+    <path d="M43 108 Q90 102 140 98" stroke="#ffffff" stroke-width="2.5" fill="none" opacity="0.7"/>
+    <path d="M50 122 Q98 116 148 112" stroke="#f686af" stroke-width="2" fill="none"/>
+    <path d="M60 135 Q105 130 155 125" stroke="#deb548" stroke-width="2" fill="none"/>
+  </g>
+</svg>

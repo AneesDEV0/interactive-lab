@@ -1,11 +1,984 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#7560af">
-<meta name="description" content="مختبر شرارة: تعرّف إلى أجهزة كتاب العلوم للصف الرابع، وجرّب مصادر الكهرباء مع صديقك شرارة.">
-<title>مختبر شرارة · نكتشف الكهرباء</title>
-<link rel="icon" href="/public/favicon.svg"><link rel="stylesheet" href="/src/electricity/style.css">
-<script type="importmap">{"imports":{"three":"/vendor/three.module.js","three/addons/":"/vendor/addons/"}}</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#7560af">
+  <meta name="description" content="مختبر تفاعلي لطلبة الصف الرابع لاكتشاف الكهرباء والمغناطيسية من خلال التجربة والأنشطة التعليمية الممتعة.">
+  <title>مختبر الكهرباء والمغناطيسية · الصف الرابع</title>
+  <link rel="icon" href="public/favicon.svg">
+  <style>
+    @font-face {
+      font-family: Tajawal;
+      src: url('assets/fonts/tajawal-arabic-400-normal.woff2') format('woff2');
+      font-weight: 400;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: Tajawal;
+      src: url('assets/fonts/tajawal-arabic-700-normal.woff2') format('woff2');
+      font-weight: 700 900;
+      font-display: swap;
+    }
+
+    :root {
+      --ink: #2d2845;
+      --muted: #6e6787;
+      --purple: #7560af;
+      --deep: #55408e;
+      --lilac: #f0eaf9;
+      --mint: #e2f4ed;
+      --green: #247a5e;
+      --yellow: #ffdb76;
+      --gold: #df9e19;
+      --bg: #f8f7fc;
+      --surface: #ffffff;
+      --line: #e9e5f2;
+      --radius: 22px;
+      font-family: Tajawal, Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { line-height: 1.6; background: var(--bg); color: var(--ink); overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+
+    /* الهيدر العلوي */
+    .site-header {
+      background: #ffffffd6;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 28px;
+    }
+    .header-inner {
+      max-width: 1280px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-symbol {
+      width: 44px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--purple);
+      color: var(--yellow);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      transform: rotate(4deg);
+      box-shadow: 0 4px 14px rgba(117, 96, 175, 0.25);
+    }
+    .brand-text strong {
+      font-size: 20px;
+      display: block;
+      line-height: 1.2;
+      color: var(--deep);
+    }
+    .brand-text small {
+      color: var(--muted);
+      font-size: 11.5px;
+    }
+    .header-badge {
+      background: var(--lilac);
+      color: var(--deep);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* البانر الترحيبي (Hero) */
+    .hero {
+      max-width: 1280px;
+      margin: 32px auto 20px;
+      padding: 0 24px;
+    }
+    .hero-card {
+      background: linear-gradient(135deg, #ffffff 0%, #fcfaff 60%, #f6efff 100%);
+      border: 1.5px solid var(--line);
+      border-radius: 28px;
+      padding: 44px 40px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(117, 96, 175, 0.06);
+    }
+    .hero-card:before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      left: -80px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffe99940 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff6db;
+      border: 1px solid #fae8a8;
+      color: #936814;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: 38px;
+      line-height: 1.3;
+      letter-spacing: -0.8px;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+    .hero h1 span {
+      color: var(--deep);
+      text-decoration: underline;
+      text-decoration-color: var(--yellow);
+      text-decoration-thickness: 6px;
+      text-underline-offset: 6px;
+    }
+    .hero-desc {
+      font-size: 17px;
+      line-height: 1.85;
+      color: #4a4361;
+      max-width: 950px;
+      margin-bottom: 20px;
+    }
+    .hero-slogan {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--mint);
+      border: 1px solid #bfe8d7;
+      color: var(--green);
+      padding: 10px 20px;
+      border-radius: 16px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    /* قسم الأنشطة التعليمية الخمسة */
+    .activities-section {
+      max-width: 1280px;
+      margin: 36px auto;
+      padding: 0 24px;
+    }
+    .section-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .section-title h2 {
+      font-size: 26px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title p {
+      color: var(--muted);
+      font-size: 14.5px;
+    }
+
+    .activities-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+    }
+
+    /* بطاقة النشاط */
+    .activity-card {
+      background: var(--surface);
+      border: 1.5px solid var(--line);
+      border-radius: 24px;
+      padding: 28px 24px 22px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      overflow: hidden;
+    }
+    .activity-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 16px 36px rgba(93, 71, 151, 0.1);
+      border-color: #cfc5e8;
+    }
+    .activity-card.featured {
+      border-color: #bcaddf;
+      background: linear-gradient(180deg, #ffffff 0%, #faf8fd 100%);
+    }
+    .activity-status {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+    .status-live {
+      background: #e2f6eb;
+      color: #1b734c;
+      border: 1px solid #c4edd7;
+    }
+    .status-soon {
+      background: #f1eef8;
+      color: #7b6f93;
+    }
+
+    .activity-icon-wrap {
+      width: 62px;
+      height: 62px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-size: 30px;
+      margin-bottom: 18px;
+    }
+    .card-purple .activity-icon-wrap { background: #f0ebfc; color: var(--purple); }
+    .card-green .activity-icon-wrap { background: #e3f6ee; color: var(--green); }
+    .card-orange .activity-icon-wrap { background: #fff2db; color: #c47c16; }
+    .card-blue .activity-icon-wrap { background: #e5f2ff; color: #1e70bf; }
+    .card-red .activity-icon-wrap { background: #ffe9ec; color: #c8324f; }
+
+    .activity-number {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: block;
+    }
+    .activity-card h3 {
+      font-size: 20px;
+      line-height: 1.35;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+    .activity-card p {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 22px;
+      flex-grow: 1;
+    }
+    .activity-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 20px;
+    }
+    .tag {
+      background: #f4f2f9;
+      color: #645a7c;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 8px;
+    }
+
+    .btn-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 14px;
+      font-size: 14.5px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .btn-primary {
+      background: var(--purple);
+      color: white;
+      box-shadow: 0 4px 12px rgba(117, 96, 175, 0.3);
+    }
+    .btn-primary:hover {
+      background: var(--deep);
+      box-shadow: 0 6px 18px rgba(85, 64, 142, 0.4);
+    }
+    .btn-secondary {
+      background: #247a5e;
+      color: white;
+      box-shadow: 0 4px 12px rgba(36, 122, 94, 0.25);
+    }
+    .btn-secondary:hover {
+      background: #1b614a;
+    }
+    .btn-disabled {
+      background: #eeebf5;
+      color: #9d93b1;
+      cursor: not-allowed;
+    }
+
+    /* مميزات المنصة */
+    .features-strip {
+      max-width: 1280px;
+      margin: 20px auto 40px;
+      padding: 0 24px;
+    }
+    .features-box {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 28px 32px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 20px;
+    }
+    .feature-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .feature-icon {
+      font-size: 24px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--lilac);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .feature-text strong {
+      font-size: 14.5px;
+      display: block;
+      color: var(--ink);
+      margin-bottom: 3px;
+    }
+    .feature-text small {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      display: block;
+    }
+
+    /* الفوتر المخصص */
+    .site-footer {
+      background: #252038;
+      color: #e5e0f5;
+      padding: 50px 24px 30px;
+      margin-top: 50px;
+      border-top: 4px solid var(--purple);
+    }
+    .footer-inner {
+      max-width: 1280px;
+      margin: auto;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1.6fr 1.2fr 1fr;
+      gap: 36px;
+      padding-bottom: 36px;
+      border-bottom: 1px solid #3d3659;
+    }
+    .footer-about h3 {
+      font-size: 20px;
+      color: #fff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .footer-about p {
+      font-size: 13.5px;
+      line-height: 1.9;
+      color: #b7add4;
+    }
+
+    .footer-credits h4 {
+      font-size: 16px;
+      color: #ffdb76;
+      margin-bottom: 14px;
+    }
+    .credit-card {
+      background: #312a4a;
+      border: 1px solid #433966;
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .credit-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .credit-info strong {
+      display: block;
+      font-size: 14px;
+      color: #ffffff;
+    }
+    .credit-info small {
+      font-size: 11.5px;
+      color: #c0b4e0;
+    }
+
+    .footer-links h4 {
+      font-size: 16px;
+      color: #ffdb76;
+      margin-bottom: 14px;
+    }
+    .footer-links ul {
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+    .footer-links a {
+      color: #b7add4;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover {
+      color: #ffdb76;
+    }
+
+    .footer-bottom {
+      padding-top: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #8c82ab;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* التجاوبية (Responsive Design) */
+    @media (max-width: 1080px) {
+      .activities-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .features-box { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .hero-card { padding: 30px 22px; }
+      .hero h1 { font-size: 28px; }
+      .hero-desc { font-size: 15px; }
+      .activities-grid { grid-template-columns: 1fr; }
+      .features-box { grid-template-columns: 1fr; }
+      .footer-top { grid-template-columns: 1fr; gap: 24px; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+    }
+
+    :root { --header-height: 76px; }
+    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+    body { overflow-x: hidden; }
+    .site-header { height: var(--header-height); padding: 0 24px; }
+    .header-inner { height: 100%; }
+    .brand-symbol { flex: 0 0 44px; }
+    .header-nav { display: flex; align-items: center; gap: 22px; }
+    .header-nav a { color: var(--muted); font-size: 14px; font-weight: 700; transition: color .18s ease; }
+    .header-nav a:hover { color: var(--deep); }
+    .hero {
+      width: 100%;
+      max-width: none;
+      min-height: calc(100vh - var(--header-height, 76px));
+      min-height: calc(100svh - var(--header-height, 76px));
+      margin: 0;
+      padding: 32px 24px;
+      display: grid;
+      align-items: center;
+      background:
+        radial-gradient(ellipse at 15% 18%, #ffdb762e 0, transparent 30%),
+        radial-gradient(ellipse at 90% 84%, #c9f1e4b0 0, transparent 32%),
+        linear-gradient(145deg, #f8f7fc 5%, #f1ecfa 100%);
+      overflow: hidden;
+      position: relative;
+    }
+    .hero-card {
+      width: min(1280px, 100%);
+      min-height: min(600px, 100%);
+      margin: 0 auto;
+      padding: clamp(32px, 6vw, 76px);
+      border-radius: 34px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr);
+      align-items: center;
+      gap: clamp(28px, 6vw, 80px);
+      background: #ffffffdc;
+      border: 1px solid #ffffff;
+      box-shadow: 0 24px 70px #49357914;
+      animation: hero-arrive .65s ease-out both;
+    }
+    .hero-copy { position: relative; z-index: 1; }
+    .hero-eyebrow { margin-bottom: 20px; }
+    .hero h1 { max-width: 690px; font-size: clamp(34px, 5vw, 62px); line-height: 1.25; }
+    .hero h1 span { text-decoration: none; color: var(--deep); position: relative; white-space: nowrap; }
+    .hero h1 span::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      right: 0;
+      bottom: 1px;
+      left: 0;
+      height: 13px;
+      border-radius: 12px;
+      background: var(--yellow);
+      opacity: .76;
+    }
+    .hero-desc { max-width: 590px; margin: 18px 0 22px; font-size: clamp(16px, 1.5vw, 19px); }
+    .hero-slogan { line-height: 1.65; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 52px;
+      padding: 11px 22px;
+      border: 2px solid transparent;
+      border-radius: 15px;
+      font-size: 15px;
+      font-weight: 700;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .hero-cta:hover { transform: translateY(-2px); }
+    .hero-cta-primary { color: #fff; background: var(--deep); box-shadow: 0 8px 18px #55408e30; }
+    .hero-cta-primary:hover { background: #463276; box-shadow: 0 12px 24px #55408e3d; }
+    .hero-cta-secondary { color: var(--deep); background: #fff; border-color: var(--line); }
+    .hero-cta-secondary:hover { background: var(--lilac); }
+    .hero-art {
+      min-height: 330px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      isolation: isolate;
+    }
+    .hero-orbit {
+      width: min(31vw, 360px);
+      aspect-ratio: 1;
+      min-width: 250px;
+      display: grid;
+      place-items: center;
+      border: 1px dashed #b8a9da;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff 0 43%, #f4effc 44% 67%, #ede6f8 68% 100%);
+      box-shadow: 0 18px 45px #57428718;
+      animation: orbit-float 5s ease-in-out infinite;
+    }
+    .hero-orbit-core {
+      width: 43%;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 32%;
+      color: #fff;
+      background: linear-gradient(145deg, #8874c0, #55408e);
+      box-shadow: 0 16px 30px #55408e40;
+      font-size: clamp(60px, 8vw, 98px);
+      transform: rotate(-7deg);
+    }
+    .hero-orbit-core span { transform: rotate(7deg); }
+    .orbit-note {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 65px;
+      height: 65px;
+      border: 5px solid #fff;
+      border-radius: 22px;
+      background: #fff8e4;
+      box-shadow: 0 8px 20px #3b2a5a19;
+      font-size: 31px;
+      animation: note-bob 3.8s ease-in-out infinite;
+    }
+    .orbit-note-one { top: 7%; right: 11%; }
+    .orbit-note-two { right: 1%; bottom: 15%; background: #e8f7f0; animation-delay: -.8s; }
+    .orbit-note-three { left: 4%; bottom: 17%; background: #edf4ff; animation-delay: -1.5s; }
+    .hero-art-label {
+      position: absolute;
+      right: 50%;
+      bottom: 0;
+      transform: translateX(50%);
+      padding: 8px 15px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      color: var(--deep);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 6px 18px #3b2a5a12;
+    }
+    .activities-section, .features-strip, .site-footer { scroll-margin-top: 88px; }
+    .activities-section { padding-top: 12px; }
+    .section-title { align-items: center; margin-bottom: 22px; }
+    .section-title h2 { font-size: clamp(23px, 3vw, 30px); }
+    .section-title p { margin-top: 4px; }
+    .features-strip { margin-top: 40px; }
+    .features-heading { margin-bottom: 18px; }
+    .features-heading h2 { font-size: clamp(22px, 2.6vw, 28px); }
+    .site-footer { margin-top: 42px; }
+    .activity-card, .features-box, .credit-card { transition: transform .2s ease, box-shadow .2s ease; }
+    .activity-card:hover { transform: translateY(-4px); }
+    .activity-card:focus-within { outline: 3px solid #c9bceb; outline-offset: 3px; }
+    .btn-action { min-height: 48px; }
+    :focus-visible { outline: 3px solid #a692db; outline-offset: 4px; }
+    @keyframes hero-arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes orbit-float { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-9px) rotate(3deg); } }
+    @keyframes note-bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-7px) rotate(5deg); } }
+    @media (max-width: 900px) {
+      .header-nav { gap: 13px; }
+      .header-nav a { font-size: 13px; }
+      .header-badge { font-size: 11px; padding-inline: 10px; }
+      .hero-card { gap: 24px; }
+    }
+    @media (max-width: 680px) {
+      html { scroll-padding-top: 72px; }
+      :root { --header-height: 68px; }
+      .site-header { padding: 0 14px; }
+      .header-inner { gap: 10px; }
+      .brand { gap: 8px; min-width: 0; }
+      .brand-symbol { width: 38px; height: 42px; font-size: 21px; }
+      .brand-text strong { font-size: 16px; white-space: nowrap; }
+      .brand-text small { font-size: 9px; }
+      .header-nav { gap: 10px; }
+      .header-nav a { font-size: 11px; }
+      .header-nav a:last-child, .header-badge { display: none; }
+      .hero { padding: 22px 14px; }
+      .hero-card {
+        min-height: 0;
+        padding: 28px 22px 24px;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        border-radius: 25px;
+      }
+      .hero-eyebrow { font-size: 11px; margin-bottom: 14px; }
+      .hero h1 { font-size: clamp(30px, 8vw, 42px); }
+      .hero h1 span { white-space: normal; }
+      .hero-desc { font-size: 15px; line-height: 1.8; margin: 14px 0; }
+      .hero-slogan { padding: 8px 12px; font-size: 12px; }
+      .hero-actions { margin-top: 18px; }
+      .hero-cta { flex: 1 1 100%; min-height: 48px; font-size: 14px; }
+      .hero-art { min-height: 205px; margin-top: 5px; }
+      .hero-orbit { width: 185px; min-width: 185px; }
+      .orbit-note { width: 48px; height: 48px; border-width: 4px; border-radius: 17px; font-size: 24px; }
+      .hero-art-label { bottom: -2px; font-size: 11px; }
+      .activities-section { margin-top: 28px; padding-inline: 14px; }
+      .section-title { margin-bottom: 16px; }
+      .section-title h2 { align-items: flex-start; font-size: 22px; }
+      .section-title p { font-size: 13px; }
+      .activity-card { padding: 24px 20px 20px; }
+      .activity-card h3 { font-size: 19px; }
+      .activity-card p { font-size: 14px; }
+      .features-strip { margin: 28px auto; padding-inline: 14px; }
+      .features-box { padding: 21px 18px; gap: 17px; }
+      .features-heading h2 { font-size: 22px; }
+      .site-footer { margin-top: 28px; padding: 36px 18px 24px; }
+      .footer-top { gap: 24px; }
+      .footer-credits h4, .footer-links h4 { margin-bottom: 10px; }
+      .credit-card { padding: 11px 12px; }
+      .credit-info strong { font-size: 13px; }
+      .footer-bottom { padding-top: 18px; font-size: 11px; }
+    }
+    @media (max-width: 370px) {
+      .header-nav { gap: 7px; }
+      .header-nav a { font-size: 10px; }
+      .header-nav a:nth-child(2) { display: none; }
+      .brand-text strong { font-size: 14px; }
+      .hero-card { padding-inline: 17px; }
+      .hero-eyebrow { align-items: flex-start; }
+      .hero-art { min-height: 95px; margin-top: 0; }
+      .hero-orbit { width: 108px; min-width: 108px; }
+      .orbit-note { width: 40px; height: 40px; font-size: 20px; }
+    }
+    @media (max-height: 680px) and (min-width: 681px) {
+      .hero { padding-block: 18px; }
+      .hero-card { padding-block: 30px; min-height: 0; }
+      .hero-art { min-height: 280px; }
+      .hero-orbit { width: min(26vw, 300px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
-<body><a class="skip-link" href="#main">انتقل إلى المختبر</a><div id="app"></div><noscript>يحتاج المختبر إلى تفعيل JavaScript لتجربة الأجهزة.</noscript><script type="module" src="/src/electricity/app.js"></script></body>
+<body>
+
+  <!-- الهيدر العلوي -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-symbol">⚡</div>
+        <div class="brand-text">
+          <strong>مختبر الكهرباء والمغناطيسية</strong>
+          <small>الصف الرابع الأساسي · المنهاج الفلسطيني</small>
+        </div>
+      </div>
+      <nav class="header-nav" aria-label="التنقل في الصفحة">
+        <a href="#activities">الأنشطة</a>
+        <a href="#features">كيف نتعلّم؟</a>
+        <a href="#team">فريق البحث</a>
+      </nav>
+      <div class="header-badge">
+        <span>🎓</span>
+        <span>رحلة استكشاف للصف الرابع</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- البانر الترحيبي والتعريف بالمنصة -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-card">
+      <div class="hero-copy">
+        <div class="hero-eyebrow">
+          <span>⚡</span>
+          <span>مغامرة علمية تفاعلية · الصف الرابع</span>
+        </div>
+        <h1 id="hero-title">جاهز تكتشف <span>الكهرباء والمغناطيسية؟</span></h1>
+        <p class="hero-desc">
+          جرّب بنفسك، اكتشف أسرار الطاقة والمغناطيس، وتعلّم خطوة بخطوة من خلال أنشطة ممتعة ومجسّمات تفاعلية.
+        </p>
+        <div class="hero-slogan">
+          <span>✨</span>
+          <span>كل سؤال بداية اكتشاف جديد!</span>
+        </div>
+        <div class="hero-actions">
+          <a href="electricity.html" class="hero-cta hero-cta-primary">ابدأ الاستكشاف <span aria-hidden="true">←</span></a>
+          <a href="#activities" class="hero-cta hero-cta-secondary">شاهد الأنشطة <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="hero-orbit">
+          <div class="hero-orbit-core"><span>⚡</span></div>
+        </div>
+        <span class="orbit-note orbit-note-one">🧲</span>
+        <span class="orbit-note orbit-note-two">💡</span>
+        <span class="orbit-note orbit-note-three">🔋</span>
+        <span class="hero-art-label">جرّب · لاحظ · اكتشف</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- شبكة الأنشطة التعليمية الخمسة -->
+  <section class="activities-section" id="activities" aria-labelledby="activities-title">
+    <div class="section-title">
+      <div>
+        <h2 id="activities-title"><span aria-hidden="true">📚</span> اختر مغامرتك العلمية</h2>
+        <p>ابدأ بنشاط متاح، واكتشف الأنشطة الجديدة عند إطلاقها</p>
+      </div>
+    </div>
+
+    <div class="activities-grid">
+      <!-- النشاط الأول -->
+      <article class="activity-card featured card-purple">
+        <span class="activity-status status-live">نشط ومتاح الآن 🚀</span>
+        <div class="activity-icon-wrap">⚡</div>
+        <span class="activity-number">النشاط الأول</span>
+        <h3>مصادر الكهرباء والأجهزة</h3>
+        <p>
+          استكشف أجهزة كتاب العلوم ثلاثية الأبعاد، وتعرف إلى مصادر الطاقة الكهربائية (البطارية، كهرباء المنزل، الطاقة الشمسية، الرياح، الدينامو) مع رفيقك التعليمي «شرارة».
+        </p>
+        <div class="activity-meta">
+          <span class="tag">مجسّمات 3D</span>
+          <span class="tag">واقع معزز AR/VR</span>
+          <span class="tag">الرفيق «شرارة»</span>
+        </div>
+        <a href="electricity.html" class="btn-action btn-primary">
+          <span>افتح مختبر الكهرباء والمغناطيسية</span>
+          <span>←</span>
+        </a>
+      </article>
+
+      <!-- النشاط الثاني -->
+      <article class="activity-card featured card-green">
+        <span class="activity-status status-live">نشط ومتاح الآن 🚀</span>
+        <div class="activity-icon-wrap">📦</div>
+        <span class="activity-number">النشاط الثاني</span>
+        <h3>محطة فرز وتصنيف خامات البيئة</h3>
+        <p>
+          صنّف خامات البيئة الطبيعية والصناعية (زجاج، بلاستيك، صوف وقماش، معادن، خشب، ورق، مطاط) عبر السحب والإفلات ومطابقة الكاميرا البصرية مع المساعد الذكي «الخبير».
+        </p>
+        <div class="activity-meta">
+          <span class="tag">سحب وإفلات Drag & Drop</span>
+          <span class="tag">كاميرا OpenCV</span>
+          <span class="tag">المساعد «الخبير»</span>
+        </div>
+        <a href="materials.html" class="btn-action btn-secondary">
+          <span>افتح محطة فرز الخامات</span>
+          <span>←</span>
+        </a>
+      </article>
+
+      <!-- النشاط الثالث -->
+      <article class="activity-card card-orange">
+        <span class="activity-status status-soon">النشاط التالي ⏳</span>
+        <div class="activity-icon-wrap">💡</div>
+        <span class="activity-number">النشاط الثالث</span>
+        <h3>الدارة الكهربائية البسيطة</h3>
+        <p>
+          تجربة تفاعلية لبناء دارة كهربائية بسيطة ومغلقة (بطارية، أسلاك، مصباح، مفتاح تحكم) لفهم سريان التيار الكهربائي وأهمية المسار المغلق للإضاءة.
+        </p>
+        <div class="activity-meta">
+          <span class="tag">توصيل دارات</span>
+          <span class="tag">مفاتيح كهربائية</span>
+          <span class="tag">محاكاة تفاعلية</span>
+        </div>
+        <button class="btn-action btn-disabled" disabled>
+          <span>قيد التحضير والإطلاق</span>
+        </button>
+      </article>
+
+      <!-- النشاط الرابع -->
+      <article class="activity-card card-blue">
+        <span class="activity-status status-soon">النشاط الرابع ⏳</span>
+        <div class="activity-icon-wrap">🔌</div>
+        <span class="activity-number">النشاط الرابع</span>
+        <h3>المواد الموصلة والمواد العازلة</h3>
+        <p>
+          فحص وتصنيف المواد المختلفة داخل الدارة الكهربائية لمعرفة أيها يسمح بمرور التيار فيضيء المصباح، وأيها يحجب الكهرباء ويعزلها لحمايتنا.
+        </p>
+        <div class="activity-meta">
+          <span class="tag">موصلات وعوازل</span>
+          <span class="tag">أمان كهربائي</span>
+          <span class="tag">فحص تجريبي</span>
+        </div>
+        <button class="btn-action btn-disabled" disabled>
+          <span>قيد التحضير والإطلاق</span>
+        </button>
+      </article>
+
+      <!-- النشاط الخامس -->
+      <article class="activity-card card-red">
+        <span class="activity-status status-soon">النشاط الخامس ⏳</span>
+        <div class="activity-icon-wrap">🧲</div>
+        <span class="activity-number">النشاط الخامس</span>
+        <h3>المغناطيس وقطباه (الجذب والتنافر)</h3>
+        <p>
+          استكشاف أشكال المغانط وأقطابها (الشمالي والجنوبي)، واكتشاف قانون التجاذب والتنافر وتأثير المغناطيس على المواد الفلزية بالواقع المعزز.
+        </p>
+        <div class="activity-meta">
+          <span class="tag">مغناطيسية</span>
+          <span class="tag">جذب وتنافر</span>
+          <span class="tag">تفاعل ثلاثي الأبعاد</span>
+        </div>
+        <button class="btn-action btn-disabled" disabled>
+          <span>قيد التحضير والإطلاق</span>
+        </button>
+      </article>
+    </div>
+  </section>
+
+  <!-- شريط مميزات المنصة -->
+  <section class="features-strip" id="features" aria-labelledby="features-title">
+    <div class="section-title features-heading">
+      <div>
+        <h2 id="features-title"><span aria-hidden="true">✨</span> نتعلّم بالتجربة</h2>
+        <p>أدوات تساعدك على الفهم والاكتشاف بطريقتك</p>
+      </div>
+    </div>
+    <div class="features-box">
+      <div class="feature-item">
+        <div class="feature-icon">🌐</div>
+        <div class="feature-text">
+          <strong>واقع معزز متقدم (AR)</strong>
+          <small>عرض المجسمات على طاولة الغرفة وتدويرها 360 درجة</small>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📷</div>
+        <div class="feature-text">
+          <strong>تعرف بصري ذكي (OpenCV)</strong>
+          <small>مطابقة صور كتاب العلوم عبر الكاميرا دون خوادم</small>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🎙️</div>
+        <div class="feature-text">
+          <strong>نطق صوتي وتفاعل ذكي</strong>
+          <small>مساعدون افتراضيون يجيبون عن أسئلة الطالب صوتياً</small>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🌟</div>
+        <div class="feature-text">
+          <strong>معالجة الفاقد التعليمي</strong>
+          <small>تغذية راجعة فورية ومكافآت تحفز الطالب وتثبت المعلومة</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- الفوتر المخصص بأسماء الباحثة والمشرف -->
+  <footer class="site-footer" id="team" aria-labelledby="team-title">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-about">
+          <h3 id="team-title"><span>⚡</span> مختبر الكهرباء والمغناطيسية</h3>
+          <p>
+            مشروع تعليمي تفاعلي لطلبة الصف الرابع، يجمع بين الاستكشاف العملي والتقنيات التفاعلية لفهم مفاهيم الكهرباء والمغناطيسية وخامات البيئة.
+          </p>
+        </div>
+
+        <div class="footer-credits">
+          <h4>فريق العمل والبحث العلمي</h4>
+          <div class="credit-card">
+            <div class="credit-avatar">و</div>
+            <div class="credit-info">
+              <strong>إعداد الباحثة: ولاء حامد الصيداوي</strong>
+              <small>إعداد وبحث تربوي</small>
+            </div>
+          </div>
+          <div class="credit-card">
+            <div class="credit-avatar">ح</div>
+            <div class="credit-info">
+              <strong>إشراف الدكتور: حسن ربحي مهدي</strong>
+              <small>إشراف تربوي وأكاديمي</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-links">
+          <h4>روابط سريعة</h4>
+          <ul>
+            <li><a href="electricity.html">⚡ النشاط 1: مختبر الكهرباء والمغناطيسية</a></li>
+            <li><a href="materials.html">📦 النشاط 2: فرز خامات البيئة</a></li>
+            <li><a href="#activities">📚 قائمة الأنشطة الخمسة</a></li>
+            <li><a href="index.html">🏠 الصفحة الرئيسية للمنصة</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>جميع الحقوق محفوظة © لمختبر الكهرباء والمغناطيسية · الصف الرابع الأساسي</p>
+        <p>صُنعت بحب لمستكشفي المستقبل 🌟</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
 </html>

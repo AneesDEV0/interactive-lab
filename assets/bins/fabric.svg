@@ -1,0 +1,33 @@
+<svg viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fabFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f68cb6"/>
+      <stop offset="100%" stop-color="#c93e76"/>
+    </linearGradient>
+    <linearGradient id="fabSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#df548d"/>
+      <stop offset="100%" stop-color="#a02456"/>
+    </linearGradient>
+    <linearGradient id="fabTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fed6e6"/>
+      <stop offset="100%" stop-color="#f9a3c5"/>
+    </linearGradient>
+    <filter id="fabShadow">
+      <feDropShadow dx="3" dy="8" stdDeviation="6" flood-color="#4a0f27" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#fabShadow)">
+    <!-- سلة نسيج وقماش ثلاثية الأبعاد -->
+    <polygon points="30,60 105,60 105,120 30,120" fill="url(#fabFront)" stroke="#8e1b4a" stroke-width="1.5"/>
+    <polygon points="105,60 135,42 135,102 105,120" fill="url(#fabSide)" stroke="#8e1b4a" stroke-width="1.5"/>
+    <polygon points="30,60 60,42 135,42 105,60" fill="url(#fabTop)" stroke="#8e1b4a" stroke-width="1.5"/>
+    <polygon points="34,60 62,45 131,45 103,60" fill="#691135" opacity="0.6"/>
+    <!-- زخرفة نسيجية متقاطعة -->
+    <line x1="30" y1="80" x2="105" y2="80" stroke="#fbcfe0" stroke-width="2" stroke-dasharray="4,4"/>
+    <line x1="30" y1="100" x2="105" y2="100" stroke="#fbcfe0" stroke-width="2" stroke-dasharray="4,4"/>
+    <circle cx="67" cy="90" r="15" fill="#ffffff" opacity="0.9"/>
+    <!-- كرة صوف صغيرة على واجهة الصندوق -->
+    <circle cx="67" cy="90" r="9" fill="#c93e76"/>
+    <path d="M61 88 Q67 82 73 88" stroke="#ffffff" stroke-width="1.5" fill="none"/>
+  </g>
+</svg>

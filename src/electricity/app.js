@@ -10,15 +10,15 @@ const state = { id: byId(params.get('device'))?.id || 'car', mode: params.get('m
 let discoveries = {}; try { const saved = JSON.parse(localStorage.getItem('sharara-discoveries-v2') || '{}'); for (const [id, list] of Object.entries(saved)) if (byId(id) && Array.isArray(list)) discoveries[id] = list.filter(s => trySource(id, s).ok); } catch { }
 let scene, guideKey = 'welcome', guideText = voiceLines.welcome, soundState = 'idle', toastTimer, modelRevision = 0;
 const brand = `<span class="brand-symbol">${icon('bolt')}</span><span><strong>مختبر شرارة</strong><small>خطوة صغيرة، اكتشاف كبير</small></span>`;
-const card = d => `<button class="device-card${d.id === state.id ? ' selected' : ''}" style="--card:${d.color}" data-device="${d.id}" aria-pressed="${d.id === state.id}"><i class="device-check">${icon('check')}</i><img src="/assets/thumbnails/${d.id}.png" alt="" loading="lazy"><span>${d.name}</span></button>`;
+const card = d => `<button class="device-card${d.id === state.id ? ' selected' : ''}" style="--card:${d.color}" data-device="${d.id}" aria-pressed="${d.id === state.id}"><i class="device-check">${icon('check')}</i><img src="assets/thumbnails/${d.id}.png" alt="" loading="lazy"><span>${d.name}</span></button>`;
 const dialogHead = (id, title) => `<div class="dialog-head"><h2 id="${id}-title">${title}</h2><button data-close="${id}" aria-label="إغلاق">${icon('close')}</button></div>`;
 $('#app').innerHTML = `<div class="shell">
-  <aside class="sidebar" aria-label="التنقل الرئيسي"><a href="/" class="brand">${brand}</a>
-    <nav class="nav-stack"><p class="nav-label">رحلتي في العلوم</p><button class="nav-item active" data-action="home">${icon('bolt')}وحدة الكهرباء<span class="small-dot"></span></button><button class="nav-item" data-open="library">${icon('cube')}أجهزة كتابي</button><button class="nav-item" data-open="notebook">${icon('book')}اكتشافاتي</button></nav>
+  <aside class="sidebar" aria-label="التنقل الرئيسي"><a href="index.html" class="brand" title="العودة لبوابة المنصة الرئيسية">${brand}</a>
+    <nav class="nav-stack"><p class="nav-label">مختبر الكهرباء</p><button class="nav-item active" data-action="home">${icon('bolt')}طاولة الاستكشاف<span class="small-dot"></span></button><button class="nav-item" data-open="library">${icon('book')}أجهزة كتابي</button><button class="nav-item" data-open="notebook">${icon('trophy')}اكتشافاتي</button></nav>
     <nav class="nav-stack"><p class="nav-label">نكتشف معًا</p><button class="nav-item" data-open="camera">${icon('camera')}صوّر من كتابك</button><button class="nav-item" data-open="help">${icon('help')}كيف ألعب؟</button></nav>
     <div class="side-mascot">${mascot}<h3>كل محاولة… اكتشاف!</h3><p>جرّب براحتك. أنا هنا لأساعدك.</p></div><p class="side-footer">صُنع لمستكشفي الصف الرابع ${icon('heart')}</p>
   </aside>
-  <div class="body-area"><header class="topbar"><div class="breadcrumb">مختبري ${icon('chevron')} العلوم ${icon('chevron')} <strong>وحدة الكهرباء</strong></div><a href="/" class="brand mobile-brand">${brand}</a><div class="top-actions"><button id="sound-toggle" class="sound-button" aria-pressed="false">${icon('mute')}<span>تشغيل الصوت</span></button><div class="learner"><span class="avatar">${icon('star')}</span><span>مستكشف صغير<small>الصف الرابع الأساسي</small></span></div><button class="sound-button" data-open="help" aria-label="كيف ألعب؟">${icon('help')}</button></div></header>
+  <div class="body-area"><header class="topbar"><div class="breadcrumb"><a href="index.html" style="color:var(--muted)">المنصة الرئيسية</a> ${icon('chevron')} العلوم ${icon('chevron')} <strong>نشاط ١: وحدة الكهرباء</strong></div><a href="index.html" class="brand mobile-brand" aria-label="العودة إلى المنصة الرئيسية">${brand}</a><div class="top-actions"><div class="activity-toggle-wrap"><button id="activity-toggle-btn" class="activity-toggle-btn" aria-label="الأنشطة" aria-expanded="false" title="عرض الأنشطة">${icon('bolt')}<span>الأنشطة</span><i class="toggle-arrow">▾</i></button><div id="activity-dropdown" class="activity-dropdown" hidden><div class="dropdown-header">محطات العلوم التفاعلية</div><a href="index.html" class="dropdown-item"><span class="dropdown-icon">🏠</span><div><strong>بوابة المنصة الرئيسية</strong><small>التعريف بالمنصة والأنشطة</small></div></a><a href="electricity.html" class="dropdown-item active"><span class="dropdown-icon">⚡</span><div><strong>نشاط ١: وحدة الكهرباء</strong><small>مختبر مصادر الطاقة مع «شرارة»</small></div></a><a href="materials.html" class="dropdown-item"><span class="dropdown-icon">📦</span><div><strong>نشاط ٢: فرز خامات البيئة</strong><small>محطة التصنيف مع «الخبير»</small></div></a><div class="dropdown-divider"></div><div class="dropdown-item disabled"><span class="dropdown-icon">💡</span><div><strong>نشاط ٣: الدارة الكهربائية</strong><small>قريباً</small></div></div><div class="dropdown-item disabled"><span class="dropdown-icon">🔌</span><div><strong>نشاط ٤: الموصلات والعوازل</strong><small>قريباً</small></div></div><div class="dropdown-item disabled"><span class="dropdown-icon">🧲</span><div><strong>نشاط ٥: المغناطيسية</strong><small>قريباً</small></div></div></div></div><button id="sound-toggle" class="sound-button" aria-label="تشغيل الصوت" aria-pressed="false">${icon('mute')}<span>تشغيل الصوت</span></button><div class="learner"><span class="avatar">${icon('star')}</span><span>مستكشف صغير<small>الصف الرابع الأساسي</small></span></div><button class="sound-button" data-open="help" aria-label="كيف ألعب؟">${icon('help')}</button></div></header>
   <main id="main" class="main"><section class="intro"><div class="intro-copy"><div class="eyebrow">${icon('bolt')} وحدة الكهرباء · نتعلّم بالتجربة</div><h1>كل جهاز… <span>له سرّ!</span></h1><p>من أين تأتي الطاقة؟ اختر، جرّب، واكتشف مع شرارة.</p></div><button class="progress-chip" data-open="notebook">${icon('trophy')}<span><strong>اكتشافاتي الصغيرة</strong><small id="progress-text"></small><span class="progress-track"><i id="progress-bar"></i></span></span></button></section>
   <section class="device-section" aria-labelledby="choose-title"><div class="section-heading"><h2 id="choose-title"><span class="step-number">١</span> اختر جهازًا <small>من صور كتاب العلوم</small></h2><button class="text-button" data-open="library">كل الأجهزة <span>(${numbers.format(devices.length)})</span> ${icon('arrow')}</button></div><div class="devices-row" id="device-shelf">${devices.slice(0, 6).map(card).join('')}<button class="camera-card" data-open="camera">${icon('camera')}<strong>صوّر من كتابك</strong><small>واجعله يظهر أمامك!</small></button></div></section>
   <div class="experiment"><section class="lab-card" aria-label="طاولة الاستكشاف"><div class="lab-top"><div><h2><span class="step-number">٢</span> طاولة الاستكشاف</h2><small>شاهد جهازك من كل الجهات</small></div><div class="mode-switch" role="group" aria-label="نوع النشاط"><button data-mode="learn">${icon('book')}تعرّف</button><button data-mode="play">${icon('play')}جرّب</button></div></div>
@@ -68,7 +68,7 @@ async function selectDevice(id, initial = false) {
   if (state.mode === 'learn') say(id + '-fact', d.fact); else if (initial) say('welcome'); else say(id + '-select', `اخترت ${d.name}. اختر مصدرًا للطاقة، ثم اضغط: جرّب التشغيل.`);
   const revision = ++modelRevision;
   if (scene) { $('#model-status').hidden = false; $('#model-status').textContent = 'نجهّز جهازك…'; try { await scene.setDevice(d); if (revision === modelRevision) { $('#model-status').hidden = true; $('#stage').dataset.loaded = id; } } catch { if (revision === modelRevision) fallback('تعذّر عرض المجسّم. جرّب الجهاز بالأزرار أدناه.'); } }
-  else if ($('#scene .fallback-image')) $('#scene .fallback-image').src = `/assets/book/${id}.jpg`;
+  else if ($('#scene .fallback-image')) $('#scene .fallback-image').src = `assets/book/${id}.jpg`;
 }
 function setMode(mode) { voice.stop(); state.mode = mode; state.running = false; render(); const url = new URL(location.href); url.searchParams.set('mode', mode); history.replaceState(null, '', url); say(mode === 'learn' ? state.id + '-fact' : 'play', mode === 'learn' ? byId(state.id).fact : voiceLines.play); }
 function selectSource(source) { if (!currentSources().some(s => s.id === source) || state.mode !== 'play') return; state.source = source; state.running = false; render(); }
@@ -81,9 +81,23 @@ function testPower() {
   render(); say(`${state.id}-${result.ok ? 'result' : 'wrong'}`, result.text, result.ok);
   let feedback = $('#power-feedback'); if (!feedback) { feedback = document.createElement('p'); feedback.id = 'power-feedback'; feedback.className = 'power-feedback'; $('#play-panel').append(feedback); } feedback.textContent = result.text;
 }
-function openNotebook() { const ids = Object.keys(discoveries).filter(id => discoveries[id].length); $('#notebook-content').innerHTML = ids.length ? `<p class="dialog-description">هذه مصادر الطاقة التي جرّبتها بنجاح. اكتشافاتك محفوظة على هذا الجهاز.</p><div class="notebook-grid">${ids.map(id => `<div class="notebook-item"><img src="/assets/thumbnails/${id}.png" alt=""><div><strong>${byId(id).name}</strong><small>${discoveries[id].map(s => sources[s].name).join(' · ')}</small></div></div>`).join('')}</div>` : `<div class="empty-notebook">${mascot}<h3>لنصنع أول اكتشاف!</h3><p class="dialog-description">جرّب تشغيل جهاز بالمصدر المناسب، وسنحفظ اكتشافك هنا.</p><button class="primary" data-close="notebook" style="margin:auto">أعود للتجربة</button></div>`; }
+function openNotebook() { const ids = Object.keys(discoveries).filter(id => discoveries[id].length); $('#notebook-content').innerHTML = ids.length ? `<p class="dialog-description">هذه مصادر الطاقة التي جرّبتها بنجاح. اكتشافاتك محفوظة على هذا الجهاز.</p><div class="notebook-grid">${ids.map(id => `<div class="notebook-item"><img src="assets/thumbnails/${id}.png" alt=""><div><strong>${byId(id).name}</strong><small>${discoveries[id].map(s => sources[s].name).join(' · ')}</small></div></div>`).join('')}</div>` : `<div class="empty-notebook">${mascot}<h3>لنصنع أول اكتشاف!</h3><p class="dialog-description">جرّب تشغيل جهاز بالمصدر المناسب، وسنحفظ اكتشافك هنا.</p><button class="primary" data-close="notebook" style="margin:auto">أعود للتجربة</button></div>`; }
 function openDialog(id) { if (id === 'notebook') openNotebook(); if (id === 'camera') say('camera'); $('#' + id).showModal(); }
 document.addEventListener('click', e => {
+  const toggleBtn = e.target.closest('#activity-toggle-btn');
+  if (toggleBtn) {
+    const dropdown = $('#activity-dropdown');
+    const isHidden = dropdown.hidden;
+    dropdown.hidden = !isHidden;
+    toggleBtn.setAttribute('aria-expanded', String(isHidden));
+    return;
+  }
+  const dropdown = $('#activity-dropdown');
+  if (dropdown && !dropdown.hidden && !e.target.closest('.activity-toggle-wrap')) {
+    dropdown.hidden = true;
+    $('#activity-toggle-btn')?.setAttribute('aria-expanded', 'false');
+  }
+
   const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.device) { selectDevice(b.dataset.device); if ($('#library').open) $('#library').close(); }
   if (b.dataset.source) selectSource(b.dataset.source);
@@ -102,7 +116,7 @@ document.addEventListener('click', e => {
 });
 $('#try-power').onclick = testPower; $('#xr-try').onclick = testPower; $('#xr-mode').onclick = () => setMode(state.mode === 'learn' ? 'play' : 'learn');
 $('#listen').onclick = () => { if (soundState === 'playing') voice.stop(); else voice.say(guideKey, guideText, true); }; $('#xr-listen').onclick = () => voice.say(guideKey, guideText, true);
-$('#sound-toggle').onclick = () => { voice.enabled = !voice.enabled; $('#sound-toggle').classList.toggle('on', voice.enabled); $('#sound-toggle').setAttribute('aria-pressed', voice.enabled); $('#sound-toggle').innerHTML = icon(voice.enabled ? 'sound' : 'mute') + `<span>${voice.enabled ? 'الصوت يعمل' : 'تشغيل الصوت'}</span>`; if (voice.enabled) voice.say(guideKey, guideText); else voice.stop(); };
+$('#sound-toggle').onclick = () => { voice.enabled = !voice.enabled; $('#sound-toggle').classList.toggle('on', voice.enabled); $('#sound-toggle').setAttribute('aria-pressed', voice.enabled); $('#sound-toggle').setAttribute('aria-label', voice.enabled ? 'إيقاف الصوت' : 'تشغيل الصوت'); $('#sound-toggle').innerHTML = icon(voice.enabled ? 'sound' : 'mute') + `<span>${voice.enabled ? 'الصوت يعمل' : 'تشغيل الصوت'}</span>`; if (voice.enabled) voice.say(guideKey, guideText); else voice.stop(); };
 $('#door').onclick = () => { state.doorOpen = !state.doorOpen; render(); };
 
 // Web Speech API - Speech-to-Text (ar-SA)
@@ -204,7 +218,7 @@ document.addEventListener('dragstart', e => { const b = e.target.closest('[data-
 $('#stage').addEventListener('dragover', e => { if (state.mode === 'play') e.preventDefault(); }); $('#stage').addEventListener('drop', e => { e.preventDefault(); const s = e.dataTransfer.getData('text/plain'); if (state.mode === 'play' && currentSources().some(x => x.id === s)) { selectSource(s); testPower(); } });
 $('#xr-ui').addEventListener('beforexrselect', e => { if (e.target.closest('button')) e.preventDefault(); });
 async function enterXR(mode) { if (!scene) { notice('تعذّر تشغيل المجسّم على هذا المتصفح. يمكنك متابعة التجربة بالأزرار.'); return; } try { await scene.enterXR(mode, $('#xr-ui')); if (mode === 'ar') $('#xr-ui').classList.add('xr-active'); say(mode); } catch (error) { $('#xr-ui').classList.remove('xr-active'); notice(error.message || 'تعذّر بدء العرض. يمكنك متابعة التجربة هنا.'); } }
-function fallback(message) { $('#model-status').hidden = true; $('#scene').innerHTML = `<img class="fallback-image" src="/assets/book/${state.id}.jpg" alt="${byId(state.id).name}">`; $('#stage').dataset.loaded = state.id; toast(message); }
+function fallback(message) { $('#model-status').hidden = true; $('#scene').innerHTML = `<img class="fallback-image" src="assets/book/${state.id}.jpg" alt="${byId(state.id).name}">`; $('#stage').dataset.loaded = state.id; toast(message); }
 render(); say('welcome');
 try {
   const { LabScene } = await import('./scene.js'); scene = new LabScene($('#scene'), {
@@ -227,4 +241,3 @@ $('#confirm-photo').onclick = async () => { const id = $('#confirmed-device').va
 document.addEventListener('visibilitychange', () => { if (document.hidden) { voice.stop(); stopCamera(); } });
 // Read-only diagnostic hooks for deterministic browser checks and asset thumbnails.
 window.lab = { state, get scene() { return scene; }, selectDevice, setMode, testPower, selectSource, get discoveries() { return discoveries; } };
-

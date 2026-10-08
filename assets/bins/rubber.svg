@@ -1,0 +1,32 @@
+<svg viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rubFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5eead4"/>
+      <stop offset="100%" stop-color="#14b8a6"/>
+    </linearGradient>
+    <linearGradient id="rubSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2dd4bf"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="rubTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ccfbf1"/>
+      <stop offset="100%" stop-color="#99f6e4"/>
+    </linearGradient>
+    <filter id="rubShadow">
+      <feDropShadow dx="3" dy="8" stdDeviation="6" flood-color="#0a3d38" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#rubShadow)">
+    <!-- حاوية مطاطية مرنة خضراء زمردية ثلاثية الأبعاد -->
+    <polygon points="30,60 105,60 105,120 30,120" fill="url(#rubFront)" stroke="#0d5953" stroke-width="1.5"/>
+    <polygon points="105,60 135,42 135,102 105,120" fill="url(#rubSide)" stroke="#0d5953" stroke-width="1.5"/>
+    <polygon points="30,60 60,42 135,42 105,60" fill="url(#rubTop)" stroke="#0d5953" stroke-width="1.5"/>
+    <polygon points="34,60 62,45 131,45 103,60" fill="#083834" opacity="0.6"/>
+    <!-- لمعان مطاطي مقوس ومرن -->
+    <path d="M36 68 Q67 76 98 68" stroke="#ffffff" stroke-width="3" fill="none" opacity="0.8"/>
+    <circle cx="67" cy="90" r="15" fill="#ffffff" opacity="0.95"/>
+    <!-- ممحاة مطاطية صغيرة على الواجهة -->
+    <rect x="59" y="84" width="16" height="12" rx="2" fill="#0f766e"/>
+    <rect x="59" y="84" width="6" height="12" fill="#f43f5e"/>
+  </g>
+</svg>

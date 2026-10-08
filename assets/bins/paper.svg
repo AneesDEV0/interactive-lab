@@ -1,0 +1,33 @@
+<svg viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cardFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dfbb86"/>
+      <stop offset="100%" stop-color="#a67c42"/>
+    </linearGradient>
+    <linearGradient id="cardSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#b88c52"/>
+      <stop offset="100%" stop-color="#785320"/>
+    </linearGradient>
+    <linearGradient id="cardTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8e5c8"/>
+      <stop offset="100%" stop-color="#e2c8a2"/>
+    </linearGradient>
+    <filter id="cardShadow">
+      <feDropShadow dx="3" dy="8" stdDeviation="6" flood-color="#3d280b" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#cardShadow)">
+    <!-- صندوق كرتون ورقي ثلاثي الأبعاد -->
+    <polygon points="30,60 105,60 105,120 30,120" fill="url(#cardFront)" stroke="#664312" stroke-width="1.5"/>
+    <polygon points="105,60 135,42 135,102 105,120" fill="url(#cardSide)" stroke="#664312" stroke-width="1.5"/>
+    <polygon points="30,60 60,42 135,42 105,60" fill="url(#cardTop)" stroke="#664312" stroke-width="1.5"/>
+    <polygon points="34,60 62,45 131,45 103,60" fill="#4d3008" opacity="0.6"/>
+    <!-- طيات أجنحة الكرتون المفتوحة -->
+    <polygon points="30,60 10,48 45,36 60,42" fill="#e8cfad" stroke="#664312" stroke-width="1"/>
+    <polygon points="105,60 130,48 152,56 135,70" fill="#c49a62" stroke="#664312" stroke-width="1"/>
+    <circle cx="67" cy="90" r="15" fill="#ffffff" opacity="0.95"/>
+    <!-- رمز الورقة المطوية -->
+    <path d="M61 80 L70 80 L74 84 L74 100 L61 100 Z" fill="#9e6e22"/>
+    <polygon points="70,80 74,84 70,84" fill="#664312"/>
+  </g>
+</svg>

@@ -1,0 +1,33 @@
+<svg viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="woodFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b8844f"/>
+      <stop offset="100%" stop-color="#78491c"/>
+    </linearGradient>
+    <linearGradient id="woodSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8f5924"/>
+      <stop offset="100%" stop-color="#552f08"/>
+    </linearGradient>
+    <linearGradient id="woodTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dfb788"/>
+      <stop offset="100%" stop-color="#c1915c"/>
+    </linearGradient>
+    <filter id="woodBoxShadow">
+      <feDropShadow dx="3" dy="8" stdDeviation="6" flood-color="#301804" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#woodBoxShadow)">
+    <!-- صندوق خشبي طبيعي بألواح الخشب -->
+    <polygon points="30,60 105,60 105,120 30,120" fill="url(#woodFront)" stroke="#4a2503" stroke-width="1.5"/>
+    <polygon points="105,60 135,42 135,102 105,120" fill="url(#woodSide)" stroke="#4a2503" stroke-width="1.5"/>
+    <polygon points="30,60 60,42 135,42 105,60" fill="url(#woodTop)" stroke="#4a2503" stroke-width="1.5"/>
+    <polygon points="34,60 62,45 131,45 103,60" fill="#361a02" opacity="0.6"/>
+    <!-- ألواح الخشب الأفقية والمسامير -->
+    <line x1="30" y1="80" x2="105" y2="80" stroke="#502a06" stroke-width="2"/>
+    <line x1="30" y1="100" x2="105" y2="100" stroke="#502a06" stroke-width="2"/>
+    <circle cx="67" cy="90" r="15" fill="#fdf6ec" opacity="0.95"/>
+    <!-- ورقة شجر خضراء ترمز للأخشاب والطبيعة -->
+    <path d="M67 78 Q76 86 67 100 Q58 86 67 78 Z" fill="#2d8753"/>
+    <line x1="67" y1="80" x2="67" y2="98" stroke="#ffffff" stroke-width="1.2"/>
+  </g>
+</svg>

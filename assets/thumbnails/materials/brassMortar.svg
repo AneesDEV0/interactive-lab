@@ -1,0 +1,29 @@
+<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brassGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e8be66"/>
+      <stop offset="25%" stop-color="#fff1b5"/>
+      <stop offset="55%" stop-color="#c99534"/>
+      <stop offset="85%" stop-color="#ffd878"/>
+      <stop offset="100%" stop-color="#8a5e14"/>
+    </linearGradient>
+    <filter id="mortarShadow">
+      <feDropShadow dx="4" dy="7" stdDeviation="6" flood-color="#382506" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <ellipse cx="100" cy="142" rx="48" ry="11" fill="#2d1c02" opacity="0.18"/>
+  <g filter="url(#mortarShadow)">
+    <!-- قاعدة الهاون النحاسي الصلبة -->
+    <path d="M68 132 L132 132 L128 140 L72 140 Z" fill="url(#brassGrad)" stroke="#784e09" stroke-width="1.5"/>
+    <!-- خصر وجسم الهاون المقعر -->
+    <path d="M54 58 Q72 98 68 132 L132 132 Q128 98 146 58 Z" fill="url(#brassGrad)" stroke="#784e09" stroke-width="1.5"/>
+    <!-- الفوهة العلوية البيضاوية -->
+    <ellipse cx="100" cy="58" rx="46" ry="12" fill="#8f6013" stroke="#ffd878" stroke-width="2"/>
+    <!-- تجويف الهاون الداخلي -->
+    <ellipse cx="100" cy="60" rx="38" ry="8" fill="#4d3106"/>
+    <!-- مدقة الهاون النحاسية المائلة -->
+    <path d="M85 30 L115 105 L125 102 L95 27 Z" fill="url(#brassGrad)" stroke="#6e4605" stroke-width="1.5" rx="3"/>
+    <!-- رأس المدقة الكروي العلوي -->
+    <circle cx="90" cy="28" r="8" fill="url(#brassGrad)" stroke="#6e4605" stroke-width="1.2"/>
+  </g>
+</svg>

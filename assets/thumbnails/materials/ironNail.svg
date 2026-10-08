@@ -1,0 +1,23 @@
+<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ironGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d6dde5"/>
+      <stop offset="35%" stop-color="#a0abb7"/>
+      <stop offset="65%" stop-color="#707a86"/>
+      <stop offset="100%" stop-color="#3d444d"/>
+    </linearGradient>
+    <filter id="nailShadow">
+      <feDropShadow dx="4" dy="7" stdDeviation="4" flood-color="#1e242b" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <g transform="rotate(-32 100 80)" filter="url(#nailShadow)">
+    <!-- رأس المسمار المسطح -->
+    <ellipse cx="48" cy="80" rx="6" ry="18" fill="#c3ccd5" stroke="#505963" stroke-width="1.5"/>
+    <!-- ساق المسمار المعدني -->
+    <path d="M48 74 L146 76 L146 84 L48 86 Z" fill="url(#ironGrad)" stroke="#4a535c" stroke-width="1"/>
+    <!-- سن المسمار المدبب الحاد -->
+    <polygon points="146,75 165,80 146,85" fill="url(#ironGrad)" stroke="#4a535c" stroke-width="1"/>
+    <!-- لمعان معدني لامع بطول المسمار -->
+    <line x1="52" y1="77" x2="152" y2="78" stroke="#ffffff" stroke-width="2" opacity="0.85"/>
+  </g>
+</svg>

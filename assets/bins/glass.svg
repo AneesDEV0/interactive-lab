@@ -1,0 +1,33 @@
+<svg viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="glassTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#c6effb" stop-opacity="0.6"/>
+    </linearGradient>
+    <linearGradient id="glassFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#93e0f5" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#3baec9" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="glassSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#55c1db" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#218fa8" stop-opacity="0.9"/>
+    </linearGradient>
+    <filter id="glassShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="3" dy="8" stdDeviation="6" flood-color="#124f5e" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#glassShadow)">
+    <!-- صندوق زجاجي بلوري شفاف ثلاثي الأبعاد -->
+    <polygon points="30,60 105,60 105,120 30,120" fill="url(#glassFront)" stroke="#1a768c" stroke-width="1.5"/>
+    <polygon points="105,60 135,42 135,102 105,120" fill="url(#glassSide)" stroke="#1a768c" stroke-width="1.5"/>
+    <polygon points="30,60 60,42 135,42 105,60" fill="url(#glassTop)" stroke="#1a768c" stroke-width="1.5"/>
+    <polygon points="34,60 62,45 131,45 103,60" fill="#135261" opacity="0.6"/>
+    <!-- لمعان بلوري زجاجي مشع -->
+    <path d="M38 68 L50 114" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+    <circle cx="67" cy="90" r="15" fill="#ffffff" opacity="0.9"/>
+    <!-- أيقونة الكأس الزجاجي على الصندوق -->
+    <path d="M62 82 L72 82 L70 93 L64 93 Z" fill="#1a768c"/>
+    <rect x="66" y="93" width="2" height="6" fill="#1a768c"/>
+    <line x1="63" y1="99" x2="71" y2="99" stroke="#1a768c" stroke-width="1.5"/>
+  </g>
+</svg>
