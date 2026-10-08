@@ -43,6 +43,11 @@ http.createServer(async (req, res) => {
     }
 
     if (!file || !(file === root || file.startsWith(root + path.sep)) || file.includes('node_modules') || file.includes('.git')) {
+      const notFoundHtml = await tryResolve(path.resolve(root, '404.html')) || await tryResolve(path.resolve(root, 'public/404.html'));
+      if (notFoundHtml) {
+        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+        return res.end(await readFile(notFoundHtml));
+      }
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
       return res.end('Not found');
     }
@@ -54,6 +59,11 @@ http.createServer(async (req, res) => {
     });
     res.end(await readFile(file));
   } catch {
+    const notFoundHtml = await tryResolve(path.resolve(root, '404.html'));
+    if (notFoundHtml) {
+      res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+      return res.end(await readFile(notFoundHtml));
+    }
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Not found');
   }

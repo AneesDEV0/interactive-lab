@@ -23,9 +23,11 @@ for (const f of targets) {
   }
 }
 
-// Copy root index.html to dist/index.html
-if (existsSync('index.html')) {
-  await cp('index.html', 'dist/index.html');
+// Copy root html files to dist
+for (const page of ['index.html', 'electricity.html', 'materials.html', '404.html']) {
+  if (existsSync(page)) {
+    await cp(page, 'dist/' + page);
+  }
 }
 if (existsSync('public/static-activity.html')) {
   await cp('public/static-activity.html', 'dist/static-activity.html');

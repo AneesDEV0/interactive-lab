@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#7560af">
+  <meta name="description" content="عفواً، هذه الصفحة غير موجودة - منصة مختبر العلوم التفاعلي لطلبة الصف الرابع الأساسي.">
+  <title>٤٠٤ · ابتعدنا عن المختبر! | منصة العلوم التفاعلية</title>
+  <link rel="icon" href="/public/favicon.svg">
+  <style>
+    @font-face {
+      font-family: Tajawal;
+      src: url('/assets/fonts/tajawal-arabic-400-normal.woff2') format('woff2');
+      font-weight: 400;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: Tajawal;
+      src: url('/assets/fonts/tajawal-arabic-700-normal.woff2') format('woff2');
+      font-weight: 700 900;
+      font-display: swap;
+    }
+
+    :root {
+      --ink: #2d2845;
+      --muted: #6e6787;
+      --purple: #7560af;
+      --deep: #55408e;
+      --lilac: #f0eaf9;
+      --mint: #e2f4ed;
+      --green: #247a5e;
+      --yellow: #ffdb76;
+      --gold: #df9e19;
+      --bg: #f8f7fc;
+      --surface: #ffffff;
+      --line: #e9e5f2;
+      --radius: 26px;
+      font-family: Tajawal, Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: radial-gradient(circle at 15% 15%, #f2ebfc 0%, #f8f7fc 50%, #eefbf6 100%);
+      color: var(--ink);
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding: 24px;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* الهيدر المصغر */
+    .header {
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 20px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-symbol {
+      width: 44px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--purple);
+      color: var(--yellow);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      transform: rotate(5deg);
+      box-shadow: 0 4px 14px rgba(117, 96, 175, 0.25);
+    }
+    .brand-text strong {
+      font-size: 19px;
+      display: block;
+      color: var(--deep);
+      line-height: 1.2;
+    }
+    .brand-text small {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+    .header-tag {
+      background: var(--lilac);
+      color: var(--deep);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+
+    /* الحاوية المركزية لصفحة 404 */
+    .content-wrap {
+      max-width: 760px;
+      width: 100%;
+      margin: auto;
+      text-align: center;
+      padding: 30px 24px;
+    }
+
+    .card-404 {
+      background: var(--surface);
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius);
+      padding: 44px 36px 40px;
+      box-shadow: 0 16px 45px rgba(85, 64, 142, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-404:before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      left: -60px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffdb7650 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .card-404:after {
+      content: '';
+      position: absolute;
+      bottom: -70px;
+      right: -70px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #7560af18 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* مشهد الرسوم المتحركة */
+    .visual-scene {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .badge-404 {
+      font-size: 82px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -3px;
+      background: linear-gradient(135deg, var(--deep) 0%, var(--purple) 60%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 8px 20px rgba(117, 96, 175, 0.15);
+      animation: float 3s ease-in-out infinite;
+    }
+    .mascot-avatar {
+      width: 105px;
+      height: 105px;
+      background: linear-gradient(135deg, #fff9e6 0%, #ffeed1 100%);
+      border: 2px solid #f6deb0;
+      border-radius: 30px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 24px rgba(223, 158, 25, 0.18);
+      animation: wiggle 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-4deg); }
+      75% { transform: rotate(4deg); }
+    }
+
+    .pill-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff4d6;
+      border: 1px solid #fae4a0;
+      color: #8c6310;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 32px;
+      line-height: 1.35;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+    h1 span {
+      color: var(--deep);
+      text-decoration: underline;
+      text-decoration-color: var(--yellow);
+      text-decoration-thickness: 5px;
+      text-underline-offset: 4px;
+    }
+
+    p.lead-desc {
+      font-size: 16px;
+      color: #554e6d;
+      line-height: 1.8;
+      max-width: 600px;
+      margin: 0 auto 28px;
+    }
+
+    /* الصندوق الحواري للمساعد */
+    .guide-box {
+      background: #faf8fd;
+      border: 1px solid #e7dfef;
+      border-radius: 18px;
+      padding: 14px 20px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: right;
+    }
+    .guide-box-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .guide-box-text strong {
+      display: block;
+      color: var(--deep);
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    .guide-box-text small {
+      color: var(--muted);
+      font-size: 12px;
+      display: block;
+      line-height: 1.6;
+    }
+
+    /* أزرار الإجراءات */
+    .actions-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: center;
+    }
+    .btn-home {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--purple);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 14px 34px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(117, 96, 175, 0.35);
+      transition: all 0.22s ease;
+      width: 100%;
+      max-width: 380px;
+    }
+    .btn-home:hover {
+      background: var(--deep);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(85, 64, 142, 0.45);
+    }
+    .btn-home:active {
+      transform: translateY(1px);
+    }
+
+    .quick-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 6px;
+    }
+    .btn-quick {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--lilac);
+      color: var(--deep);
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      border: 1px solid #dcd4ee;
+      transition: all 0.2s ease;
+    }
+    .btn-quick:hover {
+      background: #e5ddf5;
+      color: var(--purple);
+      transform: translateY(-2px);
+    }
+
+    /* الفوتر */
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 20px 0 10px;
+    }
+
+    @media (max-width: 650px) {
+      body { padding: 16px; }
+      .card-404 { padding: 30px 20px; }
+      .badge-404 { font-size: 64px; }
+      .mascot-avatar { width: 85px; height: 85px; }
+      h1 { font-size: 24px; }
+      p.lead-desc { font-size: 14px; }
+      .header-tag { display: none; }
+      .btn-home { font-size: 14.5px; padding: 12px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- شريط الموقع العلوي -->
+  <header class="header">
+    <a href="/" class="brand" title="العودة لبوابة المنصة">
+      <div class="brand-symbol">⚡</div>
+      <div class="brand-text">
+        <strong>مختبر العلوم التفاعلي</strong>
+        <small>الصف الرابع الأساسي · المنهاج الفلسطيني</small>
+      </div>
+    </a>
+    <span class="header-tag">🔬 خطوة صغيرة، اكتشاف كبير</span>
+  </header>
+
+  <!-- المحتوى الرئيسي لصفحة 404 -->
+  <main class="content-wrap">
+    <div class="card-404">
+      
+      <div class="visual-scene">
+        <span class="badge-404">٤٠٤</span>
+        <div class="mascot-avatar" aria-hidden="true">
+          <!-- أيقونة علمية لطيفة ومتحركة -->
+          <svg viewBox="0 0 64 64" width="60" height="60" fill="none">
+            <!-- عدسة مكبرة كرتونية -->
+            <circle cx="28" cy="28" r="16" stroke="#7560af" stroke-width="4.5" fill="#f8f4ff"/>
+            <path d="M40 40 L56 56" stroke="#df9e19" stroke-width="6" stroke-linecap="round"/>
+            <!-- عينان تبتسمان وتتساءلان -->
+            <circle cx="23" cy="26" r="2.5" fill="#55408e"/>
+            <circle cx="33" cy="26" r="2.5" fill="#55408e"/>
+            <!-- فم متعجب لطيف -->
+            <path d="M25 34 Q28 37 31 34" stroke="#55408e" stroke-width="2" stroke-linecap="round"/>
+            <!-- شرارة صغيرة فوق العدسة -->
+            <path d="M28 6 L29.5 10 L34 11 L29.5 12 L28 16 L26.5 12 L22 11 L26.5 10 Z" fill="#ffdb76"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="pill-eyebrow">
+        <span>🧭</span>
+        <span>أوووه! يبدو أننا ابتعدنا عن المختبر قليلاً</span>
+      </div>
+
+      <h1>الصفحة غير موجودة… <span>لكن الاستكشاف مستمر!</span></h1>
+
+      <p class="lead-desc">
+        لا تقلق يا بطل العلوم، حتى المستكشفون والعلماء الكبار يتوهون أحياناً في طريق البحث عن الاكتشافات الجديدة! هذه الصفحة التي تبحث عنها غير موجودة أو تم نقلها.
+      </p>
+
+      <div class="guide-box">
+        <span class="guide-box-icon">💡</span>
+        <div class="guide-box-text">
+          <strong>توجيه من صديقيك «شرارة» و«الخبير»:</strong>
+          <small>طاولات التجارب جاهزة ومضيئة بانتظارك، اضغط على الزر أدناه لنعود فوراً إلى المختبر ونواصل متعة العلم والتجربة!</small>
+        </div>
+      </div>
+
+      <div class="actions-wrap">
+        <a href="/" class="btn-home">
+          <span>🏠</span>
+          <span>العودة إلى بوابة المنصة الرئيسية</span>
+          <span>←</span>
+        </a>
+
+        <div class="quick-links">
+          <a href="/electricity.html" class="btn-quick">
+            <span>⚡</span>
+            <span>نشاط ١: مختبر الكهرباء</span>
+          </a>
+          <a href="/materials.html" class="btn-quick">
+            <span>📦</span>
+            <span>نشاط ٢: محطة فرز الخامات</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- الفوتر -->
+  <footer class="footer">
+    <p>منصة مختبر العلوم التفاعلي · الصف الرابع الأساسي · المنهاج الفلسطيني 🌟</p>
+  </footer>
+
+</body>
+</html>
