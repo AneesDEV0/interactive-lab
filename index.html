@@ -159,7 +159,7 @@
       width: min(340px, 86vw);
       background: #ffffff;
       box-shadow: -10px 0 40px rgba(45, 34, 75, 0.25);
-      z-index: 2000;
+      z-index: 2200;
       display: flex;
       flex-direction: column;
       padding: 20px 16px 24px;
@@ -176,10 +176,10 @@
     .drawer-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(37, 32, 56, 0.5);
+      background: rgba(37, 32, 56, 0.45);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
-      z-index: 1999;
+      z-index: 2100;
       animation: fadeIn 0.18s ease-out;
     }
     .drawer-backdrop[hidden] {
@@ -985,74 +985,74 @@
         <span class="toggle-label">القائمة</span>
       </button>
     </div>
-
-    <!-- درج القائمة للجوال والشاشات الصغيرة -->
-    <div class="mobile-nav-drawer" id="mobile-nav-drawer" hidden>
-      <div class="drawer-header">
-        <div class="drawer-title">
-          <span>⚡</span>
-          <span>منصة العلوم التفاعلية</span>
-        </div>
-        <button type="button" class="drawer-close" id="drawer-close" aria-label="إغلاق القائمة">✕</button>
-      </div>
-      <nav class="drawer-nav">
-        <div class="drawer-section-label">الأنشطة المتاحة الآن 🚀</div>
-        <a href="/electricity.html" class="drawer-link drawer-link-active">
-          <span class="drawer-link-icon">⚡</span>
-          <div class="drawer-link-text">
-            <strong>النشاط 1: مختبر مصادر الكهرباء</strong>
-            <small>مع الرفيق «شرارة» · ثلاثي الأبعاد</small>
-          </div>
-          <span class="drawer-arrow">←</span>
-        </a>
-        <a href="/materials.html" class="drawer-link">
-          <span class="drawer-link-icon">📦</span>
-          <div class="drawer-link-text">
-            <strong>النشاط 2: فرز خامات البيئة</strong>
-            <small>مع المساعد «الخبير» · ذكاء اصطناعي وتصنيف</small>
-          </div>
-          <span class="drawer-arrow">←</span>
-        </a>
-        <a href="/safety.html" class="drawer-link">
-          <span class="drawer-link-icon">🛡️</span>
-          <div class="drawer-link-text">
-            <strong>النشاط 3: حارس الأمان والسلامة الكهربائية</strong>
-            <small>مع المساعد «كابتن أمان» · فرز السلوكيات والوقاية</small>
-          </div>
-          <span class="drawer-arrow">←</span>
-        </a>
-        <a href="/conductors.html" class="drawer-link">
-          <span class="drawer-link-icon">💡</span>
-          <div class="drawer-link-text">
-            <strong>النشاط 4: المواد الموصلة والعازلة</strong>
-            <small>مع المساعد «البروفيسور» · الجدول الثنائي والتقرير</small>
-          </div>
-          <span class="drawer-arrow">←</span>
-        </a>
-        <div class="drawer-divider"></div>
-        <div class="drawer-section-label">أقسام المنصة الرئيسية</div>
-        <a href="#activities" class="drawer-link">
-          <span class="drawer-link-icon">📚</span>
-          <div class="drawer-link-text">
-            <strong>قائمة الأنشطة الخمسة</strong>
-          </div>
-        </a>
-        <a href="#features" class="drawer-link">
-          <span class="drawer-link-icon">✨</span>
-          <div class="drawer-link-text">
-            <strong>كيف نتعلّم في المنصة؟</strong>
-          </div>
-        </a>
-        <a href="#team" class="drawer-link">
-          <span class="drawer-link-icon">👥</span>
-          <div class="drawer-link-text">
-            <strong>فريق البحث والإشراف</strong>
-          </div>
-        </a>
-      </nav>
-    </div>
   </header>
+
+  <!-- درج القائمة للجوال والشاشات الصغيرة -->
   <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+  <div class="mobile-nav-drawer" id="mobile-nav-drawer" hidden>
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span>⚡</span>
+        <span>منصة العلوم التفاعلية</span>
+      </div>
+      <button type="button" class="drawer-close" id="drawer-close" aria-label="إغلاق القائمة">✕</button>
+    </div>
+    <nav class="drawer-nav">
+      <div class="drawer-section-label">الأنشطة المتاحة الآن 🚀</div>
+      <a href="electricity.html" class="drawer-link">
+        <span class="drawer-link-icon">⚡</span>
+        <div class="drawer-link-text">
+          <strong>النشاط 1: مختبر مصادر الكهرباء</strong>
+          <small>مع الرفيق «شرارة» · ثلاثي الأبعاد</small>
+        </div>
+        <span class="drawer-arrow">←</span>
+      </a>
+      <a href="materials.html" class="drawer-link">
+        <span class="drawer-link-icon">📦</span>
+        <div class="drawer-link-text">
+          <strong>النشاط 2: فرز خامات البيئة</strong>
+          <small>مع المساعد «الخبير» · ذكاء اصطناعي وتصنيف</small>
+        </div>
+        <span class="drawer-arrow">←</span>
+      </a>
+      <a href="safety.html" class="drawer-link">
+        <span class="drawer-link-icon">🛡️</span>
+        <div class="drawer-link-text">
+          <strong>النشاط 3: حارس الأمان والسلامة الكهربائية</strong>
+          <small>مع المساعد «كابتن أمان» · فرز السلوكيات والوقاية</small>
+        </div>
+        <span class="drawer-arrow">←</span>
+      </a>
+      <a href="conductors.html" class="drawer-link">
+        <span class="drawer-link-icon">💡</span>
+        <div class="drawer-link-text">
+          <strong>النشاط 4: المواد الموصلة والعازلة</strong>
+          <small>مع المساعد «البروفيسور» · الجدول الثنائي والتقرير</small>
+        </div>
+        <span class="drawer-arrow">←</span>
+      </a>
+      <div class="drawer-divider"></div>
+      <div class="drawer-section-label">أقسام المنصة الرئيسية</div>
+      <a href="#activities" class="drawer-link">
+        <span class="drawer-link-icon">📚</span>
+        <div class="drawer-link-text">
+          <strong>قائمة الأنشطة الخمسة</strong>
+        </div>
+      </a>
+      <a href="#features" class="drawer-link">
+        <span class="drawer-link-icon">✨</span>
+        <div class="drawer-link-text">
+          <strong>كيف نتعلّم في المنصة؟</strong>
+        </div>
+      </a>
+      <a href="#team" class="drawer-link">
+        <span class="drawer-link-icon">👥</span>
+        <div class="drawer-link-text">
+          <strong>فريق البحث والإشراف</strong>
+        </div>
+      </a>
+    </nav>
+  </div>
 
   <!-- البانر الترحيبي والتعريف بالمنصة - متناسق ومتوسط دائماً -->
   <section class="hero" aria-labelledby="hero-title">
