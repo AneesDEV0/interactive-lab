@@ -144,6 +144,10 @@ $('#app').innerHTML = `
               <span class="dropdown-icon">📦</span>
               <div><strong>نشاط ٢: فرز خامات البيئة</strong><small>محطة التصنيف مع «الخبير»</small></div>
             </a>
+            <a href="safety.html" class="dropdown-item">
+              <span class="dropdown-icon">🛡️</span>
+              <div><strong>نشاط ٣: حارس الأمان والسلامة</strong><small>محطة الوقاية مع «كابتن أمان»</small></div>
+            </a>
             <a href="conductors.html" class="dropdown-item active">
               <span class="dropdown-icon">💡</span>
               <div><strong>نشاط ٤: الموصلات والعوازل</strong><small>محطة الفحص مع «البروفيسور»</small></div>

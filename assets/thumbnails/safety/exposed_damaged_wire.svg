@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120">
+  <rect x="0" y="0" width="160" height="120" rx="14" fill="#fff5f5"/>
+  <!-- غلاف السلك الخارجي الأزرق المتشقق -->
+  <path d="M15,60 C40,40 60,75 80,60" fill="none" stroke="#3182ce" stroke-width="12" stroke-linecap="round"/>
+  <path d="M100,55 C120,40 135,70 150,60" fill="none" stroke="#3182ce" stroke-width="12" stroke-linecap="round"/>
+  <!-- المنطقة الممزقة ذات الأسلاك المعراة -->
+  <!-- شعيرات النحاس اللامعة المكشوفة -->
+  <path d="M72,63 C80,50 95,52 105,58" fill="none" stroke="#dd6b20" stroke-width="3"/>
+  <path d="M74,67 C82,58 92,66 102,54" fill="none" stroke="#d69e2e" stroke-width="2.5"/>
+  <path d="M76,60 C85,68 94,50 106,62" fill="none" stroke="#c05621" stroke-width="2.5"/>
+  <path d="M73,65 C88,48 93,68 104,59" fill="none" stroke="#dd6b20" stroke-width="2"/>
+  <!-- عوازل داخلية ممزقة متدلية -->
+  <line x1="72" y1="56" x2="68" y2="48" stroke="#e53e3e" stroke-width="3" stroke-linecap="round"/>
+  <line x1="104" y1="52" x2="108" y2="44" stroke="#e53e3e" stroke-width="3" stroke-linecap="round"/>
+  <!-- شرارات كهربائية متطايرة من النحاس المكشوف -->
+  <polygon points="86,40 88,46 94,48 88,50 86,56 84,50 78,48 84,46" fill="#f6e05e"/>
+  <polygon points="98,62 100,66 105,67 100,69 98,73 96,69 91,67 96,66" fill="#ecc94b"/>
+  <!-- ختم الخطر الصريح -->
+  <circle cx="88" cy="22" r="14" fill="#e53e3e"/>
+  <text x="88" y="27" font-size="14" font-weight="bold" fill="#fff" text-anchor="middle">❌</text>
+</svg>

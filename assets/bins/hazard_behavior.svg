@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" width="200" height="180">
+  <defs>
+    <!-- تدرجات لونية ثلاثية الأبعاد لصندوق السلوك الخطر -->
+    <linearGradient id="hazardTopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f56565" />
+      <stop offset="100%" stop-color="#c53030" />
+    </linearGradient>
+    <linearGradient id="hazardFrontGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e53e3e" />
+      <stop offset="100%" stop-color="#742a2a" />
+    </linearGradient>
+    <linearGradient id="hazardSideGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9b2c2c" />
+      <stop offset="100%" stop-color="#551a1a" />
+    </linearGradient>
+    <linearGradient id="warnTriGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fbd38d" />
+      <stop offset="100%" stop-color="#dd6b20" />
+    </linearGradient>
+    <filter id="hazardGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#e53e3e" flood-opacity="0.38" />
+    </filter>
+  </defs>
+
+  <!-- ظل الصندوق على الأرض -->
+  <ellipse cx="100" cy="162" rx="72" ry="14" fill="#000000" fill-opacity="0.16" />
+
+  <!-- جسم الحاوية ثلاثي الأبعاد -->
+  <g filter="url(#hazardGlow)">
+    <!-- الوجه الجانبي الأيسر -->
+    <polygon points="34,70 18,124 100,158 100,98" fill="url(#hazardSideGrad)" />
+    <!-- الوجه الأمامي الأيمن -->
+    <polygon points="100,98 100,158 182,124 166,70" fill="url(#hazardFrontGrad)" />
+    <!-- الوجه العلوي (فتحة الصندوق) -->
+    <polygon points="100,42 166,70 100,98 34,70" fill="url(#hazardTopGrad)" stroke="#fc8181" stroke-width="2" />
+  </g>
+
+  <!-- أشرطة تحذير مخططة صفراء وسوداء على الحاوية -->
+  <polygon points="18,124 100,158 100,146 22,114" fill="#f6e05e" fill-opacity="0.4" />
+  <polygon points="100,158 182,124 178,114 100,146" fill="#fbd38d" fill-opacity="0.5" />
+
+  <!-- مثلث التحذير والشرارة الكهربائية في المقدمة -->
+  <g transform="translate(100, 95)">
+    <!-- هالة التحذير -->
+    <circle cx="0" cy="0" r="32" fill="#fff5f5" fill-opacity="0.92" stroke="#e53e3e" stroke-width="2" />
+    
+    <!-- مثلث الخطر البرتقالي الأصفر -->
+    <polygon points="0,-22 24,18 -24,18" fill="url(#warnTriGrad)" stroke="#7b341e" stroke-width="2" stroke-linejoin="round" />
+    
+    <!-- صاعقة كهربائية تحذيرية -->
+    <path d="M1,-12 L-6,1 L0,1 L-2,12 L7,-1 L1,-1 Z" fill="#2d3748" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round" />
+
+    <!-- علامة تعجب تحذيرية حمراء صغيرة جانبية -->
+    <circle cx="20" cy="-14" r="5" fill="#e53e3e" />
+    <text x="20" y="-11" font-size="8" font-weight="bold" fill="#ffffff" text-anchor="middle">!</text>
+  </g>
+
+  <!-- شرارات تحذيرية متطايرة -->
+  <polygon points="46,42 48,46 52,48 48,50 46,54 44,50 40,48 44,46" fill="#f6ad55" />
+  <polygon points="152,40 154,44 158,45 154,47 152,51 150,47 146,45 150,44" fill="#fc8181" />
+</svg>

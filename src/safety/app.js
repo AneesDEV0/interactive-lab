@@ -1,10 +1,11 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// src/materials/app.js — المنطق التفاعلي لمحطة فرز وتصنيف خامات البيئة
+// src/safety/app.js — المنطق التفاعلي لمحطة حارس الأمان والسلامة الكهربائية
+// للصف الرابع الأساسي · مع المساعد التعليمي «حارس الأمان» (كابتن أمان)
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { items, byId, categories, testClassification, answer, voiceLines } from './data.js';
-import { icon, expertMascot } from './icons.js';
-import { KhabeerVoice } from './audio.js';
+import { items, byId, categories, testClassification, answer, voiceLines, generateSafetyReport } from './data.js';
+import { icon, captainAmanMascot } from './icons.js';
+import { SafetyVoice } from './audio.js';
 
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -13,15 +14,17 @@ const params = new URLSearchParams(location.search);
 
 // حالة النشاط
 const state = {
-  id: byId(params.get('item'))?.id || 'plasticRuler',
+  id: byId(params.get('item'))?.id || 'wet_hands_plug',
   mode: params.get('mode') === 'learn' ? 'learn' : 'play',
-  activeCategory: null
+  activeCategory: null,
+  attempts: 0,
+  startTime: Date.now()
 };
 
 // استرجاع التقدم المحفوظ من LocalStorage
 let discoveries = {};
 try {
-  const saved = JSON.parse(localStorage.getItem('khabeer-materials-discoveries-v1') || '{}');
+  const saved = JSON.parse(localStorage.getItem('captain-safety-discoveries-v1') || '{}');
   for (const [id, cat] of Object.entries(saved)) {
     if (byId(id) && categories[cat] && testClassification(id, cat).ok) {
       discoveries[id] = cat;
@@ -38,10 +41,10 @@ let modelRevision = 0;
 
 // الشعار والهوية البصرية
 const brand = `
-  <span class="brand-symbol">${icon('box')}</span>
+  <span class="brand-symbol">${icon('shield')}</span>
   <span>
-    <strong>محطة فرز الخامات</strong>
-    <small>مع رفيقك «الخبير»</small>
+    <strong>حارس الأمان</strong>
+    <small>مع رفيقك «كابتن أمان»</small>
   </span>
 `;
 
@@ -56,21 +59,22 @@ const card = d => {
             aria-pressed="${d.id === state.id}">
       <i class="device-check">${icon('check')}</i>
       ${isSorted ? `<span class="device-sorted-badge">${icon('check')} مصنّف</span>` : ''}
-      <img src="assets/thumbnails/materials/${d.id}.svg" alt="${d.name}" class="device-card-thumb" loading="lazy">
+      <img src="assets/thumbnails/safety/${d.id}.svg" alt="${d.name}" class="device-card-thumb" loading="lazy">
       <span>${d.name}</span>
-      <small>${d.material}</small>
+      <small>${d.origin || d.dangerLevel}</small>
     </button>
   `;
 };
 
-// حاوية تصنيف ثلاثية الأبعاد (صندوق فرز)
+// حاوية تصنيف ثلاثية الأبعاد (عمود الجدول الثنائي: آمن أو خطر)
 const binCard = cat => {
   const sortedCount = Object.keys(discoveries).filter(id => discoveries[id] === cat.id).length;
+  const binImgSrc = cat.id === 'safe' ? 'assets/bins/safe_behavior.svg' : 'assets/bins/hazard_behavior.svg';
   return `
     <div class="bin-card" data-bin="${cat.id}" role="button" tabindex="0" aria-label="${cat.title}">
       <span class="bin-counter" id="counter-${cat.id}">${numbers.format(sortedCount)}</span>
       <div class="bin-3d-visual">
-        <img src="assets/bins/${cat.id}.svg" alt="${cat.title}" class="bin-3d-img" loading="lazy">
+        <img src="${binImgSrc}" alt="${cat.title}" class="bin-3d-img" loading="lazy">
       </div>
       <strong>${cat.name}</strong>
       <small>${cat.badge}</small>
@@ -85,47 +89,47 @@ const dialogHead = (id, title) => `
   </div>
 `;
 
-// بناء واجهة المستخدم الكاملة المتوافقة مع 100vh
+// بناء واجهة المستخدم الكاملة المتوافقة مع 100vh ومعمارية النشاط 2 و 4
 $('#app').innerHTML = `
 <div class="shell">
-  <!-- الشريط الجانبي الأنيق غير المزدحم -->
+  <!-- الشريط الجانبي الأنيق -->
   <aside class="sidebar" aria-label="التنقل الرئيسي">
-    <a href="materials.html" class="brand">${brand}</a>
+    <a href="safety.html" class="brand">${brand}</a>
     
     <nav class="nav-stack">
-      <p class="nav-label">محطة فرز الخامات</p>
-      <button class="nav-item active" data-action="home">${icon('box')}طاولة الاستكشاف<span class="small-dot"></span></button>
-      <button class="nav-item" data-open="library">${icon('cube')}كل خامات كتابي</button>
-      <button class="nav-item" data-open="notebook">${icon('book')}دفتر تصنيفاتي</button>
+      <p class="nav-label">محطة السلامة والوقاية</p>
+      <button class="nav-item active" data-action="home">${icon('shield')}طاولة الفحص والتقييم<span class="small-dot"></span></button>
+      <button class="nav-item" data-open="library">${icon('cube')}كل سلوكيات كتابي (${numbers.format(items.length)})</button>
+      <button class="nav-item" data-open="notebook">${icon('book')}سجل الأمان والتقرير</button>
     </nav>
 
     <nav class="nav-stack">
       <p class="nav-label">مساعدة وكاميرا</p>
       <button class="nav-item" data-open="camera">${icon('camera')}صوّر من كتابك</button>
-      <button class="nav-item" data-open="help">${icon('help')}كيف أفرز المواد؟</button>
+      <button class="nav-item" data-open="help">${icon('help')}كيف أفرز السلوكيات؟</button>
     </nav>
 
     <div class="side-mascot">
-      ${expertMascot}
-      <h3>مع «الخبير» نتعلّم!</h3>
-      <p>فكر في خواص المادة وضعها في مكانها الصحيح.</p>
+      ${captainAmanMascot}
+      <h3>مع «حارس الأمان» نسلم!</h3>
+      <p>افحص السلوك وميّز الخطر من الأمان لحماية نفسك وبيتك.</p>
     </div>
-    <p class="side-footer">صُنع لمستكشفي الصف الرابع ${icon('heart')}</p>
+    <p class="side-footer">صُنع لحماة الغد بالصف الرابع ${icon('heart')}</p>
   </aside>
 
   <!-- المنطقة الرئيسية -->
   <div class="body-area">
     <header class="topbar">
       <div class="breadcrumb">
-        <a href="/" style="color:var(--muted);transition:color .2s" title="العودة لبوابة المنصة الرئيسية">المنصة الرئيسية</a> ${icon('chevron')} العلوم ${icon('chevron')} <strong>نشاط ٢: فرز وتصنيف خامات البيئة</strong>
+        <a href="/" style="color:var(--muted);transition:color .2s" title="العودة لبوابة المنصة الرئيسية">المنصة الرئيسية</a> ${icon('chevron')} العلوم ${icon('chevron')} <strong>نشاط ٣: حارس الأمان والسلامة الكهربائية</strong>
       </div>
-      <a href="materials.html" class="brand mobile-brand" aria-label="العودة إلى محطة فرز الخامات">${brand}</a>
+      <a href="safety.html" class="brand mobile-brand" aria-label="العودة إلى محطة السلامة الكهربائية">${brand}</a>
       
       <div class="top-actions">
-        <!-- زر التبديل بين الأنشطة (توقل الأنشطة) لمنع ازدحام الشاشات -->
+        <!-- زر التبديل بين الأنشطة لمنع ازدحام الشاشات -->
         <div class="activity-toggle-wrap">
           <button id="activity-toggle-btn" class="activity-toggle-btn" aria-label="الأنشطة" aria-expanded="false" title="عرض الأنشطة">
-            ${icon('box')}<span>الأنشطة</span><i class="toggle-arrow">▾</i>
+            ${icon('bolt')}<span>الأنشطة</span><i class="toggle-arrow">▾</i>
           </button>
           <div id="activity-dropdown" class="activity-dropdown" hidden>
             <div class="dropdown-header">محطات العلوم التفاعلية</div>
@@ -137,11 +141,11 @@ $('#app').innerHTML = `
               <span class="dropdown-icon">⚡</span>
               <div><strong>نشاط ١: وحدة الكهرباء</strong><small>مختبر مصادر الطاقة مع «شرارة»</small></div>
             </a>
-            <a href="materials.html" class="dropdown-item active">
+            <a href="materials.html" class="dropdown-item">
               <span class="dropdown-icon">📦</span>
               <div><strong>نشاط ٢: فرز خامات البيئة</strong><small>محطة التصنيف مع «الخبير»</small></div>
             </a>
-            <a href="safety.html" class="dropdown-item">
+            <a href="safety.html" class="dropdown-item active">
               <span class="dropdown-icon">🛡️</span>
               <div><strong>نشاط ٣: حارس الأمان والسلامة</strong><small>محطة الوقاية مع «كابتن أمان»</small></div>
             </a>
@@ -162,7 +166,7 @@ $('#app').innerHTML = `
         </button>
         <div class="learner">
           <span class="avatar">${icon('star')}</span>
-          <span>عالم صغير<small>الصف الرابع الأساسي</small></span>
+          <span>بطل الأمان<small>الصف الرابع الأساسي</small></span>
         </div>
         <button class="sound-button" data-open="help" aria-label="تعليمات النشاط">${icon('help')}</button>
       </div>
@@ -172,43 +176,43 @@ $('#app').innerHTML = `
       <!-- مقدمة النشاط -->
       <section class="intro">
         <div class="intro-copy">
-          <div class="eyebrow">${icon('sparkles')} الصف الرابع الأساسي · خامات البيئة</div>
-          <h1>محطة فرز <span>وتصنيف المواد</span></h1>
-          <p>اسحب العنصر إلى الحاوية المناسبة، أو صوّره من كتابك واستكشف أسرار خاماته مع «الخبير».</p>
+          <div class="eyebrow">${icon('sparkles')} الصف الرابع الأساسي · أخطار الكهرباء وقواعد السلامة في المنزل (ص ٨٩ - ٩٠)</div>
+          <h1>محطة <span>حارس الأمان والسلامة الكهربائية</span></h1>
+          <p>اسحب التصرف إلى عمود السلوك الآمن أو السلوك الخطر، أو صوّره من كتابك وتعرّف إلى القواعد الذهبية لحماية الحياة مع «كابتن أمان».</p>
         </div>
         <button class="progress-chip" data-open="notebook">
           ${icon('trophy')}
           <span>
-            <strong>إنجازاتي في الفرز</strong>
+            <strong>إنجازاتي في الأمان</strong>
             <small id="progress-text"></small>
             <span class="progress-track"><i id="progress-bar"></i></span>
           </span>
         </button>
       </section>
 
-      <!-- رف اختيار العناصر -->
+      <!-- رف اختيار السلوكيات والمواقف -->
       <section class="device-section" aria-labelledby="choose-title">
         <div class="section-heading">
-          <h2 id="choose-title"><span class="step-number">١</span> اختر خامة من كتابك <small>أو اسحبها مباشرة</small></h2>
-          <button class="text-button" data-open="library">كل الخامات <span>(${numbers.format(items.length)})</span> ${icon('arrow')}</button>
+          <h2 id="choose-title"><span class="step-number">١</span> اختر سلوكاً من كتابك <small>أو اسحبه مباشرة للفرز</small></h2>
+          <button class="text-button" data-open="library">كل السلوكيات <span>(${numbers.format(items.length)})</span> ${icon('arrow')}</button>
         </div>
         <div class="devices-row" id="device-shelf">
           ${items.slice(0, 6).map(card).join('')}
           <button class="camera-card" data-open="camera">
             ${icon('camera')}
             <strong>صوّر من كتابك</strong>
-            <small>ليظهر المجسم فوراً!</small>
+            <small>ليظهر الموقف فوراً!</small>
           </button>
         </div>
       </section>
 
-      <!-- طاولة التجربة وعمود الخبير -->
+      <!-- طاولة التجربة وعمود حارس الأمان -->
       <div class="experiment">
-        <section class="lab-card" aria-label="طاولة الاستكشاف">
+        <section class="lab-card" aria-label="طاولة فحص السلوكيات">
           <div class="lab-top">
             <div>
-              <h2><span class="step-number">٢</span> طاولة الفرز والاستكشاف</h2>
-              <small>شاهد تفاصيل المجسم من كل الزوايا</small>
+              <h2><span class="step-number">٢</span> طاولة الفحص والتقييم</h2>
+              <small>شاهد تفاصيل الموقف والمجسم من كل الزوايا ٣٦٠ درجة</small>
             </div>
             <div class="mode-switch" role="group" aria-label="نوع النشاط">
               <button data-mode="learn">${icon('book')}تعرّف</button>
@@ -219,30 +223,30 @@ $('#app').innerHTML = `
           <!-- مسرح Three.js -->
           <div class="stage" id="stage">
             <div id="scene" class="scene-container"></div>
-            <div class="stage-badge">${icon('cube')} مجسّم ثلاثي الأبعاد</div>
+            <div class="stage-badge">${icon('cube')} مجسّم تفاعلي ثلاثي الأبعاد</div>
             <div class="stage-tools">
               <button class="icon-button" data-action="reset-view" aria-label="إعادة زاوية العرض" title="إعادة زاوية العرض">${icon('reset')}</button>
               <button class="icon-button" data-action="zoom-in" aria-label="تقريب" title="تقريب">+</button>
               <button class="icon-button" data-action="zoom-out" aria-label="إبعاد" title="إبعاد">−</button>
             </div>
             
-            <div class="drag-prompt-pill" id="drag-pill" draggable="true" title="اسحب من هنا إلى الصندوق">
-              ${icon('hand')} اسحب العنصر إلى الحاوية
+            <div class="drag-prompt-pill" id="drag-pill" draggable="true" title="اسحب من هنا إلى الجدول">
+              ${icon('hand')} اسحب السلوك إلى الحاوية
             </div>
 
-            <p id="model-status" class="model-status" role="status">نجهّز مجسم المادة…</p>
+            <p id="model-status" class="model-status" role="status">نجهّز مجسم الموقف…</p>
             <h3 class="device-title" id="device-title"></h3>
             
             <div class="stage-caption">
               <span>${icon('hand')} اسحب لتدوير المجسم</span>
-              <span id="device-state" class="state-pill">جاهز للفرز</span>
+              <span id="device-state" class="state-pill">جاهز للفحص</span>
             </div>
           </div>
 
-          <!-- لوحة وضع "جرّب وصنّف" (حاويات الفرز والسحب والإفلات) -->
+          <!-- لوحة وضع "جرّب وصنّف" (الجدول الثنائي: آمن وخطر) -->
           <div class="sorting-panel" id="play-panel">
             <h3 class="panel-heading">
-              <span class="step-number">٣</span> اسحب إلى الحاوية المناسبة لخامة هذا العنصر:
+              <span class="step-number">٣</span> اسحب إلى العمود المناسب لهذا التصرف:
               <small>أو اضغط على الحاوية لتصنيفه فوراً</small>
             </h3>
             <div class="bins-grid" id="bins-grid">
@@ -251,30 +255,36 @@ $('#app').innerHTML = `
             <div id="sorting-feedback" class="sorting-feedback" hidden></div>
           </div>
 
-          <!-- لوحة وضع "تعرّف" (معلومات تعليمية وشرح الخبير) -->
+          <!-- لوحة وضع "تعرّف" (بطاقة الموقف وقواعد الحماية) -->
           <div class="learn-panel" id="learn-panel" hidden>
-            <h3 class="panel-heading">${icon('info')} بطاقة المادة التعليمية</h3>
+            <h3 class="panel-heading">${icon('info')} بطاقة الموقف التوعوية وقاعدة الحماية</h3>
             <div class="learn-grid">
-              <div class="learn-spec"><label>الخامة الأساسية</label><strong id="learn-material"></strong></div>
-              <div class="learn-spec"><label>أصل الخامة</label><strong id="learn-origin"></strong></div>
-              <div class="learn-spec" style="grid-column:1/-1"><label>أهم الخصائص</label><strong id="learn-properties"></strong></div>
+              <div class="learn-spec"><label>المصدر والسياق</label><strong id="learn-origin"></strong></div>
+              <div class="learn-spec"><label>درجة الخطورة</label><strong id="learn-danger"></strong></div>
+              <div class="learn-spec"><label>سبب الخطر / الأمان</label><strong id="learn-reason"></strong></div>
+              <div class="learn-spec"><label>نوع السلوك</label><strong id="learn-type"></strong></div>
+              <div class="learn-spec" style="grid-column:1/-1"><label>نصيحة الأمان الحياتية</label><strong id="learn-safety"></strong></div>
             </div>
             <div class="fact-box">
-              <strong style="display:block;margin-bottom:4px;color:var(--deep)">معلومة الخبير:</strong>
+              <strong style="display:block;margin-bottom:4px;color:var(--green)">شرح كابتن أمان التوعوي:</strong>
               <p id="device-fact"></p>
             </div>
-            <button class="primary" data-action="fact">${icon('sound')} استمع إلى شرح «الخبير»</button>
+            <div class="golden-box">
+              <strong style="display:block;margin-bottom:4px;color:#744210">💡 القاعدة الذهبية لحماية الحياة:</strong>
+              <p id="device-golden"></p>
+            </div>
+            <button class="primary" data-action="fact">${icon('sound')} استمع إلى توجيه «حارس الأمان»</button>
           </div>
         </section>
 
-        <!-- عمود المساعد التعليمي: "الخبير" -->
-        <aside class="guide-column" aria-label="المساعد التعليمي الخبير">
+        <!-- عمود المساعد التعليمي: "حارس الأمان" (كابتن أمان) -->
+        <aside class="guide-column" aria-label="المساعد التعليمي حارس الأمان">
           <section class="guide-card">
             <div class="guide-mascot">
-              ${expertMascot}
+              ${captainAmanMascot}
               <div>
-                <h3>أهلاً، أنا «الخبير»!</h3>
-                <p>مرشدك في فرز خامات البيئة</p>
+                <h3>أهلاً، أنا «حارس الأمان»!</h3>
+                <p>مرشدك في الوقاية من الصعق والحرائق</p>
               </div>
             </div>
 
@@ -282,64 +292,64 @@ $('#app').innerHTML = `
               <p id="guide-text" aria-live="polite"></p>
             </div>
 
-            <button class="guide-listen" id="listen">${icon('sound')} استمع إلى الخبير</button>
+            <button class="guide-listen" id="listen">${icon('sound')} استمع إلى حارس الأمان</button>
 
             <div class="guide-suggestions">
-              <button data-question="تلميح">${icon('help')} أعطني تلميحاً للفرز</button>
-              <button data-question="مما يصنع">${icon('info')} ما هي خامة هذا العنصر؟</button>
-              <button data-question="مغناطيس">${icon('metal')} هل يجذبه المغناطيس؟</button>
+              <button data-question="تلميح">${icon('help')} أعطني تلميحاً للتصنيف</button>
+              <button data-question="قاعدة">${icon('shield')} ما هي القاعدة الذهبية؟</button>
+              <button data-question="آمن">${icon('bolt')} هل هذا السلوك آمن أم خطر؟</button>
             </div>
 
             <form class="ask-form" id="ask-form">
-              <input id="ask-input" maxlength="180" aria-label="اسأل الخبير" placeholder="اسأل الخبير عن خصائص المادة…" autocomplete="off">
+              <input id="ask-input" maxlength="180" aria-label="اسأل حارس الأمان" placeholder="اسأل كابتن أمان عن الصعق، البلل، الأسلاك، المقابس…" autocomplete="off">
               <button type="button" id="mic-btn" class="speech-btn" aria-label="تحدث بالصوت" title="تحدث بالصوت">${icon('mic')}</button>
               <button type="button" id="clear-btn" class="clear-btn" aria-label="مسح النص" title="مسح النص">${icon('trash')}</button>
               <button type="submit" aria-label="إرسال السؤال">${icon('send')}</button>
             </form>
 
-            <p class="guide-note">مساعد تفاعلي ذكي لطلاب الصف الرابع</p>
+            <p class="guide-note">مساعد ذكي للسلامة والوقاية · الصف الرابع</p>
             <p id="sound-status" class="sound-status" role="status"></p>
           </section>
 
           <div class="safety-card">
             ${icon('shield')}
             <div>
-              <strong>نحافظ على بيئتنا بأمان</strong>
-              <p>نصنف النفايات لنعيد تدويرها.<br>ننتبه للزجاج ونغسل أيدينا بعد التجربة.</p>
+              <strong>قواعد الأمان الذهبية مع «كابتن أمان»</strong>
+              <p>الماء والمعادن موصلات سريعة تنقل الكهرباء إلى أجسادنا.<br>لا تلمس مقبساً بيد مبللة، ولا تشد سلكاً بقوة أبداً!</p>
             </div>
           </div>
         </aside>
       </div>
 
-      <!-- إنجازات الرحلة -->
+      <!-- إنجازات الرحلة والتقرير النهائي -->
       <section class="journey">
         ${icon('star')}
         <div>
-          <h3 id="journey-title">مهمة الفرز والتصنيف بانتظارك!</h3>
-          <p id="journey-text">كل مادة تصنفها بنجاح تضيف نجمة ذهبية إلى إنجازاتك.</p>
+          <h3 id="journey-title">مهمة حماية الأرواح والسلامة بانتظارك!</h3>
+          <p id="journey-text">كل تصرف تصنفه بنجاح يضيف وسام أمان جديد، ويفتح تقرير كابتن أمان النهائي المعتمد.</p>
         </div>
-        <button data-open="notebook">دفتر تصنيفاتي ${icon('arrow')}</button>
+        <button data-open="notebook">تقرير التقييم النهائي ${icon('arrow')}</button>
       </section>
 
-      <p class="footer">${icon('heart')} بالعلم والاستكشاف نرتقي، وبالتجربة نصنع المستقبل!</p>
+      <p class="footer">${icon('heart')} الوعي بالأمان يحمي الحياة، وبالعلم نصنع مجتمعاً آمناً!</p>
     </main>
   </div>
 </div>
 
 <!-- النوافذ المنبثقة -->
 <dialog id="library" aria-labelledby="library-title">
-  ${dialogHead('library', 'خامات ومواد كتاب العلوم')}
-  <p class="dialog-description">اختر أي مادة لاستكشاف مجسمها ثلاثي الأبعاد وفرزها داخل حاويتها الصحيحة:</p>
+  ${dialogHead('library', 'سلوكيات وقواعد كتاب العلوم (صفحة ٨٩ - ٩٠)')}
+  <p class="dialog-description">اختر أي سلوك لمشاهدة مجسمه ثلاثي الأبعاد بزاوية ٣٦٠ درجة وتصنيفه داخل الجدول الثنائي:</p>
   <div class="library-grid" id="library-grid">
     ${items.map(card).join('')}
   </div>
 </dialog>
 
 <dialog id="camera" aria-labelledby="camera-title">
-  ${dialogHead('camera', 'التعرف البصري بالكاميرا')}
-  <p class="dialog-description">وجّه الكاميرا نحو صورة العنصر في كتاب العلوم للصف الرابع، وسيتعرف عليها «الخبير» فوراً:</p>
+  ${dialogHead('camera', 'التعرف البصري بالكاميرا الذكية')}
+  <p class="dialog-description">وجّه الكاميرا نحو صورة السلوك في كتاب العلوم (صفحة ٨٩ أو ٩٠)، وسيتعرف عليها «حارس الأمان» فوراً:</p>
   <video id="camera-video" class="camera-preview" autoplay playsinline muted hidden></video>
-  <img id="photo-preview" class="camera-preview" alt="صورة العنصر الملتقطة" hidden>
+  <img id="photo-preview" class="camera-preview" alt="صورة الموقف الملتقطة" hidden>
   
   <div class="camera-controls">
     <button class="primary" id="start-camera">${icon('camera')} افتح الكاميرا</button>
@@ -352,56 +362,56 @@ $('#app').innerHTML = `
   
   <div class="camera-result" id="camera-result" hidden>
     <p id="recognition-text"></p>
-    <label for="confirmed-item">تأكيد اسم العنصر:</label>
+    <label for="confirmed-item">تأكيد اسم السلوك:</label>
     <select id="confirmed-item">
-      <option value="">اختر العنصر للتأكيد</option>
-      ${items.map(d => `<option value="${d.id}">${d.name} (${d.material})</option>`).join('')}
+      <option value="">اختر السلوك للتأكيد</option>
+      ${items.map(d => `<option value="${d.id}">${d.name} (${d.origin})</option>`).join('')}
     </select>
-    <button class="primary" id="confirm-photo">افتح العنصر في المختبر ${icon('arrow')}</button>
+    <button class="primary" id="confirm-photo">افتح السلوك على طاولة الفحص ${icon('arrow')}</button>
   </div>
 </dialog>
 
 <dialog id="notebook" aria-labelledby="notebook-title">
-  ${dialogHead('notebook', 'دفتر تصنيفاتي وإنجازاتي')}
+  ${dialogHead('notebook', 'تقرير التقييم النهائي وسجل الأمان')}
   <div id="notebook-content"></div>
 </dialog>
 
 <dialog id="help" aria-labelledby="help-title">
-  ${dialogHead('help', 'كيف ألعب وأصنف خامات البيئة؟')}
+  ${dialogHead('help', 'كيف أصنف السلوكيات وأحمي نفسي؟')}
   <div class="help-steps">
     <div class="help-step">
       <span class="step-number">١</span>
       <div>
-        <h3>اختر العنصر أو صوّره</h3>
-        <p>اختر مادة من كتابك من الرف العلوي، أو استخدم الكاميرا لمطابقة صورتها.</p>
+        <h3>اختر السلوك أو صوّره</h3>
+        <p>اختر سلوكاً من كتابك من الرف العلوي، أو استخدم الكاميرا لمطابقة صورته في صفحة ٨٩ أو ٩٠.</p>
       </div>
     </div>
     <div class="help-step">
       <span class="step-number">٢</span>
       <div>
-        <h3>تعرّف إلى خواص الخامة</h3>
-        <p>في وضع «تعرّف» دوّر المجسم ثلاثي الأبعاد، واستمع إلى شرح «الخبير» حول نوع الخامة وخصائصها.</p>
+        <h3>تأمّل الموقف وقاعدته الذهبية</h3>
+        <p>في وضع «تعرّف» دوّر المجسم ثلاثي الأبعاد، واستمع لتوجيه «حارس الأمان» لمعرفة هل يعرضك للصعق والحرائق أم يحميك ويحفظ سلامتك.</p>
       </div>
     </div>
     <div class="help-step">
       <span class="step-number">٣</span>
       <div>
-        <h3>اسحب وأفلت في الحاوية (Drag and Drop)</h3>
-        <p>اسحب العنصر إلى حاويته المناسبة (زجاج، بلاستيك، خشب، صوف، معادن..). إذا أصبت ستحصل على نجمة تشجيعية، وإن أخطأت سيعطيك الخبير تلميحاً!</p>
+        <h3>اسحب وأفلت في الجدول الثنائي (Drag and Drop)</h3>
+        <p>اسحب السلوك إلى عمود "سلوك آمن وصحيح 🛡️✅" أو "سلوك خطر وخاطئ ⚠️❌". إذا أصبت ستكسب وساماً، وإن أخطأت سيعطيك كابتن أمان تنبيهاً ذكياً فورياً!</p>
       </div>
     </div>
   </div>
-  <button class="primary" data-close="help" style="margin-top:18px;width:100%">فهمت، لنبدأ الفرز! ${icon('arrow')}</button>
+  <button class="primary" data-close="help" style="margin-top:18px;width:100%">فهمت، لنبدأ تقييم الأمان فوراً! ${icon('arrow')}</button>
 </dialog>
 
 <div id="toast" class="toast" role="status" hidden></div>
 `;
 
-// تهيئة نظام الصوت لشخصية "الخبير"
-const voice = new KhabeerVoice(status => {
+// تهيئة نظام الصوت لشخصية "حارس الأمان"
+const voice = new SafetyVoice(status => {
   soundState = status;
-  $('#listen').innerHTML = icon(status === 'playing' ? 'stop' : 'sound') + (status === 'playing' ? ' إيقاف الصوت' : ' استمع إلى الخبير');
-  $('#sound-status').textContent = status === 'unavailable' ? 'تعذّر تشغيل الصوت المباشر. يمكنك قراءة توجيه الخبير أعلاه.' : '';
+  $('#listen').innerHTML = icon(status === 'playing' ? 'stop' : 'sound') + (status === 'playing' ? ' إيقاف الصوت' : ' استمع إلى حارس الأمان');
+  $('#sound-status').textContent = status === 'unavailable' ? 'تعذّر تشغيل الصوت المباشر. يمكنك قراءة توجيه حارس الأمان أعلاه.' : '';
 });
 
 function say(key, text = voiceLines[key], success = false, force = false) {
@@ -421,7 +431,7 @@ function toast(text) {
 
 function saveDiscoveries() {
   try {
-    localStorage.setItem('khabeer-materials-discoveries-v1', JSON.stringify(discoveries));
+    localStorage.setItem('captain-safety-discoveries-v1', JSON.stringify(discoveries));
   } catch { }
 }
 
@@ -446,7 +456,11 @@ function render() {
 
   // العناوين والحالات
   $('#device-title').textContent = item.name;
-  $('#device-state').textContent = isSorted ? `مصنّف (${categories[discoveries[state.id]].name})` : isPlay ? 'جاهز للفرز' : 'نتعرّف إلى الخامة';
+  $('#device-state').textContent = isSorted 
+    ? `مصنّف (${categories[discoveries[state.id]].shortName})` 
+    : isPlay 
+    ? 'جاهز للفحص والتقييم' 
+    : 'نتعرّف إلى قواعد الحماية';
   $('#device-state').classList.toggle('sorted', isSorted);
 
   // إظهار وإخفاء اللوحات
@@ -455,10 +469,13 @@ function render() {
   $('#drag-pill').hidden = !isPlay;
 
   if (!isPlay) {
-    $('#learn-material').textContent = item.material;
     $('#learn-origin').textContent = item.origin;
-    $('#learn-properties').textContent = item.properties;
+    $('#learn-danger').textContent = item.dangerLevel;
+    $('#learn-reason').textContent = item.hazardReason;
+    $('#learn-type').textContent = item.category === 'safe' ? 'سلوك آمن وصحيح 🛡️✅' : 'سلوك خطر وخاطئ ⚠️❌';
+    $('#learn-safety').textContent = item.safetyTip;
     $('#device-fact').textContent = item.fact;
+    $('#device-golden').textContent = item.goldenRule;
   }
 
   // تحديث عدادات الحاويات
@@ -471,18 +488,20 @@ function render() {
   // شريط الإنجاز العام
   const sortedCount = Object.keys(discoveries).length;
   const total = items.length;
-  $('#progress-text').textContent = `${numbers.format(sortedCount)} من ${numbers.format(total)} خامات`;
+  $('#progress-text').textContent = `${numbers.format(sortedCount)} من ${numbers.format(total)} سلوكيات`;
   $('#progress-bar').style.width = `${(sortedCount / total) * 100}%`;
 
   $('#journey-title').textContent = sortedCount === 0 
-    ? 'مهمة الفرز والتصنيف بانتظارك!' 
+    ? 'مهمة حماية الأرواح والسلامة بانتظارك!' 
     : sortedCount === total 
-    ? 'مبارك! أنت خبير خامات البيئة الأول!' 
-    : `رائع! صنّفت ${numbers.format(sortedCount)} من خامات كتابك`;
+    ? 'مبارك! أتممت تقييم وفرز جميع السلوكيات بنجاح باهر!' 
+    : `رائع! قيّمت ${numbers.format(sortedCount)} من سلوكيات كتابك`;
 
-  $('#journey-text').textContent = sortedCount 
-    ? 'تابع فرز باقي المواد لتكتمل مجموعتك في دفتر التصنيفات.' 
-    : 'كل مادة تصنفها بنجاح تضيف نجمة ذهبية إلى إنجازاتك.';
+  $('#journey-text').textContent = sortedCount === total
+    ? 'اضغط هنا لعرض تقرير كابتن أمان النهائي واستلام وسام حارس الأمان الذهبي المعتمد!'
+    : sortedCount > 0
+    ? 'تابع تصنيف باقي السلوكيات لتكتمل مجموعتك وتصبح سفيراً معتمداً للسلامة والوقاية.'
+    : 'كل تصرف تصنفه بنجاح يضيف وسام أمان جديد، ويفتح تقرير كابتن أمان النهائي.';
 }
 
 /**
@@ -506,7 +525,7 @@ async function selectItem(id, initial = false) {
       <button class="camera-card" data-open="camera">
         ${icon('camera')}
         <strong>صوّر من كتابك</strong>
-        <small>ليظهر المجسم فوراً!</small>
+        <small>ليظهر الموقف فوراً!</small>
       </button>
     `;
   }
@@ -514,25 +533,25 @@ async function selectItem(id, initial = false) {
   render();
 
   if (state.mode === 'learn') {
-    say(id + '-fact', `${item.name}: مصنوع من ${item.material}. ${item.fact}`);
+    say(id + '-fact', `${item.name}: ${item.fact} ${item.goldenRule}`);
   } else if (initial) {
     say('welcome');
   } else {
-    say(id + '-select', `اخترت ${item.name}. اسحب المجسم أو اضغط على الحاوية المناسبة لخامته.`);
+    say(id + '-select', `اخترت: ${item.name}. اسحب المجسم أو اضغط على عمود السلوك الآمن أو الخطر في الجدول.`);
   }
 
   const rev = ++modelRevision;
   if (scene) {
     $('#model-status').hidden = false;
-    $('#model-status').textContent = 'نجهّز مجسم الخامة…';
+    $('#model-status').textContent = 'نجهّز مجسم الموقف…';
     try {
       await scene.setItem(item);
       if (rev === modelRevision) {
         $('#model-status').hidden = true;
       }
-    } catch (err) {
+    } catch {
       if (rev === modelRevision) {
-        $('#model-status').textContent = 'تعذّر تجهيز المجسم. يمكنك مواصلة الفرز بالأزرار.';
+        $('#model-status').textContent = 'تعذّر تجهيز المجسم. يمكنك مواصلة التصنيف بالأزرار.';
       }
     }
   }
@@ -552,17 +571,18 @@ function setMode(mode) {
 
   if (mode === 'learn') {
     const item = byId(state.id);
-    say(state.id + '-fact', item.fact);
+    say(state.id + '-fact', `${item.name}: ${item.fact} ${item.goldenRule}`);
   } else {
     say('play', voiceLines.play);
   }
 }
 
 /**
- * تنفيذ فحص وتصنيف العنصر داخل الحاوية المستهدفة
+ * تنفيذ فحص وتصنيف السلوك داخل الحاوية المستهدفة (آمن أو خطر)
  */
 function handleClassification(itemId, targetCategoryId) {
   if (state.mode !== 'play') return;
+  state.attempts++;
   const result = testClassification(itemId, targetCategoryId);
   const binEl = $(`[data-bin="${targetCategoryId}"]`);
 
@@ -584,7 +604,15 @@ function handleClassification(itemId, targetCategoryId) {
 
     render();
     say(`${itemId}-result`, result.text, true);
-    toast(`أحسنت! أضيفت ${result.item.name} إلى ${result.target.name}`);
+    toast(`أحسنت! صنّفت (${result.item.name}) في (${result.target.name})`);
+
+    // في حال اكتمال فرز جميع السلوكيات، عرض التقرير النهائي تلقائياً بعد ثانية ونصف
+    if (Object.keys(discoveries).length === items.length) {
+      setTimeout(() => {
+        openNotebook();
+        $('#notebook').showModal();
+      }, 1400);
+    }
   } else {
     voice.playSfx('wrong');
     scene?.shakeWrong();
@@ -599,43 +627,89 @@ function handleClassification(itemId, targetCategoryId) {
 }
 
 /**
- * دفتر التصنيفات والإنجازات
+ * نافذة التقرير النهائي التفاعلي لحارس الأمان وسجل السلوكيات
  */
 function openNotebook() {
   const ids = Object.keys(discoveries);
   const content = $('#notebook-content');
+  const elapsedSeconds = Math.max(1, Math.round((Date.now() - state.startTime) / 1000));
 
-  if (ids.length) {
-    content.innerHTML = `
-      <p class="dialog-description">هذه الخامات التي صنفتها بنجاح في مختبرك. إنجازاتك محفوظة دائماً:</p>
+  const report = generateSafetyReport({
+    totalItems: ids.length || items.length,
+    attempts: Math.max(state.attempts, ids.length),
+    elapsedSeconds
+  });
+
+  content.innerHTML = `
+    <div class="captain-report-card">
+      <div class="report-header">
+        <div class="report-badge-icon">${report.accuracy >= 90 ? '🛡️🌟' : '🏅'}</div>
+        <div>
+          <h3>${report.rank}</h3>
+          <p class="report-subtitle">${report.badgeTitle}</p>
+        </div>
+      </div>
+
+      <div class="report-stats-grid">
+        <div class="stat-box">
+          <label>دقة التصنيف</label>
+          <strong>${numbers.format(report.accuracy)}%</strong>
+        </div>
+        <div class="stat-box">
+          <label>السلوكيات المصنفة</label>
+          <strong>${numbers.format(ids.length)} / ${numbers.format(items.length)}</strong>
+        </div>
+        <div class="stat-box">
+          <label>المحاولات</label>
+          <strong>${numbers.format(report.attempts)}</strong>
+        </div>
+        <div class="stat-box">
+          <label>الوقت المستغرق</label>
+          <strong>${report.timeFormatted}</strong>
+        </div>
+      </div>
+
+      <div class="report-speech-box">
+        <div class="report-pro-header">
+          ${captainAmanMascot}
+          <strong>رسالة «حارس الأمان» لتقييم وعيك وسلامتك:</strong>
+        </div>
+        <p class="report-evaluation">${report.evaluation}</p>
+        <p class="report-advice">💡 <strong>النصيحة الذهبية من كابتن أمان:</strong> ${report.advice}</p>
+      </div>
+
+      <div class="report-date"><small>تاريخ التقييم: ${report.date}</small></div>
+    </div>
+
+    <h4 style="margin:20px 0 10px;font-size:15px;color:var(--green)">السلوكيات التي صنفتها في الجدول (${numbers.format(ids.length)}):</h4>
+    ${ids.length ? `
       <div class="notebook-grid">
         ${ids.map(id => {
           const item = byId(id);
           const cat = categories[discoveries[id]];
+          const isSafe = cat.id === 'safe';
           return `
             <div class="notebook-item">
               <div class="notebook-item-icon">
-                <img src="assets/thumbnails/materials/${item.id}.svg" alt="${item.name}" style="width:40px;height:40px;object-fit:contain">
+                <img src="assets/thumbnails/safety/${item.id}.svg" alt="${item.name}" style="width:40px;height:40px;object-fit:contain">
               </div>
               <div>
                 <strong>${item.name}</strong>
-                <small>${icon('check')} في ${cat.name} (${item.material})</small>
+                <small>${isSafe ? '🛡️ سلوك آمن وصحيح' : '⚠️ سلوك خطر وخاطئ'} (${item.origin})</small>
               </div>
             </div>
           `;
         }).join('')}
       </div>
-    `;
-  } else {
-    content.innerHTML = `
+    ` : `
       <div class="empty-notebook">
-        ${expertMascot}
-        <h3>دفتر التصنيفات بانتظار أول إنجاز!</h3>
-        <p class="dialog-description">اسحب عنصراً إلى حاويته المناسبة لتسجيل اكتشافك الأول هنا.</p>
-        <button class="primary" data-close="notebook" style="margin:auto">أعود للفرز الآن</button>
+        ${captainAmanMascot}
+        <h3>بانتظار تصنيف سلوكك الأول!</h3>
+        <p class="dialog-description">اسحب سلوكاً إلى عمود السلوكيات الآمنة أو الخطرة لتسجيل إنجازك واستلام التقرير.</p>
+        <button class="primary" data-close="notebook" style="margin:auto">أعود للفحص الآن</button>
       </div>
-    `;
-  }
+    `}
+  `;
 }
 
 function openDialog(id) {
@@ -659,7 +733,7 @@ document.addEventListener('dragstart', e => {
   }
 });
 
-// استقبال الإفلات على الحاويات
+// استقبال الإفلات على الحاويات (أعمدة الجدول الثنائي: آمن وخطر)
 $$('[data-bin]').forEach(bin => {
   bin.addEventListener('dragover', e => {
     if (state.mode === 'play') {
@@ -680,7 +754,7 @@ $$('[data-bin]').forEach(bin => {
     handleClassification(droppedItemId, bin.dataset.bin);
   });
 
-  // دعم النقر المباشر (Touch / Click to place) مناسب جداً للأجهزة اللوحية
+  // دعم النقر المباشر (Touch / Click to sort) ممتاز للأجهزة اللوحية والمحمولة
   bin.addEventListener('click', () => {
     if (state.mode === 'play') {
       handleClassification(state.id, bin.dataset.bin);
@@ -725,7 +799,10 @@ document.addEventListener('click', e => {
   if (b.dataset.action === 'reset-view') scene?.resetView();
   if (b.dataset.action === 'zoom-in') scene?.zoom(0.85);
   if (b.dataset.action === 'zoom-out') scene?.zoom(1.15);
-  if (b.dataset.action === 'fact') say(state.id + '-fact', byId(state.id).fact, false, true);
+  if (b.dataset.action === 'fact') {
+    const it = byId(state.id);
+    say(state.id + '-fact', `${it.name}: ${it.fact} ${it.goldenRule}`, false, true);
+  }
 });
 
 $('#listen').onclick = () => {
@@ -744,7 +821,7 @@ $('#sound-toggle').onclick = () => {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// تحويل الصوت إلى نص وسؤال الخبير (Web Speech API)
+// تحويل الصوت إلى نص وسؤال كابتن أمان (Web Speech API)
 // ═══════════════════════════════════════════════════════════════════════════
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -761,7 +838,7 @@ function stopRecording() {
     micBtn.innerHTML = icon('mic');
   }
   const input = $('#ask-input');
-  if (input) input.placeholder = 'اسأل الخبير عن خصائص المادة…';
+  if (input) input.placeholder = 'اسأل كابتن أمان عن الصعق، البلل، الأسلاك، المقابس…';
 }
 
 function startRecording() {
@@ -790,7 +867,7 @@ function startRecording() {
           micBtn.innerHTML = icon('stop');
         }
         const input = $('#ask-input');
-        if (input) input.placeholder = 'جاري الاستماع... تفضل بالسؤال 🎙️';
+        if (input) input.placeholder = 'جاري الاستماع... تفضل بسؤالك لحارس الأمان 🎙️';
       };
 
       speechRec.onresult = event => {
@@ -874,10 +951,10 @@ $('#start-camera').onclick = async () => {
     $('#camera-video').hidden = false;
     $('#capture').hidden = false;
     $('#start-camera').hidden = true;
-    $('#camera-status').textContent = 'وجّه الكاميرا نحو صورة الخامة في كتاب العلوم، ثم اضغط التقط الصورة.';
+    $('#camera-status').textContent = 'وجّه الكاميرا نحو صورة السلوك في كتاب العلوم (صفحة ٨٩ أو ٩٠)، ثم اضغط التقط الصورة.';
   } catch {
     if (rev !== photoRevision) return;
-    $('#camera-status').textContent = 'تعذّر فتح الكاميرا. يمكنك اختيار صورة محفوظة من جهازك أو اختيار العنصر من القائمة.';
+    $('#camera-status').textContent = 'تعذّر فتح الكاميرا. يمكنك اختيار صورة محفوظة من جهازك أو اختيار السلوك من القائمة.';
   }
 };
 
@@ -908,7 +985,7 @@ async function processPhoto(url) {
   $('#photo-preview').hidden = false;
   $('#camera-result').hidden = true;
   $('#confirmed-item').value = '';
-  $('#camera-status').textContent = 'الخبير يبحث عن الصورة في كتاب العلوم ويطابقها…';
+  $('#camera-status').textContent = '«حارس الأمان» يفحص الصورة ويطابقها مع كتاب العلوم…';
 
   try {
     await $('#photo-preview').decode();
@@ -918,15 +995,15 @@ async function processPhoto(url) {
 
     $('#camera-status').textContent = '';
     if (result) {
-      $('#recognition-text').textContent = `رائع! يتعرف «الخبير» على الصورة: إنها ${byId(result.id).name}. يمكنك تأكيدها أو تغييرها:`;
+      $('#recognition-text').textContent = `رائع! يتعرف «حارس الأمان» على الصورة: إنها ${byId(result.id).name}. يمكنك تأكيدها أو تغييرها:`;
       $('#confirmed-item').value = result.id;
     } else {
-      $('#recognition-text').textContent = 'لم يتأكد الخبير من المطابقة تماماً. اختر اسم العنصر من القائمة لنستكشفه معاً:';
+      $('#recognition-text').textContent = 'لم يتأكد حارس الأمان من المطابقة تماماً. اختر اسم السلوك من القائمة لنفحصه معاً:';
     }
   } catch {
     if (rev !== photoRevision || !$('#camera').open) return;
     $('#camera-status').textContent = '';
-    $('#recognition-text').textContent = 'تم تجهيز الصورة. اختر اسم العنصر لفتحه على طاولة الاستكشاف:';
+    $('#recognition-text').textContent = 'تم تجهيز الصورة. اختر اسم السلوك لفتحه على طاولة الفحص:';
   }
 
   if (rev === photoRevision) $('#camera-result').hidden = false;
@@ -935,7 +1012,7 @@ async function processPhoto(url) {
 $('#confirm-photo').onclick = async () => {
   const id = $('#confirmed-item').value;
   if (!id) {
-    toast('اختر اسم العنصر أولاً.');
+    toast('اختر اسم السلوك أولاً.');
     $('#confirmed-item').focus();
     return;
   }
@@ -958,23 +1035,24 @@ say('welcome');
 
 // تهيئة مشهد Three.js
 try {
-  const { MaterialsScene } = await import('./scene.js');
-  scene = new MaterialsScene($('#scene'), {
+  const { SafetyScene } = await import('./scene.js');
+  scene = new SafetyScene($('#scene'), {
     error: msg => toast(msg)
   });
 } catch (err) {
   console.warn('3D not loaded', err);
-  $('#model-status').textContent = 'المجسم الثلاثي الأبعاد غير مدعوم في هذا المتصفح. يمكنك إتمام الفرز عبر البطاقات والأزرار.';
+  $('#model-status').textContent = 'المجسم الثلاثي الأبعاد غير مدعوم في هذا المتصفح. يمكنك إتمام التصنيف عبر البطاقات والأزرار.';
 }
 
 await selectItem(state.id, true);
 
 // نافذة الفحص العامة للمتصفح
-window.materialsLab = {
+window.safetyLab = {
   state,
   get scene() { return scene; },
   selectItem,
   setMode,
   handleClassification,
-  get discoveries() { return discoveries; }
+  get discoveries() { return discoveries; },
+  generateSafetyReport
 };

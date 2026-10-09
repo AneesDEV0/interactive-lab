@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120">
+  <rect x="0" y="0" width="160" height="120" rx="14" fill="#fff5f5"/>
+  <!-- حافة حوض الاستحمام أو المغسلة مليئة بالماء -->
+  <path d="M15,65 C15,95 70,105 105,95 L105,65 Z" fill="#ebf8ff" stroke="#bee3f8" stroke-width="2"/>
+  <ellipse cx="60" cy="68" rx="42" ry="10" fill="#63b3ed" fill-opacity="0.7"/>
+  <!-- مجفف شعر كهربائي موضوع على الحافة يوشك على السقوط -->
+  <g transform="rotate(35 85 45)">
+    <!-- فوهة المجفف -->
+    <rect x="65" y="40" width="26" height="16" rx="3" fill="#e53e3e"/>
+    <rect x="85" y="36" width="30" height="24" rx="8" fill="#c53030"/>
+    <!-- مقبض المجفف -->
+    <rect x="95" y="60" width="12" height="26" rx="4" fill="#9b2c2c"/>
+    <!-- سلك المجفف متصل بالكهرباء ومغمور طرفه -->
+    <path d="M101,86 C105,95 85,98 65,85" fill="none" stroke="#2d3748" stroke-width="3"/>
+  </g>
+  <!-- تموجات مائية وشرارة خطر صعق الماء -->
+  <polygon points="58,68 64,60 67,69 75,65 69,74 72,80 63,75 60,82" fill="#f6e05e" stroke="#e53e3e" stroke-width="1"/>
+  <!-- علامة خطر الموت -->
+  <circle cx="140" cy="22" r="12" fill="#e53e3e"/>
+  <text x="140" y="26" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">⚡</text>
+</svg>

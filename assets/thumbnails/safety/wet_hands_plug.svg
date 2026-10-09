@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120">
+  <rect x="0" y="0" width="160" height="120" rx="14" fill="#fff5f5"/>
+  <!-- مقبس جداري أبيض -->
+  <rect x="95" y="30" width="50" height="60" rx="8" fill="#ffffff" stroke="#cbd5e0" stroke-width="2"/>
+  <circle cx="112" cy="58" r="4" fill="#4a5568"/>
+  <circle cx="128" cy="58" r="4" fill="#4a5568"/>
+  <!-- يد ممتدة ومبللة بالماء تقترب من القابس -->
+  <g transform="translate(15, 30)">
+    <!-- الذراع واليد -->
+    <path d="M0,45 Q35,42 60,35 Q75,32 82,34 Q86,37 78,42 Q86,42 88,46 Q84,49 76,49 Q84,52 82,56 Q75,56 65,54 Q50,60 0,60 Z" fill="#fbd38d"/>
+    <!-- قطرات ماء واضحة تسيل من الأصابع -->
+    <path d="M78,38 C78,38 75,44 75,46 A2,2 0 0,0 79,46 C79,44 78,38 78,38 Z" fill="#3182ce"/>
+    <path d="M86,48 C86,48 83,55 83,57 A2.5,2.5 0 0,0 88,57 C88,55 86,48 86,48 Z" fill="#4299e1"/>
+    <path d="M80,58 C80,58 77,65 77,68 A3,3 0 0,0 83,68 C83,65 80,58 80,58 Z" fill="#63b3ed"/>
+    <path d="M65,58 C65,58 63,64 63,66 A2,2 0 0,0 67,66 C67,64 65,58 65,58 Z" fill="#3182ce"/>
+  </g>
+  <!-- صاعقة كهربائية عند التلامس المائي -->
+  <polygon points="102,48 106,56 112,58 105,62 108,70 100,64 94,66 98,58" fill="#ecc94b" stroke="#e53e3e" stroke-width="1.2"/>
+  <circle cx="25" cy="22" r="12" fill="#e53e3e"/>
+  <text x="25" y="26" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle">❌</text>
+</svg>

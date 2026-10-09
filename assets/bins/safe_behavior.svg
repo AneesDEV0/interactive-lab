@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" width="200" height="180">
+  <defs>
+    <!-- تدرجات لونية ثلاثية الأبعاد لصندوق السلوك الآمن -->
+    <linearGradient id="safeTopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#48bb78" />
+      <stop offset="100%" stop-color="#2f855a" />
+    </linearGradient>
+    <linearGradient id="safeFrontGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38a169" />
+      <stop offset="100%" stop-color="#1c4532" />
+    </linearGradient>
+    <linearGradient id="safeSideGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#276749" />
+      <stop offset="100%" stop-color="#143224" />
+    </linearGradient>
+    <linearGradient id="safeShieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9ae6b4" />
+      <stop offset="50%" stop-color="#38a169" />
+      <stop offset="100%" stop-color="#22543d" />
+    </linearGradient>
+    <filter id="safeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#38a169" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- ظل الصندوق على الأرض -->
+  <ellipse cx="100" cy="162" rx="72" ry="14" fill="#000000" fill-opacity="0.16" />
+
+  <!-- جسم الحاوية ثلاثي الأبعاد -->
+  <g filter="url(#safeGlow)">
+    <!-- الوجه الجانبي الأيسر -->
+    <polygon points="34,70 18,124 100,158 100,98" fill="url(#safeSideGrad)" />
+    <!-- الوجه الأمامي الأيمن -->
+    <polygon points="100,98 100,158 182,124 166,70" fill="url(#safeFrontGrad)" />
+    <!-- الوجه العلوي (فتحة الصندوق) -->
+    <polygon points="100,42 166,70 100,98 34,70" fill="url(#safeTopGrad)" stroke="#68d391" stroke-width="2" />
+  </g>
+
+  <!-- شريط زخرفي ناصع حول الحاوية -->
+  <polygon points="18,124 100,158 100,146 22,114" fill="#68d391" fill-opacity="0.4" />
+  <polygon points="100,158 182,124 178,114 100,146" fill="#9ae6b4" fill-opacity="0.5" />
+
+  <!-- درع الأمان الأخضر المشرق في المقدمة -->
+  <g transform="translate(100, 95)">
+    <!-- هالة الدرع -->
+    <circle cx="0" cy="0" r="32" fill="#e6fffa" fill-opacity="0.9" stroke="#38a169" stroke-width="2" />
+    <!-- الدرع الحامي -->
+    <path d="M-18,-14 C-18,-14 0,-22 0,-22 C0,-22 18,-14 18,-14 C18,12 0,26 0,26 C0,26 -18,12 -18,-14 Z" 
+          fill="url(#safeShieldGrad)" stroke="#ffffff" stroke-width="2.5" />
+    <!-- علامة الصح البيضاء البراقة -->
+    <path d="M-9,2 L-2,9 L10,-5" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- بريق النجمة الذهبية -->
+    <polygon points="14,-14 16,-10 20,-8 16,-6 14,-2 12,-6 8,-8 12,-10" fill="#f6e05e" />
+  </g>
+
+  <!-- نجوم وشارات أمان محيطة -->
+  <circle cx="48" cy="46" r="3" fill="#68d391" />
+  <circle cx="152" cy="44" r="3.5" fill="#9ae6b4" />
+</svg>

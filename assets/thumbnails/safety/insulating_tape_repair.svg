@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120">
+  <rect x="0" y="0" width="160" height="120" rx="14" fill="#f0fff4"/>
+  <!-- سلك كهربائي سليم ومعزول -->
+  <path d="M15,60 L145,60" fill="none" stroke="#4299e1" stroke-width="10" stroke-linecap="round"/>
+  <!-- بكرة شريط العزل اللاصق الأسود تغلف وتلف موضع الصيانة -->
+  <rect x="65" y="48" width="30" height="24" rx="4" fill="#1a202c" stroke="#2d3748" stroke-width="1.5"/>
+  <!-- لفات الشريط العازل المتقاطعة المحكمة -->
+  <line x1="72" y1="48" x2="72" y2="72" stroke="#4a5568" stroke-width="1.5"/>
+  <line x1="80" y1="48" x2="80" y2="72" stroke="#4a5568" stroke-width="1.5"/>
+  <line x1="88" y1="48" x2="88" y2="72" stroke="#4a5568" stroke-width="1.5"/>
+  <!-- بكرة الشريط اللاصق ذات الفتحة الدائرية -->
+  <g transform="translate(100, 32)">
+    <circle cx="14" cy="14" r="14" fill="#1a202c" stroke="#4a5568" stroke-width="2"/>
+    <circle cx="14" cy="14" r="7" fill="#f7fafc"/>
+  </g>
+  <!-- درع أمان تام -->
+  <circle cx="134" cy="24" r="14" fill="#38a169"/>
+  <path d="M127,24 L132,29 L142,19" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
