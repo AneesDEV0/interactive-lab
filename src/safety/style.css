@@ -51,11 +51,11 @@ svg { display: block; }
 .shell { display: grid; grid-template-columns: 218px minmax(0, 1fr); min-height: 100vh; }
 .sidebar { background: white; border-left: 1px solid var(--line); padding: 30px 20px; display: flex; flex-direction: column; gap: 28px; position: sticky; top: 0; height: 100vh; z-index: 5; }
 
-.brand { display: flex; align-items: center; gap: 10px; }
-.brand-symbol { display: grid; place-items: center; width: 44px; height: 48px; border-radius: 15px; background: var(--green); color: var(--yellow); transform: rotate(5deg); }
-.brand-symbol .icon { width: 26px; height: 26px; transform: rotate(-5deg); fill: currentColor; stroke-width: 1.2; }
-.brand strong { font-size: 21px; display: block; line-height: 1.2; letter-spacing: -0.5px; }
-.brand small { color: var(--muted); font-size: 11px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand-symbol { display: grid; place-items: center; width: 42px; height: 44px; border-radius: 14px; background: var(--green); color: var(--yellow); transform: rotate(5deg); flex-shrink: 0; }
+.brand-symbol .icon { width: 24px; height: 24px; transform: rotate(-5deg); fill: currentColor; stroke-width: 1.2; }
+.brand strong { font-size: 19px; display: block; line-height: 1.25; letter-spacing: -0.5px; margin: 0; }
+.brand small { color: var(--muted); font-size: 11px; display: block; line-height: 1.2; margin: 0; }
 
 .nav-label { font-size: 12px; color: #a0aec0; margin: 0 10px 10px; font-weight: 700; }
 .nav-stack { display: grid; gap: 6px; }
@@ -72,7 +72,7 @@ svg { display: block; }
 .side-footer .icon { width: 13px; height: 13px; color: #e53e3e; }
 
 .body-area { min-width: 0; position: relative; }
-.topbar { position: sticky; top: 0; z-index: 1000; height: 80px; background: #ffffffeb; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 38px; gap: 20px; }
+.topbar { position: sticky; top: 0; z-index: 1000; height: 74px; background: #ffffff; border-bottom: 1.5px solid var(--line); box-shadow: 0 2px 10px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; gap: 16px; }
 .breadcrumb { display: flex; align-items: center; gap: 11px; font-size: 13px; color: var(--muted); }
 .breadcrumb .icon { width: 14px; height: 14px; }
 .breadcrumb strong { color: var(--ink); font-weight: 700; }
@@ -103,27 +103,27 @@ h1 span { color: var(--green); text-decoration: underline; text-decoration-color
 .progress-track i { display: block; background: #276749; height: 100%; border-radius: 5px; transition: width 0.35s ease; }
 
 /* ══ رف السلوكيات والمواقف ══ */
-.device-section { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 22px; margin-bottom: 20px; }
-.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-.section-heading h2 { font-size: 16px; display: flex; align-items: center; gap: 10px; }
-.step-number { width: 24px; height: 24px; background: #e6fffa; color: var(--green); font-size: 13px; border-radius: 8px; display: inline-grid; place-items: center; font-weight: 700; }
+.device-section { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 20px; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.section-heading h2 { font-size: 15px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0; }
+.step-number { width: 24px; height: 24px; background: #e6fffa; color: var(--green); font-size: 13px; border-radius: 8px; display: inline-grid; place-items: center; font-weight: 700; flex-shrink: 0; }
 .section-heading small { color: var(--muted); font-size: 12px; font-weight: 400; margin-inline-start: 4px; }
-.text-button { display: flex; align-items: center; gap: 6px; color: var(--green); font-size: 12.5px; min-height: 38px; }
+.text-button { display: flex; align-items: center; gap: 6px; color: var(--green); font-size: 12.5px; font-weight: 700; min-height: 36px; flex-shrink: 0; }
 .text-button .icon { width: 16px; height: 16px; }
 
-.devices-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 125px), 1fr)); gap: 11px; }
-.device-card { position: relative; border: 1.5px solid transparent; border-radius: 15px; background: var(--card, #f7fafc); padding: 7px 8px 10px; min-width: 0; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s; cursor: grab; user-select: none; }
+.devices-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); gap: 12px; }
+.device-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; border: 1.5px solid transparent; border-radius: 16px; background: var(--card, #f7fafc); padding: 10px 8px 12px; min-width: 0; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s; cursor: grab; user-select: none; }
 .device-card:hover { transform: translateY(-3px); }
 .device-card:active { cursor: grabbing; }
-.device-card.selected { border-color: var(--emerald); box-shadow: 0 0 0 3px #c6f6d5; }
-.device-card-thumb { width: 100%; height: 72px; object-fit: contain; margin: 2px auto 4px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.08)); transition: transform 0.2s ease; }
+.device-card.selected { border-color: var(--emerald); box-shadow: 0 0 0 3px #c6f6d5; background: #ffffff; }
+.device-card-thumb { width: 100%; height: 68px; object-fit: contain; margin: 2px auto 6px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.08)); transition: transform 0.2s ease; flex-shrink: 0; }
 .device-card:hover .device-card-thumb { transform: scale(1.06); }
-.device-card span { font-weight: 700; font-size: 12px; display: -webkit-box; text-align: center; white-space: normal; overflow: hidden; text-overflow: ellipsis; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.4; min-height: 2.8em; }
-.device-card small { display: -webkit-box; text-align: center; font-size: 10px; color: var(--muted); margin-top: 2px; white-space: normal; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.35; min-height: 2.7em; }
-.device-check { display: none; position: absolute; top: 6px; right: 6px; color: white; background: var(--green); border-radius: 50%; padding: 3px; }
+.device-card span { font-weight: 700; font-size: 12px; color: var(--ink); line-height: 1.4; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; min-height: 2.8em; width: 100%; margin: 2px 0 4px; }
+.device-card small { font-size: 10px; color: var(--muted); line-height: 1.35; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; width: 100%; margin-top: auto; }
+.device-check { display: none; position: absolute; top: 6px; right: 6px; color: white; background: var(--green); border-radius: 50%; padding: 3px; z-index: 2; }
 .device-check .icon { width: 10px; height: 10px; }
 .selected .device-check { display: block; }
-.device-sorted-badge { position: absolute; top: 6px; left: 6px; background: #c6f6d5; color: #22543d; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 8px; }
+.device-sorted-badge { position: absolute; top: 6px; left: 6px; background: #c6f6d5; color: #22543d; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 8px; z-index: 2; }
 
 .camera-card { border: 1.5px dashed #a0aec0; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: #f7fafc; color: var(--green); min-height: 110px; transition: background 0.18s; }
 .camera-card:hover { background: #e6fffa; }
@@ -395,102 +395,134 @@ dialog::backdrop { background: rgba(26,32,44,0.5); backdrop-filter: blur(5px); }
 [hidden] { display: none !important; }
 
 /* ══ التجاوبية Responsive ══ */
+/* ══ 1. الشاشات المحمولة واللابتوب الصغير (أقل من 1190px) ══ */
 @media (max-width: 1190px) {
   .shell { grid-template-columns: 180px minmax(0, 1fr); }
   .sidebar { padding: 24px 14px; }
-  .main { padding: 22px; }
+  .main { padding: 20px; }
   .devices-row { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .camera-card { grid-column: 1 / -1; min-height: 48px; flex-direction: row; gap: 10px; }
   .experiment { grid-template-columns: minmax(0, 1fr) 250px; gap: 16px; }
 }
 
+/* ══ 2. الأجهزة اللوحية والتابلت (أقل من 900px) ══ */
 @media (max-width: 900px) {
   .shell { grid-template-columns: 1fr; }
   .sidebar { display: none; }
-  .topbar { height: 70px; }
+  .topbar { height: 68px; padding: 0 20px; }
   .mobile-brand { display: flex; }
   .breadcrumb { display: none; }
   .learner { display: none; }
-  .main { padding: 20px; }
-  .experiment { grid-template-columns: 1fr; }
+  .main { padding: 18px 16px; }
+  .experiment { grid-template-columns: 1fr; gap: 18px; }
+  .devices-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
+/* ══ 3. الشاشات المتوسطة والهواتف الكبيرة (أقل من 650px) ══ */
 @media (max-width: 650px) {
-  .main { padding: 16px 12px; }
-  .topbar { padding: 0 16px; height: 66px; }
+  .topbar { height: 64px; padding: 0 12px; gap: 10px; }
+  .mobile-brand .brand-symbol { width: 36px; height: 38px; border-radius: 12px; }
+  .mobile-brand strong { font-size: 16px; }
+  .mobile-brand small { font-size: 9.5px; }
+  .top-actions { gap: 6px; }
+  .top-actions > .sound-button > span { display: none; }
+  .top-actions > .sound-button { padding: 0 10px; min-width: 38px; justify-content: center; }
+  .activity-toggle-btn { padding: 6px 10px; font-size: 12px; }
+  
+  .main { padding: 14px 12px; }
+  .intro { flex-direction: column; align-items: stretch; gap: 12px; }
   .intro h1 { font-size: 24px; }
-  .devices-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
-  .device-card { padding: 7px 6px 9px; }
-  .device-card-thumb { height: 64px; }
+  .progress-chip { width: 100%; justify-content: flex-start; }
+  
+  .devices-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .device-card { padding: 8px 6px 10px; }
+  .device-card-thumb { height: 58px; }
   .device-card span { font-size: 11.5px; }
   .device-card small { font-size: 9.5px; }
-  .bins-grid { grid-template-columns: 1fr; }
-  .stage { height: 280px; margin: 0 8px; }
-  .notebook-grid { grid-template-columns: 1fr; }
+
+  .stage { height: 270px; margin: 0 4px; }
+  .bins-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .bin-card { min-height: 105px; padding: 10px 8px; }
+  .bin-3d-visual { width: 60px; height: 54px; }
+  .bin-card strong { font-size: 13.5px; }
+  .bin-card small { font-size: 10.5px; }
+
+  .learn-grid { grid-template-columns: 1fr; }
   .report-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .notebook-grid { grid-template-columns: 1fr; }
 }
 
+/* ══ 4. الهواتف الذكية الشائعة (أقل من 480px: iPhone / Galaxy / Pixel) ══ */
 @media (max-width: 480px) {
   body { overflow-x: clip; }
-  .intro { flex-direction: column; align-items: stretch; gap: 10px; }
-  .intro-copy { min-width: 0; }
-  .progress-chip { width: 100%; max-width: 100%; justify-content: flex-start; }
-  .topbar { height: 60px; padding-inline: 8px; gap: 6px; }
-  .mobile-brand { flex: 1 1 auto; min-width: 0; gap: 6px; }
-  .mobile-brand .brand-symbol { width: 36px; height: 38px; flex: 0 0 36px; }
-  .mobile-brand strong { font-size: 16px; white-space: nowrap; }
-  .mobile-brand small { font-size: 9px; }
-  .top-actions { flex: 0 0 auto; gap: 4px; }
-  .activity-toggle-btn { height: 38px; min-width: 0; padding: 0 9px; justify-content: center; gap: 5px; font-size: 12px; }
-  .activity-toggle-btn > .icon { width: 16px; height: 16px; }
+  .topbar { height: 60px; padding: 0 10px; gap: 6px; }
+  .mobile-brand { gap: 6px; }
+  .mobile-brand .brand-symbol { width: 34px; height: 34px; border-radius: 10px; }
+  .mobile-brand strong { font-size: 15px; }
+  .mobile-brand small { display: none; }
+  
+  .activity-toggle-btn { height: 36px; padding: 0 8px; gap: 4px; font-size: 11.5px; }
   .activity-toggle-btn .toggle-arrow { display: none; }
-  .top-actions > .sound-button { width: 34px; height: 38px; min-width: 34px; min-height: 38px; padding: 0; justify-content: center; }
-  .top-actions > .sound-button > span { display: none; }
-  .activity-dropdown { position: fixed; top: 60px; left: 8px; right: 8px; width: auto; max-width: none; max-height: calc(100vh - 72px); overflow-y: auto; }
-  .lab-top { flex-wrap: wrap; gap: 8px; padding-inline: 12px; }
-  .lab-top > div:first-child { flex: 1 1 100%; min-width: 0; max-width: 100%; }
-  .lab-top h2 { flex-wrap: wrap; }
-  .lab-top small { margin-inline-start: 32px; }
+  .activity-dropdown { position: fixed; top: 60px; left: 8px; right: 8px; width: auto; max-width: none; }
+  
+  .main { padding: 12px 10px; }
+  .intro h1 { font-size: 22px; line-height: 1.35; }
+  .eyebrow { font-size: 11px; flex-wrap: wrap; }
+  .intro-copy > p { font-size: 12.5px; }
+
+  /* عرض بطاقات الرف بنظام عمودين رحبين لمنع أي انضغاط في النصوص */
+  .devices-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .device-card { padding: 10px 8px; }
+  .device-card-thumb { height: 64px; }
+  .device-card span { font-size: 12px; min-height: 2.7em; }
+  .device-card small { font-size: 10px; }
+
+  .section-heading h2 { font-size: 14px; }
+  .text-button { font-size: 11.5px; }
+
+  .lab-top { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px; }
+  .lab-top small { margin: 2px 0 0; }
   .mode-switch { width: 100%; }
-  .mode-switch button { flex: 1; min-width: 0; padding-inline: 6px; white-space: normal; text-align: center; }
-  .learn-grid { grid-template-columns: 1fr; }
+  .mode-switch button { flex: 1; padding: 8px 4px; font-size: 12px; }
+
+  .stage { height: 250px; }
+  .device-title { font-size: 16px; bottom: 38px; }
+  .drag-prompt-pill { font-size: 10.5px; padding: 5px 10px; }
+
+  .bins-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .bin-card { min-height: 95px; padding: 8px 6px; }
+  .bin-3d-visual { width: 50px; height: 46px; }
+  .bin-card strong { font-size: 12.5px; }
+  .bin-card small { font-size: 9.5px; }
+  .bin-counter { font-size: 10px; padding: 1px 6px; top: 6px; right: 6px; }
+
+  .guide-mascot .mascot { width: 68px; height: 74px; }
+  .guide-mascot h3 { font-size: 16px; }
+  .guide-bubble { padding: 12px 10px; min-height: 100px; }
+  .guide-bubble p { font-size: 13.5px; }
+
+  .ask-form input { font-size: 11px; padding: 8px 8px; }
+  .ask-form button { width: 34px; }
+
+  .journey { padding: 12px 14px; gap: 8px; flex-direction: column; text-align: center; }
+  .journey > .icon { margin: auto; }
+  .journey button { margin: 6px auto 0; width: 100%; justify-content: center; }
 }
 
-@media (max-width: 320px) {
-  .main { padding-inline: 8px; }
-  .intro { flex-direction: column; align-items: stretch; gap: 8px; }
-  .intro-copy { width: 100%; min-width: 0; text-align: center; }
-  .eyebrow { justify-content: center; flex-wrap: wrap; line-height: 1.5; }
-  .intro h1 { font-size: 22px; line-height: 1.45; text-wrap: balance; }
-  .intro-copy > p { font-size: 13px; line-height: 1.75; }
-  .progress-chip { width: 100%; max-width: 100%; justify-content: flex-start; }
-  .section-heading { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
-  .section-heading h2 { min-width: 0; }
-  .text-button { justify-self: end; }
-  .lab-top { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px 10px; }
-  .lab-top > div:first-child { width: 100%; min-width: 0; max-width: 100%; text-align: center; }
-  .lab-top h2 { justify-content: center; flex-wrap: wrap; font-size: 14px; line-height: 1.5; }
-  .lab-top small { margin: 3px 0 0; line-height: 1.5; }
-  .mode-switch { width: 100%; }
-  .mode-switch button { flex: 1; min-width: 0; min-height: 40px; padding-inline: 5px; gap: 4px; font-size: 11px; white-space: normal; text-align: center; }
-  .panel-heading { flex-wrap: wrap; gap: 6px; }
-  .panel-heading small { width: 100%; margin-inline-start: 33px; }
-  .journey { min-width: 0; flex-wrap: wrap; }
-  .journey button { min-width: 0; flex: 1; justify-content: center; padding-inline: 4px; font-size: 10px; white-space: normal; line-height: 1.2; }
-}
-
-@media (max-width: 280px) {
-  .topbar { height: auto; min-height: 88px; padding: 7px 8px; gap: 4px; flex-wrap: wrap; }
-  .mobile-brand { flex: 1 1 100%; min-height: 36px; }
-  .mobile-brand .brand-symbol { width: 32px; height: 34px; flex-basis: 32px; }
-  .mobile-brand strong { font-size: 14px; }
-  .mobile-brand small { font-size: 9px; }
-  .top-actions { width: 100%; justify-content: space-between; gap: 8px; }
-  .activity-toggle-btn { min-width: 84px; padding-inline: 10px; font-size: 12px; }
-  .top-actions > .sound-button { width: 36px; min-width: 36px; }
+/* ══ 5. الهواتف الصغيرة جداً (أقل من 340px: مثل Galaxy Fold الخارجي وiPhone 5) ══ */
+@media (max-width: 340px) {
+  .topbar { padding: 0 6px; gap: 4px; height: 56px; }
+  .mobile-brand strong { font-size: 13.5px; }
+  .activity-toggle-btn { padding: 0 6px; font-size: 11px; }
+  .activity-toggle-btn span { display: none; }
   .top-actions > button[data-open="help"] { display: none; }
-  .devices-row { grid-template-columns: repeat(auto-fit, minmax(min(100%, 76px), 1fr)); gap: 8px; }
-  .device-card-thumb { height: 56px; }
-  .device-card span { font-size: 11px; }
-  .device-card small { font-size: 9px; }
+  
+  .devices-row { grid-template-columns: 1fr; }
+  .device-card { flex-direction: row; text-align: right; gap: 10px; padding: 8px 12px; }
+  .device-card-thumb { width: 48px; height: 48px; margin: 0; }
+  .device-card span { text-align: right; min-height: auto; }
+  .device-card small { text-align: right; }
+  
+  .bins-grid { grid-template-columns: 1fr; }
+  .stage { height: 230px; }
 }

@@ -611,6 +611,12 @@ function handleClassification(itemId, targetCategoryId) {
       setTimeout(() => {
         openNotebook();
         $('#notebook').showModal();
+        const rep = generateSafetyReport({
+          totalItems: items.length,
+          attempts: state.attempts,
+          elapsedSeconds: Math.round((Date.now() - state.startTime) / 1000)
+        });
+        say('final-complete', `مبارك يا بطل السلامة! لقد أتممت تقييم وفرز جميع السلوكيات وحصلت على رتبة ${rep.rank}. تفضل بقراءة تقييمك النهائي.`, true, true);
       }, 1400);
     }
   } else {
@@ -713,8 +719,18 @@ function openNotebook() {
 }
 
 function openDialog(id) {
-  if (id === 'notebook') openNotebook();
-  if (id === 'camera') say('camera');
+  if (id === 'notebook') {
+    openNotebook();
+    const count = Object.keys(discoveries).length;
+    if (count === items.length) {
+      say('report-done', 'مبارك يا بطل! هذا تقريرك النهائي الشامل ورتبتك المعتمدة في الأمان والسلامة الكهربائية.');
+    } else {
+      say('report-progress', `أهلاً بك في سجل الأمان! لقد صنفت حتى الآن ${numbers.format(count)} من أصل ${numbers.format(items.length)} سلوكيات.`);
+    }
+  }
+  if (id === 'camera') say('camera', voiceLines.camera);
+  if (id === 'library') say('library', 'هذه قائمة بجميع سلوكيات الأمان والسلامة في كتاب العلوم. اختر أي سلوك لمشاهدته وتصنيفه.');
+  if (id === 'help') say('help', voiceLines.help);
   $('#' + id).showModal();
 }
 
@@ -796,9 +812,19 @@ document.addEventListener('click', e => {
     say(a.key, a.text);
   }
 
-  if (b.dataset.action === 'reset-view') scene?.resetView();
-  if (b.dataset.action === 'zoom-in') scene?.zoom(0.85);
-  if (b.dataset.action === 'zoom-out') scene?.zoom(1.15);
+  if (b.dataset.action === 'reset-view') {
+    scene?.resetView();
+    voice.playSfx('pop');
+    toast('تمت إعادة زاوية العرض.');
+  }
+  if (b.dataset.action === 'zoom-in') {
+    scene?.zoom(0.85);
+    voice.playSfx('pop');
+  }
+  if (b.dataset.action === 'zoom-out') {
+    scene?.zoom(1.15);
+    voice.playSfx('pop');
+  }
   if (b.dataset.action === 'fact') {
     const it = byId(state.id);
     say(state.id + '-fact', `${it.name}: ${it.fact} ${it.goldenRule}`, false, true);
@@ -1018,6 +1044,8 @@ $('#confirm-photo').onclick = async () => {
   }
   $('#camera').close();
   await selectItem(id);
+  const it = byId(id);
+  say('camera-confirmed', `رائع! فتحنا موقف: (${it.name}). هل تعتقد أنه سلوك آمن يحمينا، أم خطر يسبب الصعق؟`);
   const stage = $('#stage');
   stage.scrollIntoView({ block: 'center', behavior: 'smooth' });
 };
