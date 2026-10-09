@@ -142,14 +142,10 @@ $('#app').innerHTML = `
               <div><strong>نشاط ٢: فرز خامات البيئة</strong><small>محطة التصنيف مع «الخبير»</small></div>
             </a>
             <div class="dropdown-divider"></div>
-            <div class="dropdown-item disabled">
+            <a href="conductors.html" class="dropdown-item">
               <span class="dropdown-icon">💡</span>
-              <div><strong>نشاط ٣: الدارة الكهربائية</strong><small>قريباً</small></div>
-            </div>
-            <div class="dropdown-item disabled">
-              <span class="dropdown-icon">🔌</span>
-              <div><strong>نشاط ٤: الموصلات والعوازل</strong><small>قريباً</small></div>
-            </div>
+              <div><strong>نشاط ٤: الموصلات والعوازل</strong><small>محطة الفحص مع «البروفيسور»</small></div>
+            </a>
             <div class="dropdown-item disabled">
               <span class="dropdown-icon">🧲</span>
               <div><strong>نشاط ٥: قطبا المغناطيس</strong><small>قريباً</small></div>
