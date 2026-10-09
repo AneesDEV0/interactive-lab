@@ -85,6 +85,8 @@ await sendSession('Emulation.setDeviceMetricsOverride', {
 });
 
 const itemsToCapture = [
+  'overloaded_socket',
+  'exposed_damaged_wire',
   'wet_hands_plug',
   'inserting_scissors_socket',
   'kids_playing_cords',
@@ -97,6 +99,8 @@ for (const itemId of itemsToCapture) {
   console.log(`Loading and capturing item: ${itemId}`);
   await sendSession('Page.navigate', { url: `http://127.0.0.1:4173/safety.html?item=${itemId}` });
   await new Promise(r => setTimeout(r, 1200));
+  await sendSession('Runtime.evaluate', { expression: "document.getElementById('stage').scrollIntoView({ behavior: 'instant', block: 'center' })" });
+  await new Promise(r => setTimeout(r, 400));
 
   const screenshot = await sendSession('Page.captureScreenshot', { format: 'png' });
   await writeFile(`docs/screenshots/safety_models/${itemId}.png`, Buffer.from(screenshot.data, 'base64'));

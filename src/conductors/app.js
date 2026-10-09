@@ -175,7 +175,7 @@ $('#app').innerHTML = `
       <!-- مقدمة النشاط -->
       <section class="intro">
         <div class="intro-copy">
-          <div class="eyebrow">${icon('sparkles')} الصف الرابع الأساسي · دارة فحص المواد والمصباح (ص ٦٧)</div>
+          <div class="eyebrow">${icon('sparkles')} الصف الرابع الأساسي · دارة فحص المواد والمصباح</div>
           <h1>محطة تصنيف <span>المواد الموصلة والعازلة</span></h1>
           <p>اسحب المادة إلى عمود الموصلات أو العوازل، أو صوّرها من كتابك واستكشف أسرار سريان التيار مع «البروفيسور».</p>
         </div>
@@ -333,7 +333,7 @@ $('#app').innerHTML = `
 
 <!-- النوافذ المنبثقة -->
 <dialog id="library" aria-labelledby="library-title">
-  ${dialogHead('library', 'مواد وخامات كتاب العلوم (صفحة ٦٧)')}
+  ${dialogHead('library', 'مواد وخامات كتاب العلوم المدرسي')}
   <p class="dialog-description">اختر أي مادة لاستكشاف مجسمها ثلاثي الأبعاد بزاوية ٣٦٠ درجة وتصنيفها داخل الجدول الثنائي:</p>
   <div class="library-grid" id="library-grid">
     ${items.map(card).join('')}
@@ -342,7 +342,7 @@ $('#app').innerHTML = `
 
 <dialog id="camera" aria-labelledby="camera-title">
   ${dialogHead('camera', 'التعرف البصري بالكاميرا الذكية')}
-  <p class="dialog-description">وجّه الكاميرا نحو صورة المادة في كتاب العلوم (صفحة ٦٧)، وسيتعرف عليها «البروفيسور» فوراً:</p>
+  <p class="dialog-description">وجّه الكاميرا نحو صورة المادة في كتاب العلوم، وسيتعرف عليها «البروفيسور» فوراً:</p>
   <video id="camera-video" class="camera-preview" autoplay playsinline muted hidden></video>
   <img id="photo-preview" class="camera-preview" alt="صورة المادة الملتقطة" hidden>
   
@@ -378,7 +378,7 @@ $('#app').innerHTML = `
       <span class="step-number">١</span>
       <div>
         <h3>اختر المادة أو صوّرها</h3>
-        <p>اختر مادة من كتابك من الرف العلوي، أو استخدم الكاميرا لمطابقة صورتها في صفحة ٦٧.</p>
+        <p>اختر مادة من كتابك من الرف العلوي، أو استخدم الكاميرا لمطابقة صورتها في كتاب العلوم.</p>
       </div>
     </div>
     <div class="help-step">
@@ -950,7 +950,7 @@ $('#start-camera').onclick = async () => {
     $('#camera-video').hidden = false;
     $('#capture').hidden = false;
     $('#start-camera').hidden = true;
-    $('#camera-status').textContent = 'وجّه الكاميرا نحو صورة المادة في كتاب العلوم (صفحة ٦٧)، ثم اضغط التقط الصورة.';
+    $('#camera-status').textContent = 'وجّه الكاميرا نحو صورة المادة في كتاب العلوم، ثم اضغط التقط الصورة.';
   } catch {
     if (rev !== photoRevision) return;
     $('#camera-status').textContent = 'تعذّر فتح الكاميرا. يمكنك اختيار صورة محفوظة من جهازك أو اختيار المادة من القائمة.';

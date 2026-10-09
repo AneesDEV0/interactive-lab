@@ -129,22 +129,58 @@ export class SafetyVoice {
         osc.start(now + idx * 0.08);
         osc.stop(now + idx * 0.08 + 0.3);
       });
-    } else if (type === 'wrong' || type === 'hazard') {
-      // نغمة جرس إنذار تحذيري خفيف (تنبيه لطيف غير مخيف)
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(320, now);
-      osc.frequency.setValueAtTime(240, now + 0.1);
+    } else if (type === 'wrong' || type === 'hazard' || type === 'shock' || type === 'electric') {
+      // ⚡ محاكاة صوت كهرباء وصعق وتفريغ واقعي 100% (Electrical Zap & Spark SFX)
+      // 1. أزيز التيار المتردد (50/60Hz AC mains hum + 120Hz buzz)
+      const humOsc = ctx.createOscillator();
+      const humGain = ctx.createGain();
+      humOsc.type = 'sawtooth';
+      humOsc.frequency.setValueAtTime(60, now);
+      humOsc.frequency.linearRampToValueAtTime(120, now + 0.12);
+      humGain.gain.setValueAtTime(0.24, now);
+      humGain.gain.exponentialRampToValueAtTime(0.005, now + 0.35);
+      humOsc.connect(humGain);
+      humGain.connect(ctx.destination);
+      humOsc.start(now);
+      humOsc.stop(now + 0.36);
 
-      gain.gain.setValueAtTime(0.18, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+      // 2. دفقات شرر وتفريغ كهربائي متقطع حقيقي (Electrical Crackle / Spark Arcing)
+      const bufferSize = Math.floor(ctx.sampleRate * 0.32);
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        // شحنات وتفريغات عشوائية متقطعة
+        output[i] = (Math.random() * 2 - 1) * (Math.random() > 0.35 ? 1 : 0);
+      }
+      const noiseSource = ctx.createBufferSource();
+      noiseSource.buffer = noiseBuffer;
 
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(2400, now);
+      filter.Q.setValueAtTime(2.5, now);
 
-      osc.start(now);
-      osc.stop(now + 0.29);
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.32, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+
+      noiseSource.connect(filter);
+      filter.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noiseSource.start(now);
+
+      // 3. نغمة صاعقة كهربائية حادة وسريعة (ZAP)
+      const zapOsc = ctx.createOscillator();
+      const zapGain = ctx.createGain();
+      zapOsc.type = 'triangle';
+      zapOsc.frequency.setValueAtTime(950, now);
+      zapOsc.frequency.exponentialRampToValueAtTime(95, now + 0.22);
+      zapGain.gain.setValueAtTime(0.26, now);
+      zapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+      zapOsc.connect(zapGain);
+      zapGain.connect(ctx.destination);
+      zapOsc.start(now);
+      zapOsc.stop(now + 0.25);
     } else if (type === 'pop') {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();

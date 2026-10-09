@@ -176,7 +176,7 @@ $('#app').innerHTML = `
       <!-- مقدمة النشاط -->
       <section class="intro">
         <div class="intro-copy">
-          <div class="eyebrow">${icon('sparkles')} الصف الرابع الأساسي · أخطار الكهرباء وقواعد السلامة في المنزل (ص ٨٩ - ٩٠)</div>
+          <div class="eyebrow">${icon('sparkles')} الصف الرابع الأساسي · أخطار الكهرباء وقواعد السلامة في المنزل</div>
           <h1>محطة <span>حارس الأمان والسلامة الكهربائية</span></h1>
           <p>اسحب التصرف إلى عمود السلوك الآمن أو السلوك الخطر، أو صوّره من كتابك وتعرّف إلى القواعد الذهبية لحماية الحياة مع «كابتن أمان».</p>
         </div>
@@ -338,7 +338,7 @@ $('#app').innerHTML = `
 
 <!-- النوافذ المنبثقة -->
 <dialog id="library" aria-labelledby="library-title">
-  ${dialogHead('library', 'سلوكيات وقواعد كتاب العلوم (صفحة ٨٩ - ٩٠)')}
+  ${dialogHead('library', 'سلوكيات وقواعد السلامة في كتاب العلوم')}
   <p class="dialog-description">اختر أي سلوك لمشاهدة مجسمه ثلاثي الأبعاد بزاوية ٣٦٠ درجة وتصنيفه داخل الجدول الثنائي:</p>
   <div class="library-grid" id="library-grid">
     ${items.map(card).join('')}
@@ -347,7 +347,7 @@ $('#app').innerHTML = `
 
 <dialog id="camera" aria-labelledby="camera-title">
   ${dialogHead('camera', 'التعرف البصري بالكاميرا الذكية')}
-  <p class="dialog-description">وجّه الكاميرا نحو صورة السلوك في كتاب العلوم (صفحة ٨٩ أو ٩٠)، وسيتعرف عليها «حارس الأمان» فوراً:</p>
+  <p class="dialog-description">وجّه الكاميرا نحو صورة السلوك في كتاب العلوم، وسيتعرف عليها «حارس الأمان» فوراً:</p>
   <video id="camera-video" class="camera-preview" autoplay playsinline muted hidden></video>
   <img id="photo-preview" class="camera-preview" alt="صورة الموقف الملتقطة" hidden>
   
@@ -383,7 +383,7 @@ $('#app').innerHTML = `
       <span class="step-number">١</span>
       <div>
         <h3>اختر السلوك أو صوّره</h3>
-        <p>اختر سلوكاً من كتابك من الرف العلوي، أو استخدم الكاميرا لمطابقة صورته في صفحة ٨٩ أو ٩٠.</p>
+        <p>اختر سلوكاً من كتابك من الرف العلوي، أو استخدم الكاميرا لمطابقة صورته في كتاب العلوم.</p>
       </div>
     </div>
     <div class="help-step">
@@ -592,7 +592,11 @@ function handleClassification(itemId, targetCategoryId) {
   feedbackEl.className = `sorting-feedback ${result.ok ? 'success' : 'wrong'}`;
 
   if (result.ok) {
-    voice.playSfx('correct');
+    if (targetCategoryId === 'hazard') {
+      voice.playSfx('shock'); // ⚡ صوت صعق وتفريغ كهربائي واقعي للسلوك الخطر
+    } else {
+      voice.playSfx('correct'); // 🛡️ نغمة أمان مبهجة للسلوك السليم
+    }
     discoveries[itemId] = targetCategoryId;
     saveDiscoveries();
     scene?.celebrateSuccess();
@@ -977,7 +981,7 @@ $('#start-camera').onclick = async () => {
     $('#camera-video').hidden = false;
     $('#capture').hidden = false;
     $('#start-camera').hidden = true;
-    $('#camera-status').textContent = 'وجّه الكاميرا نحو صورة السلوك في كتاب العلوم (صفحة ٨٩ أو ٩٠)، ثم اضغط التقط الصورة.';
+    $('#camera-status').textContent = 'وجّه الكاميرا نحو صورة السلوك في كتاب العلوم، ثم اضغط التقط الصورة.';
   } catch {
     if (rev !== photoRevision) return;
     $('#camera-status').textContent = 'تعذّر فتح الكاميرا. يمكنك اختيار صورة محفوظة من جهازك أو اختيار السلوك من القائمة.';
