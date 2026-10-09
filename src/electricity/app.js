@@ -77,12 +77,21 @@ function testPower() {
   if (scene?.xrMode === 'ar' && !scene.placed) { say('ar'); return; }
   if (state.running) { state.running = false; render(); say('stopped'); return; }
   const result = trySource(state.id, state.source); state.running = result.ok;
-  if (result.ok) { discoveries[state.id] ||= []; if (!discoveries[state.id].includes(state.source)) discoveries[state.id].push(state.source); save(); }
+  if (result.ok) { voice.playSfx('correct'); discoveries[state.id] ||= []; if (!discoveries[state.id].includes(state.source)) discoveries[state.id].push(state.source); save(); }
+  else { voice.playSfx('wrong'); }
   render(); say(`${state.id}-${result.ok ? 'result' : 'wrong'}`, result.text, result.ok);
   let feedback = $('#power-feedback'); if (!feedback) { feedback = document.createElement('p'); feedback.id = 'power-feedback'; feedback.className = 'power-feedback'; $('#play-panel').append(feedback); } feedback.textContent = result.text;
 }
-function openNotebook() { const ids = Object.keys(discoveries).filter(id => discoveries[id].length); $('#notebook-content').innerHTML = ids.length ? `<p class="dialog-description">هذه مصادر الطاقة التي جرّبتها بنجاح. اكتشافاتك محفوظة على هذا الجهاز.</p><div class="notebook-grid">${ids.map(id => `<div class="notebook-item"><img src="assets/thumbnails/${id}.png" alt=""><div><strong>${byId(id).name}</strong><small>${discoveries[id].map(s => sources[s].name).join(' · ')}</small></div></div>`).join('')}</div>` : `<div class="empty-notebook">${mascot}<h3>لنصنع أول اكتشاف!</h3><p class="dialog-description">جرّب تشغيل جهاز بالمصدر المناسب، وسنحفظ اكتشافك هنا.</p><button class="primary" data-close="notebook" style="margin:auto">أعود للتجربة</button></div>`; }
-function openDialog(id) { if (id === 'notebook') openNotebook(); if (id === 'camera') say('camera'); $('#' + id).showModal(); }
+function openDialog(id) {
+  if (id === 'notebook') {
+    openNotebook();
+    say('notebook', 'هذا دفتر اكتشافاتك الصغيرة! شاهد الأجهزة التي قمت بتشغيلها بنجاح.');
+  }
+  if (id === 'camera') say('camera');
+  if (id === 'library') say('library', 'تصفح جميع أجهزة كتاب العلوم، واختر ما تريد استكشافه!');
+  if (id === 'help') say('help', voiceLines.help);
+  $('#' + id).showModal();
+}
 document.addEventListener('click', e => {
   const toggleBtn = e.target.closest('#activity-toggle-btn');
   if (toggleBtn) {
@@ -108,9 +117,9 @@ document.addEventListener('click', e => {
   if (b.dataset.filter) { $$('[data-filter]').forEach(el => el.classList.toggle('active', el === b)); $('#library-grid').innerHTML = devices.filter(d => b.dataset.filter === 'all' || d.page === b.dataset.filter).map(card).join(''); }
   if (b.dataset.xr) enterXR(b.dataset.xr);
   if (b.dataset.action === 'home') $('#main').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-  if (b.dataset.action === 'reset-view') scene?.reset();
-  if (b.dataset.action === 'zoom-in') scene?.zoom(.85);
-  if (b.dataset.action === 'zoom-out') scene?.zoom(1.15);
+  if (b.dataset.action === 'reset-view') { voice.playSfx('pop'); scene?.reset(); }
+  if (b.dataset.action === 'zoom-in') { voice.playSfx('pop'); scene?.zoom(.85); }
+  if (b.dataset.action === 'zoom-out') { voice.playSfx('pop'); scene?.zoom(1.15); }
   if (b.dataset.action === 'fact') say(state.id + '-fact', byId(state.id).fact, false, true);
   if (b.dataset.action === 'exit-xr') scene?.exitXR();
 });
@@ -237,7 +246,7 @@ $('#start-camera').onclick = async () => { const revision = ++photoRevision; $('
 $('#capture').onclick = () => { const video = $('#camera-video'); if (!video.videoWidth) { $('#camera-status').textContent = 'انتظر ظهور صورة الكاميرا ثم التقطها.'; return; } const c = document.createElement('canvas'); c.width = video.videoWidth; c.height = video.videoHeight; c.getContext('2d').drawImage(video, 0, 0); stopCamera(); processPhoto(c.toDataURL('image/jpeg', .92)); };
 $('#photo-file').onchange = () => { const file = $('#photo-file').files[0]; if (!file) return; if (!file.type.startsWith('image/') || file.size > 15 * 1024 * 1024) { $('#camera-status').textContent = 'اختر صورة بحجم أقل من ١٥ ميغابايت.'; return; } stopCamera(); if (photoURL) URL.revokeObjectURL(photoURL); photoURL = URL.createObjectURL(file); processPhoto(photoURL); };
 async function processPhoto(url) { const revision = ++photoRevision; $('#photo-preview').src = url; $('#photo-preview').hidden = false; $('#camera-result').hidden = true; $('#confirmed-device').value = ''; $('#camera-status').textContent = 'نبحث عن صورة الجهاز في كتابك…'; try { await $('#photo-preview').decode(); const { recognize } = await import('./recognition.js'); const result = await recognize(url); if (revision !== photoRevision || !$('#camera').open) return; $('#camera-status').textContent = ''; $('#recognition-text').textContent = result ? `أظنّ أنها ${byId(result.id).name}. هل الاسم صحيح؟ يمكنك تغييره.` : 'لم أتأكد من الجهاز. اختر اسمه من القائمة لنستكشفه معًا.'; if (result) $('#confirmed-device').value = result.id; } catch { if (revision !== photoRevision || !$('#camera').open) return; $('#camera-status').textContent = ''; $('#recognition-text').textContent = 'لم أستطع مطابقة الصورة. اختر اسم الجهاز من القائمة.'; } if (revision === photoRevision) $('#camera-result').hidden = false; }
-$('#confirm-photo').onclick = async () => { const id = $('#confirmed-device').value; if (!id) { $('#recognition-text').textContent = 'اختر اسم الجهاز أولًا.'; $('#confirmed-device').focus(); return; } $('#camera').close(); await selectDevice(id); const stage = $('#stage'); stage.tabIndex = -1; stage.setAttribute('aria-label', byId(id).name + ' على طاولة الاستكشاف'); stage.focus({ preventScroll: true }); stage.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); };
+$('#confirm-photo').onclick = async () => { const id = $('#confirmed-device').value; if (!id) { $('#recognition-text').textContent = 'اختر اسم الجهاز أولًا.'; $('#confirmed-device').focus(); return; } $('#camera').close(); await selectDevice(id); say(id + '-select', `رائع! تعرفنا على ${byId(id).name}. لنكتشف الآن مصدر طاقته!`); const stage = $('#stage'); stage.tabIndex = -1; stage.setAttribute('aria-label', byId(id).name + ' على طاولة الاستكشاف'); stage.focus({ preventScroll: true }); stage.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); };
 document.addEventListener('visibilitychange', () => { if (document.hidden) { voice.stop(); stopCamera(); } });
 // Read-only diagnostic hooks for deterministic browser checks and asset thumbnails.
 window.lab = { state, get scene() { return scene; }, selectDevice, setMode, testPower, selectSource, get discoveries() { return discoveries; } };

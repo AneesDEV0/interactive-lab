@@ -602,6 +602,8 @@ function handleClassification(itemId, targetCategoryId) {
 
     // في حال اكتمال فرز جميع المواد، عرض التقرير النهائي تلقائياً بعد ثانية ونصف
     if (Object.keys(discoveries).length === items.length) {
+      voice.playSfx('correct');
+      say('celebrate-all', 'مبارك يا بطل! لقد أكملت تصنيف جميع المواد في جدول الموصلات والعوازل واستحققت وسام البروفيسور!', true);
       setTimeout(() => {
         openNotebook();
         $('#notebook').showModal();
@@ -708,8 +710,13 @@ function openNotebook() {
 }
 
 function openDialog(id) {
-  if (id === 'notebook') openNotebook();
+  if (id === 'notebook') {
+    openNotebook();
+    say('notebook', 'هذا تقريرك النهائي التفاعلي ودفتر تصنيف المواد الموصلة والعازلة!');
+  }
   if (id === 'camera') say('camera');
+  if (id === 'library') say('library', 'تفضل باستعراض كافة المواد في كتاب العلوم للصف الرابع!');
+  if (id === 'help') say('help', voiceLines.help);
   $('#' + id).showModal();
 }
 
@@ -791,9 +798,9 @@ document.addEventListener('click', e => {
     say(a.key, a.text);
   }
 
-  if (b.dataset.action === 'reset-view') scene?.resetView();
-  if (b.dataset.action === 'zoom-in') scene?.zoom(0.85);
-  if (b.dataset.action === 'zoom-out') scene?.zoom(1.15);
+  if (b.dataset.action === 'reset-view') { voice.playSfx('pop'); scene?.resetView(); }
+  if (b.dataset.action === 'zoom-in') { voice.playSfx('pop'); scene?.zoom(0.85); }
+  if (b.dataset.action === 'zoom-out') { voice.playSfx('pop'); scene?.zoom(1.15); }
   if (b.dataset.action === 'fact') say(state.id + '-fact', byId(state.id).fact, false, true);
 });
 
@@ -1010,6 +1017,7 @@ $('#confirm-photo').onclick = async () => {
   }
   $('#camera').close();
   await selectItem(id);
+  say(id + '-select', `رائع! تعرفنا على ${byId(id).name}. لنكتشف الآن هل يوصل الكهرباء أم يعزلها!`);
   const stage = $('#stage');
   stage.scrollIntoView({ block: 'center', behavior: 'smooth' });
 };

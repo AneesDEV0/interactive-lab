@@ -585,6 +585,12 @@ function handleClassification(itemId, targetCategoryId) {
     render();
     say(`${itemId}-result`, result.text, true);
     toast(`أحسنت! أضيفت ${result.item.name} إلى ${result.target.name}`);
+
+    if (Object.keys(discoveries).length === items.length) {
+      setTimeout(() => {
+        say('celebrate-all', 'مبارك يا بطل! لقد نجحت في فرز وتصنيف جميع خامات كتاب العلوم! أنت الآن خبير المواد الأول!', true);
+      }, 1200);
+    }
   } else {
     voice.playSfx('wrong');
     scene?.shakeWrong();
@@ -639,8 +645,13 @@ function openNotebook() {
 }
 
 function openDialog(id) {
-  if (id === 'notebook') openNotebook();
+  if (id === 'notebook') {
+    openNotebook();
+    say('notebook', 'هذا دفتر تصنيفاتك وإنجازاتك! شاهد المواد التي نجحت في فرزها.');
+  }
   if (id === 'camera') say('camera');
+  if (id === 'library') say('library', 'تفضل بتصفح جميع خامات ومواد كتاب العلوم للصف الرابع!');
+  if (id === 'help') say('help', voiceLines.help);
   $('#' + id).showModal();
 }
 
@@ -722,9 +733,9 @@ document.addEventListener('click', e => {
     say(a.key, a.text);
   }
 
-  if (b.dataset.action === 'reset-view') scene?.resetView();
-  if (b.dataset.action === 'zoom-in') scene?.zoom(0.85);
-  if (b.dataset.action === 'zoom-out') scene?.zoom(1.15);
+  if (b.dataset.action === 'reset-view') { voice.playSfx('pop'); scene?.resetView(); }
+  if (b.dataset.action === 'zoom-in') { voice.playSfx('pop'); scene?.zoom(0.85); }
+  if (b.dataset.action === 'zoom-out') { voice.playSfx('pop'); scene?.zoom(1.15); }
   if (b.dataset.action === 'fact') say(state.id + '-fact', byId(state.id).fact, false, true);
 });
 
@@ -941,6 +952,7 @@ $('#confirm-photo').onclick = async () => {
   }
   $('#camera').close();
   await selectItem(id);
+  say(id + '-select', `رائع! تعرفنا على ${byId(id).name}. لنكتشف الآن إلى أي خامة ينتمي!`);
   const stage = $('#stage');
   stage.scrollIntoView({ block: 'center', behavior: 'smooth' });
 };
