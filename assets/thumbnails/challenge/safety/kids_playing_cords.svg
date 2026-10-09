@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120">
+  <rect x="0" y="0" width="160" height="120" rx="14" fill="#f3f0f7"/>
+  <!-- جدار وأرضية -->
+  <line x1="0" y1="88" x2="160" y2="88" stroke="#cbd5e0" stroke-width="2"/>
+  <!-- مقبس جداري منخفض -->
+  <rect x="18" y="52" width="22" height="26" rx="4" fill="#edf2f7" stroke="#a0aec0"/>
+  <circle cx="25" cy="65" r="2" fill="#4a5568"/>
+  <circle cx="33" cy="65" r="2" fill="#4a5568"/>
+  <!-- سلك ممتد على الأرض تسحبه يد طفل -->
+  <path d="M29,66 C45,75 55,95 85,92 C115,89 125,70 145,72" fill="none" stroke="#ffffff" stroke-width="4.5"/>
+  <path d="M29,66 C45,75 55,95 85,92 C115,89 125,70 145,72" fill="none" stroke="#dd6b20" stroke-width="3" stroke-linecap="round"/>
+  <!-- رسم طفل صغير يقترب -->
+  
+  <!-- جسم الطفل -->
+  <path d="M104,61 C104,55 136,55 136,61 L140,86 L100,86 Z" fill="#4299e1"/>
+  <!-- يد ممدودة تسحب السلك والمقبس -->
+  <path d="M108,66 Q90,75 82,88" fill="none" stroke="#fbd38d" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="82" cy="88" r="5" fill="#fbd38d"/>
+  <!-- علامة خطر -->
+  
+</svg>

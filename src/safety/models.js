@@ -700,6 +700,12 @@ function normalizeBounds(object, targetSize = 2.4) {
 // ─── تصدير دالة تحميل وتهيئة الموقف ───
 export async function loadSafetyItem(item) {
   const object = createProceduralModel(item.id);
+  // Evaluation cues belong in feedback, never in the challenge scene.
+  const cues=[];
+  object.traverse(node => {
+    if ([materials.hazardGlow, materials.safeGreenGlow, materials.electricSpark, materials.sparkCore].includes(node.material)) cues.push(node);
+  });
+  cues.forEach(node=>{node.removeFromParent();node.geometry?.dispose();});
   normalizeBounds(object);
 
   const root = new THREE.Group();
@@ -720,6 +726,8 @@ export async function loadSafetyItem(item) {
   sparkleRing.position.y = 0.02;
   root.add(sparkleRing);
   root.userData.sparkleRing = sparkleRing;
+  const sharedMaterials=new Set(Object.values(materials));
+  root.traverse(node=>{for(const material of (Array.isArray(node.material)?node.material:[node.material]).filter(Boolean))if(!sharedMaterials.has(material))material.userData.localToModel=true;});
 
   let celebrateTime = 0;
   root.userData.triggerCelebration = () => {

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120">
+  <rect x="0" y="0" width="160" height="120" rx="14" fill="#f3f0f7"/>
+  <!-- أرضية -->
+  <rect x="10" y="30" width="140" height="70" rx="4" fill="#edf2f7"/>
+  <!-- سلك ممدود تحت السجادة يظهر طرفه -->
+  <path d="M15,65 L145,65" fill="none" stroke="#2d3748" stroke-width="5" stroke-dasharray="8 6"/>
+  <!-- سجادة ملونة تغطي السلك ويظهر انتفاخ السلك تحتها -->
+  <polygon points="35,38 125,38 135,82 25,82" fill="#9b2c2c" stroke="#742a2a" stroke-width="1.5"/>
+  <!-- نقوش السجادة -->
+  <polygon points="45,46 115,46 122,74 38,74" fill="#c53030"/>
+  <!-- أثر دعس وضغط الحذاء على مكان السلك المتخفي -->
+  <ellipse cx="80" cy="62" rx="18" ry="8" fill="#742a2a" fill-opacity="0.4"/>
+  <!-- لهب حرارة كامنة تحت السجادة -->
+  
+  
+  <!-- شارة تحذير -->
+  
+</svg>

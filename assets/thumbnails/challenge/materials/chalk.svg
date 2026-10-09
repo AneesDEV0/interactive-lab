@@ -1,0 +1,29 @@
+<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="chalkShadow">
+      <feDropShadow dx="3" dy="5" stdDeviation="4" flood-color="#334155" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <g filter="url(#chalkShadow)">
+    <!-- طبشورة بيضاء مائلة -->
+    <g transform="rotate(-20 100 80)">
+      <rect x="80" y="45" width="14" height="75" rx="3" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+      <ellipse cx="87" cy="45" rx="7" ry="2.5" fill="#ffffff"/>
+    </g>
+    <!-- طبشورة زرقاء سماوية -->
+    <g transform="rotate(-5 100 80)">
+      <rect x="94" y="48" width="14" height="72" rx="3" fill="#7dd3fc" stroke="#0284c7" stroke-width="1.5"/>
+      <ellipse cx="101" cy="48" rx="7" ry="2.5" fill="#bae6fd"/>
+    </g>
+    <!-- طبشورة وردية ناعمة -->
+    <g transform="rotate(12 100 80)">
+      <rect x="108" y="52" width="14" height="70" rx="3" fill="#f472b6" stroke="#db2777" stroke-width="1.5"/>
+      <ellipse cx="115" cy="52" rx="7" ry="2.5" fill="#fbcfe8"/>
+    </g>
+    <!-- طبشورة صفراء -->
+    <g transform="rotate(28 100 80)">
+      <rect x="122" y="56" width="14" height="68" rx="3" fill="#fde047" stroke="#ca8a04" stroke-width="1.5"/>
+      <ellipse cx="129" cy="56" rx="7" ry="2.5" fill="#fef08a"/>
+    </g>
+  </g>
+</svg>

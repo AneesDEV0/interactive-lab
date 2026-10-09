@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120">
+  <rect x="0" y="0" width="160" height="120" rx="14" fill="#f3f0f7"/>
+  <!-- مفتاح إنارة جداري -->
+  <rect x="95" y="30" width="48" height="60" rx="8" fill="#ffffff" stroke="#cbd5e0" stroke-width="2"/>
+  <!-- كبسة المفتاح في وضع التشغيل الآمن -->
+  <rect x="109" y="44" width="20" height="32" rx="3" fill="#edf2f7" stroke="#a0aec0"/>
+  <!-- منشفة قطنية نظيفة لتجفيف اليدين بجانب المفتاح -->
+  <path d="M20,25 C25,25 35,28 35,65 C35,75 18,75 18,65 Z" fill="#81e6d9" stroke="#319795" stroke-width="1.5"/>
+  <!-- يد نظيفة وجافة تماماً تضغط المفتاح بأمان -->
+  <g transform="translate(42, 38)">
+    <path d="M0,25 Q35,22 55,16 Q65,15 70,18 Q62,23 55,25 Q62,26 64,30 Q55,33 45,34 Q35,36 0,36 Z" fill="#fbd38d"/>
+    <!-- لمعان الجفاف والنظافة -->
+    
+  </g>
+  </svg>

@@ -181,7 +181,7 @@ AUDIO_ENTRIES = {
     "guide.blender.deselect": "ألغيتَ تحديد خلاط العصائر المنزلي! اخْتَرْ جهازاً آخر."
 }
 
-async def generate_single(key, text, output_dir, voice="ar-SA-ZariyahNeural"):
+async def generate_single(key, text, output_dir, voice="ar-JO-SanaNeural"):
     import edge_tts
     file_name = f"{key}.mp3"
     file_path = os.path.join(output_dir, file_name)

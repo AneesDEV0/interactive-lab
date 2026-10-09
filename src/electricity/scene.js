@@ -53,7 +53,7 @@ export class LabScene {
     const guide=this.label(this.hooks.guidance(),3.5,.65);guide.position.set(0,.9,-3);this.vrPanel.add(guide);
     const learn=this.state?.mode==='learn';
     const entries=learn?[['play','جرّب الجهاز']]:this.hooks.sources().map(s=>[s.id,s.name]);
-    if(!learn)entries.push(['stop',this.state?.running?'أوقف الجهاز':'اسمعني'],['mode','تعرّف إلى الجهاز']);
+    if(!learn)entries.push(['try','جرّب التشغيل'],['stop',this.state?.running?'أوقف الجهاز':'اسمعني'],['mode','تعرّف إلى الجهاز']);
     else entries.push(['listen','اسمعني']);
     entries.push(['next','الجهاز التالي'],['exit','خروج']);
     entries.forEach(([id,name],i)=>{const m=this.label(name,1.05,.34,this.state?.source===id?'#d4f4e6':'#eee8ff');m.position.set((i%3-1)*1.15,-.55-Math.floor(i/3)*.44,-2.35);m.userData.action=id;this.vrPanel.add(m);this.vrTargets.push(m);});

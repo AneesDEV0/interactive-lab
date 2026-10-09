@@ -24,7 +24,7 @@ for (const f of targets) {
 }
 
 // Copy root html files to dist
-for (const page of ['index.html', 'electricity.html', 'materials.html', 'conductors.html', 'safety.html', '404.html']) {
+for (const page of ['index.html', 'electricity.html', 'materials.html', 'conductors.html', 'safety.html', 'about.html', '404.html']) {
   if (existsSync(page)) {
     await cp(page, 'dist/' + page);
   }
@@ -36,6 +36,10 @@ if (existsSync('public/favicon.svg')) {
   await cp('public/favicon.svg', 'dist/favicon.svg');
 }
 await mkdir('docs', { recursive: true });
+if (existsSync('docs/implementation/REPORT.md')) {
+  await mkdir('dist/docs/implementation', { recursive: true });
+  await cp('docs/implementation/REPORT.md', 'dist/docs/implementation/REPORT.md');
+}
 
 async function walk(p) {
   const out = [];

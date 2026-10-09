@@ -1,0 +1,13 @@
+{
+  "errors": [],
+  "checks": [
+    "No automatic device TTS for missing recordings",
+    "Local clip preview actually plays",
+    "Narrator change stops previous playback",
+    "Device mode never switches to existing recording",
+    "Voice/rate preferences persist",
+    "Closing settings stops preview",
+    "Missing human recording cannot fall back to a different narrator"
+  ],
+  "limitation": "Playback and routing tests only. Naturalness and Arabic pronunciation still require listening approval of new recordings."
+}

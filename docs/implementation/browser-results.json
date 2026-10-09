@@ -1,0 +1,29 @@
+{
+  "checks": [
+    "Home: four direct activity links and no invented progress",
+    "Explicit source, wrong/retry explanation, functional animation, no auto-advance, idempotent progress",
+    "Existing exact-match local Arabic recording plays and stops",
+    "Assistant cancels previous message and preserves assistance across item reselection",
+    "Completion and assistance survive refresh; device resets safely",
+    "Unknown Arabic intent/HTML is handled as text with bounded suggestions",
+    "Material challenge hides material name; keyboard classification works",
+    "Separate draggable card classifies without dragging the 3D canvas",
+    "electricity: all 17 models load and all correct answers complete exactly once",
+    "materials: all 14 models load and all correct answers complete exactly once",
+    "safety: all 13 models load and all correct answers complete exactly once",
+    "conductors: all 15 models load and all correct answers complete exactly once",
+    "Unsupported XR shows explanation, with no fake start button",
+    "Desktop, tablet, mobile and 320px: no horizontal overflow; visible buttons >=44px",
+    "Reduced motion honored",
+    "Blocked WebGL module: image, circuit and classification still work",
+    "Credits preserved; progress reset requires confirmation; cancel retains data",
+    "Corrupted saved data recovers without blocking learning"
+  ],
+  "errors": [],
+  "external": [],
+  "failed": [],
+  "models": 59,
+  "limitations": [
+    "Chrome desktop emulates viewport sizes; physical tablets, headset tracking and touch-camera hardware not available."
+  ]
+}

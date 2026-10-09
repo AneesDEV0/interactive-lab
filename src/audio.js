@@ -196,9 +196,10 @@ export function selectBestVoice(voices, lang = 'ar') {
     const n = (v.name || '').toLowerCase();
     const l = (v.lang || '').toLowerCase();
 
+    if (l === 'ar-jo' || n.includes('sana')) score += 60;
     if (l === 'ar-sa') score += 50;
     if (l.startsWith('ar')) score += 30;
-    if (n.includes('natural') || n.includes('neural') || n.includes('zariyah') || n.includes('salma') || n.includes('maged')) score += 40;
+    if (n.includes('natural') || n.includes('neural') || n.includes('sana') || n.includes('zariyah') || n.includes('salma')) score += 40;
     if (n.includes('google') || n.includes('siri') || n.includes('apple') || n.includes('microsoft')) score += 20;
     if (v.localService) score += 10;
     return score;

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120">
+  <rect x="0" y="0" width="160" height="120" rx="14" fill="#f3f0f7"/>
+  <!-- مقبس جداري ثابت -->
+  <rect x="15" y="35" width="30" height="50" rx="6" fill="#edf2f7" stroke="#cbd5e0" stroke-width="1.5"/>
+  <!-- رأس القابس محشور في الجدار بينما السلك مشدود بقوة -->
+  <rect x="42" y="48" width="18" height="24" rx="4" fill="#2d3748"/>
+  <!-- سلك مشدود ومتمزق عند نقطة الاتصال -->
+  <path d="M58,60 L120,60" fill="none" stroke="#2d3748" stroke-width="6"/>
+  <!-- تمزق وانفلات عند قاعدة الرأس -->
+  <polygon points="56,54 62,59 58,60 62,61 56,66" fill="#e53e3e"/>
+  <!-- يد تمسك السلك من المنتصف وتسحبه للخلف -->
+  <g transform="translate(100, 42)">
+    <circle cx="18" cy="18" r="16" fill="#fbd38d"/>
+    <!-- أصابع ممسكة بالسلك مشدودة -->
+    <rect x="6" y="8" width="22" height="22" rx="6" fill="#f6ad55"/>
+    <!-- أسهم تشير لاتجاه السحب الخاطئ -->
+    <path d="M35,18 L48,18 M44,12 L49,18 L44,24" fill="none" stroke="#e53e3e" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <!-- شرارة تمزق السلك -->
+  
+  <!-- تحذير -->
+  
+</svg>

@@ -1,0 +1,12 @@
+{
+  "before": {
+    "geometries": 27,
+    "textures": 1
+  },
+  "after": {
+    "geometries": 27,
+    "textures": 2
+  },
+  "min": true,
+  "max": true
+}

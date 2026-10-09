@@ -1,0 +1,25 @@
+<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff8db"/>
+      <stop offset="30%" stop-color="#f5c23a"/>
+      <stop offset="60%" stop-color="#d99912"/>
+      <stop offset="85%" stop-color="#ffd863"/>
+      <stop offset="100%" stop-color="#996404"/>
+    </linearGradient>
+    <filter id="ringShadow">
+      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-color="#4a3304" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <ellipse cx="100" cy="132" rx="42" ry="12" fill="#3b2700" opacity="0.18"/>
+  <g filter="url(#ringShadow)">
+    <!-- حلقة الخاتم الذهبي البيضاوية المنحوتة -->
+    <ellipse cx="100" cy="82" rx="45" ry="32" fill="none" stroke="url(#goldGrad)" stroke-width="16"/>
+    <!-- نقش وزخرفة التاج الذهبي الملكي -->
+    <path d="M88 48 Q100 32 112 48 Q118 42 124 54 Q100 48 76 54 Q82 42 88 48 Z" fill="url(#goldGrad)" stroke="#a16b06" stroke-width="1.2"/>
+    <!-- بريق اللمعان الذهبي الساطع -->
+    <circle cx="82" cy="62" r="3.5" fill="#ffffff" opacity="0.95"/>
+    <path d="M82 54 L82 70 M74 62 L90 62" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
+    <circle cx="118" cy="100" r="2.5" fill="#ffffff" opacity="0.8"/>
+  </g>
+</svg>

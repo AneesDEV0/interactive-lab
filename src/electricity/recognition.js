@@ -11,20 +11,21 @@ function loadCV(){
   });return cvPromise;
 }
 async function imageCanvas(source){
-  const image=new Image();image.src=source;await image.decode();
-  const canvas=document.createElement('canvas');const scale=Math.min(1,900/Math.max(image.naturalWidth,image.naturalHeight));
-  canvas.width=Math.round(image.naturalWidth*scale);canvas.height=Math.round(image.naturalHeight*scale);canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);return canvas;
+  const image=new Image();image.src=typeof source==='string'?source:source.source;await image.decode();
+  const [x,y,w,h]=source.rect||[0,0,image.naturalWidth,image.naturalHeight];
+  const canvas=document.createElement('canvas');const scale=Math.min(1,900/Math.max(w,h));
+  canvas.width=Math.round(w*scale);canvas.height=Math.round(h*scale);canvas.getContext('2d').drawImage(image,x,y,w,h,0,0,canvas.width,canvas.height);return canvas;
 }
 // ORB descriptors + ratio test + geometric verification. Low confidence never auto-selects.
-export async function recognize(source){
+export async function recognize(source,references=devices.map(d=>({id:d.id,source:`/assets/book/${d.id}.jpg`}))){
   const {cv}=await loadCV();const canvas=await imageCanvas(source);const input=cv.imread(canvas),gray=new cv.Mat();cv.cvtColor(input,gray,cv.COLOR_RGBA2GRAY);input.delete();
   const orb=new cv.ORB(1200,1.2,8,12,0,2,0,31,10),kp=new cv.KeyPointVector(),desc=new cv.Mat(),mask=new cv.Mat();
   orb.detectAndCompute(gray,mask,kp,desc);gray.delete();mask.delete();
   const scores=[];
   try{
     if(desc.rows<8)return null;
-    for(const d of devices){
-      const reference=await imageCanvas(`/assets/book/${d.id}.jpg`);const raw=cv.imread(reference),refGray=new cv.Mat();cv.cvtColor(raw,refGray,cv.COLOR_RGBA2GRAY);raw.delete();
+    for(const d of references){
+      const reference=await imageCanvas(d);const raw=cv.imread(reference),refGray=new cv.Mat();cv.cvtColor(raw,refGray,cv.COLOR_RGBA2GRAY);raw.delete();
       const rk=new cv.KeyPointVector(),rd=new cv.Mat(),rm=new cv.Mat();orb.detectAndCompute(refGray,rm,rk,rd);refGray.delete();rm.delete();
       const matcher=new cv.BFMatcher(cv.NORM_HAMMING,false),matches=new cv.DMatchVectorVector();let pointsA=[],pointsB=[];
       try{

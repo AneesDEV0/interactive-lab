@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120">
+  <rect x="0" y="0" width="160" height="120" rx="14" fill="#f3f0f7"/>
+  <!-- مقبس جداري -->
+  <rect x="18" y="32" width="28" height="56" rx="6" fill="#ffffff" stroke="#cbd5e0" stroke-width="2"/>
+  <!-- رأس القابس البلاستيكي العازل -->
+  <rect x="44" y="45" width="26" height="30" rx="6" fill="#2d3748"/>
+  <!-- السلك ممتد بسلامة دون أي شد -->
+  <path d="M70,60 L145,60" fill="none" stroke="#2d3748" stroke-width="5" stroke-linecap="round"/>
+  <!-- يد تمسك بالرأس البلاستيكي العازل بإحكام وأمان -->
+  <g transform="translate(36, 35)">
+    <!-- إبهام وأصابع تمسك جوانب القابس -->
+    <rect x="6" y="6" width="16" height="12" rx="4" fill="#fbd38d"/>
+    <rect x="6" y="22" width="16" height="14" rx="4" fill="#fbd38d"/>
+    <path d="M14,10 Q35,12 45,22 Q35,32 14,34" fill="#f6ad55"/>
+  </g>
+  <!-- علامة الصح الخضراء البراقة للأمان -->
+  
+</svg>

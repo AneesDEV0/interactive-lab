@@ -5,8 +5,9 @@ import { createPBRMaterials } from '../materials.js';
 
 const loader = new GLTFLoader();
 const materials = createPBRMaterials({mint:0x67c9b3,navy:0x434263});
-const mat = (color, extra={}) => new THREE.MeshStandardMaterial({color,roughness:.4,...extra});
+const mat = (color, extra={}) => {const m=new THREE.MeshStandardMaterial({color,roughness:.4,...extra});m.userData.localToModel=true;return m;};
 const cream = mat(0xf8fafb), purple = mat(0x7360ab), dark = mat(0x303547), mint = mat(0x64c3b1), metal = mat(0xa9bdc5,{metalness:.65});
+[cream,purple,dark,mint,metal].forEach(m=>m.userData.localToModel=false);
 function mesh(parent,geometry,material,x=0,y=0,z=0) {
   const m = new THREE.Mesh(geometry,material); m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; parent.add(m); return m;
 }
@@ -94,7 +95,7 @@ export async function loadDevice(device) {
   const glow=mesh(root,new THREE.SphereGeometry(.09,18,12),mat(0xffdc70,{emissive:0xffbf30,emissiveIntensity:1.5}),.85,.24,.8);glow.visible=false;fx.glow=glow;
   const ring=mesh(root,new THREE.TorusGeometry(.55,.022,8,60),mat(0x55b99d),0,.12,0);ring.rotation.x=Math.PI/2;ring.visible=false;fx.ring=ring;
   const baseX=object.position.x;
-  const init = new Map();for(const key of ['radioLight','screen','display','fridgeLight'])if(fx[key]?.material){fx[key].material=fx[key].material.clone();init.set(key,fx[key].material.color.clone());}
+  const init = new Map();for(const key of ['radioLight','screen','display','fridgeLight'])if(fx[key]?.material){const old=fx[key].material;fx[key].material=old.clone();fx[key].material.userData.localToModel=true;if(old.userData.localToModel)old.dispose();init.set(key,fx[key].material.color.clone());}
   root.userData.effects=fx;
   root.userData.animate=(time,running,source,reduced,doorOpen=false)=>{
     const t=reduced?0:time;

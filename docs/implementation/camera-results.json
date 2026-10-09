@@ -1,0 +1,96 @@
+{
+  "checks": [
+    "Camera track stops immediately on close",
+    "Capture, preview, stopped stream, manual confirmation and selected model",
+    "Real local book matching proposes car and requires child confirmation",
+    "Unsupported/invalid and blank images never produce false success",
+    "Camera denial leaves manual selection and activity fully usable",
+    "Late camera permission after closing cannot leave a live stream",
+    "Rotated/scaled electricity reference and 14 cropped page fixtures; no false IDs",
+    "Delayed Arabic voices load; stale narration is canceled; remote TTS voice is rejected"
+  ],
+  "recognition": {
+    "results": [
+      {
+        "activity": "safety",
+        "id": "overloaded_socket",
+        "matched": "overloaded_socket"
+      },
+      {
+        "activity": "safety",
+        "id": "kids_playing_cords",
+        "matched": "kids_playing_cords"
+      },
+      {
+        "activity": "safety",
+        "id": "baby_biting_cord",
+        "matched": "baby_biting_cord"
+      },
+      {
+        "activity": "safety",
+        "id": "exposed_damaged_wire",
+        "matched": "exposed_damaged_wire"
+      },
+      {
+        "activity": "safety",
+        "id": "inserting_scissors_socket",
+        "matched": "inserting_scissors_socket"
+      },
+      {
+        "activity": "conductors",
+        "id": "metalSpoon",
+        "matched": "metalSpoon"
+      },
+      {
+        "activity": "conductors",
+        "id": "paperEnvelope",
+        "matched": "paperEnvelope"
+      },
+      {
+        "activity": "conductors",
+        "id": "fabricCloth",
+        "matched": "fabricCloth"
+      },
+      {
+        "activity": "conductors",
+        "id": "ironNail",
+        "matched": "ironNail"
+      },
+      {
+        "activity": "conductors",
+        "id": "eraser",
+        "matched": "eraser"
+      },
+      {
+        "activity": "conductors",
+        "id": "glassCup",
+        "matched": "glassCup"
+      },
+      {
+        "activity": "conductors",
+        "id": "chalk",
+        "matched": "chalk"
+      },
+      {
+        "activity": "conductors",
+        "id": "woodStick",
+        "matched": "woodStick"
+      },
+      {
+        "activity": "conductors",
+        "id": "paperClip",
+        "matched": "paperClip"
+      }
+    ],
+    "rotated": "washer"
+  },
+  "audio": {
+    "delayed": true,
+    "remoteBlocked": true
+  },
+  "errors": [],
+  "external": [],
+  "limits": [
+    "Camera stream is synthetic, not a physical camera. Matching tested on known scans transformed in browser; lighting, printed-page glare and real phone focus remain unverified."
+  ]
+}

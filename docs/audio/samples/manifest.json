@@ -1,0 +1,30 @@
+{
+  "generatedOn": "2026-10-09",
+  "type": "synthetic-neural",
+  "provider": "Microsoft Edge TTS",
+  "purpose": "production-approved",
+  "approvedForProduction": true,
+  "approvedVoice": "ar-JO-SanaNeural",
+  "approvedVoiceLabel": "١. سَنا — الأردن",
+  "approvedDate": "2026-10-09",
+  "decisionNotes": "تم اعتماد صوت سَنا — الأردن رسميًا لكافة التعليمات الصوتية في المنصة بناءً على اختيار وتفضيل المستخدم.",
+  "text": "أهلًا، أنا شَرارة. هَيّا نكتشف معًا. اختر الجهاز، ثم جرّب تشغيله. البطّارية تُزوّد سيّارة الألعاب بالكهرباء، فيُحوّل المُحرّك الطاقة إلى حركة. والآن، تأمّل المِسطرة. ما الصِّفة التي تساعدك على معرفة مادّتها؟ خذ وقتك في التفكير. يمكنك تدوير النموذج، والنظر إليه من جهة أخرى.",
+  "samples": [
+    {
+      "file": "sharara-sana-jordan-v1.mp3",
+      "voice": "ar-JO-SanaNeural",
+      "label": "سَنا — الأردن",
+      "rate": "+0%",
+      "pitch": "+0Hz",
+      "bytes": 129600
+    },
+    {
+      "file": "sharara-layla-lebanon-v1.mp3",
+      "voice": "ar-LB-LaylaNeural",
+      "label": "ليلى — لبنان",
+      "rate": "+0%",
+      "pitch": "+0Hz",
+      "bytes": 193248
+    }
+  ]
+}

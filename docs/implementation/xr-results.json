@@ -1,0 +1,18 @@
+{
+  "result": {
+    "blockedBeforePlacement": true,
+    "placed": true,
+    "arRunning": true,
+    "reCenter": true,
+    "preservesSelection": true,
+    "explicitTry": true,
+    "vrRunning": true,
+    "vrStopped": true,
+    "learn": true,
+    "play": true,
+    "next": true,
+    "exit": true
+  },
+  "errors": [],
+  "limitation": "Synthetic hit-test placement and controller rays only. No physical headset, tracking, scale or WebXR session validation on supported hardware."
+}

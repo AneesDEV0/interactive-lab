@@ -19,11 +19,12 @@ const materials = {
   }),
   // خامة الزجاج الشفاف البراق
   glass: new THREE.MeshPhysicalMaterial({
-    color: 0xffffff,
-    transmission: 0.92,
-    opacity: 1,
+    color: 0xb8e2ed,
+    transmission: 0.25,
+    opacity: 0.48,
     transparent: true,
-    roughness: 0.05,
+    side: THREE.DoubleSide,
+    roughness: 0.12,
     ior: 1.52,
     thickness: 0.6,
     specularIntensity: 1.0
@@ -121,14 +122,15 @@ function createProceduralModel(id) {
     case 'plasticRuler': {
       // مسطرة بلاستيكية صفراء شفافة مع تدريجات القياس
       const ruler = box(g, 2.6, 0.45, 0.04, materials.plastic, 0, 0.5, 0);
-      ruler.rotation.z = 0.15;
+      const ink = new THREE.MeshStandardMaterial({ color: 0x514121, roughness: .6 });
+      ink.userData.localToModel = true;
       // علامات تدريج السنتيمتر
       for (let i = -12; i <= 12; i++) {
         const isMajor = i % 5 === 0;
         const markHeight = isMajor ? 0.14 : 0.08;
-        const mark = box(g, 0.015, markHeight, 0.045, materials.plastic, i * 0.09, 0.62 - markHeight / 2, 0);
-        mark.rotation.z = 0.15;
+        box(g, 0.015, markHeight, 0.007, ink, i * 0.09, 0.715 - markHeight / 2, 0.025);
       }
+      g.rotation.z = .08;
       break;
     }
 
@@ -161,7 +163,7 @@ function createProceduralModel(id) {
 
     case 'glassCup': {
       // كأس زجاجي شفاف أملس
-      cylinder(g, 0.52, 0.42, 1.35, 32, materials.glass, 0, 0.72, 0);
+      mesh(g, new THREE.CylinderGeometry(0.52, 0.42, 1.35, 48, 1, true), materials.glass, 0, 0.72, 0);
       // قاعدة زجاجية سميكة مانعة للانزلاق
       cylinder(g, 0.43, 0.44, 0.15, 32, materials.glass, 0, 0.12, 0);
       // حافة علوية مستديرة
@@ -370,6 +372,8 @@ export async function loadMaterialItem(item) {
   sparkleRing.position.y = 0.02;
   root.add(sparkleRing);
   root.userData.sparkleRing = sparkleRing;
+  const sharedMaterials=new Set(Object.values(materials));
+  root.traverse(node=>{for(const material of (Array.isArray(node.material)?node.material:[node.material]).filter(Boolean))if(!sharedMaterials.has(material))material.userData.localToModel=true;});
 
   // دالة تحريك المجسم
   let celebrateTime = 0;

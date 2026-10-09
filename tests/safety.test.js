@@ -155,7 +155,7 @@ test('Assets verification: all 14 thumbnails and bin SVGs and book images exist'
 test('HTML entry point: safety.html is well-formed and links to correct script and styles', () => {
   assert.ok(existsSync('safety.html'), 'safety.html must exist');
   const html = readFileSync('safety.html', 'utf-8');
-  assert.ok(html.includes('src/safety/style.css'), 'Must link to src/safety/style.css');
-  assert.ok(html.includes('src/safety/app.js'), 'Must link to src/safety/app.js');
-  assert.ok(html.includes('حارس الأمان'), 'Must mention حارس الأمان');
+  assert.ok(html.includes('src/shared/lab.css'), 'Must link to shared design tokens');
+  assert.ok(html.includes('src/shared/app.js'), 'Must link to shared activity layout');
+  assert.ok(html.includes('data-activity="safety"'), 'Must select safety data');
 });

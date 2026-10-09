@@ -4,10 +4,10 @@ import {devices} from '../src/electricity/data.js';
 await mkdir('assets/thumbnails',{recursive:true});
 const browser=await chromium.launch({channel:'chrome',headless:true,args:['--use-angle=swiftshader','--enable-webgl','--enable-unsafe-swiftshader']});
 const page=await browser.newPage({viewport:{width:1400,height:950}});
-await page.goto('http://127.0.0.1:4173');await page.waitForFunction(()=>window.lab?.scene);
+await page.goto('http://127.0.0.1:4173/electricity.html');await page.waitForFunction(()=>window.lab?.scene);
 for(const d of devices){
  const png=await page.evaluate(async id=>{
-   await window.lab.selectDevice(id);const s=window.lab.scene;
+   await window.lab.selectItem(id);const s=window.lab.scene;
    s.world.children.forEach(o=>{if(o!==s.model)o.visible=false;});
    s.renderer.setSize(300,240,false);s.camera.aspect=300/240;s.camera.position.set(3.5,2.6,4.5);s.controls.target.set(0,1,0);s.controls.update();s.camera.updateProjectionMatrix();s.renderer.render(s.scene,s.camera);
    const canvas=document.createElement('canvas');canvas.width=300;canvas.height=240;const ctx=canvas.getContext('2d');ctx.drawImage(s.renderer.domElement,0,0,300,240);

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مقارنة صوت شرارة</title>
+<style>
+  @font-face{font-family:Tajawal;src:url('../../../assets/fonts/tajawal-arabic-400-normal.woff2') format('woff2');font-display:swap}
+  *{box-sizing:border-box}body{margin:0;background:#f6f4fb;color:#251d3a;font-family:Tajawal,system-ui,sans-serif;line-height:1.9}
+  main{max-width:760px;margin:auto;padding:36px 20px}h1{line-height:1.4}article{background:white;border:1px solid #ddd4ed;border-radius:18px;padding:20px;margin:18px 0}h2{margin:0 0 12px}audio{width:100%}p{margin:12px 0}.note{color:#665b78}blockquote{margin:0;border-right:3px solid #7955ab;padding:0 18px}a{color:#633698}
+</style>
+<main>
+  <p class="note">شرارة · مراجعة الصوت</p>
+  <h1>أيّ صوت أوضح وأقرب لما تريده؟</h1>
+  <p>عينتان مولّدتان بالنص نفسه، بسرعة طبيعية ومن دون تغيير طبقة الصوت. استمع إلى النبرة ونطق الكلمات العلمية. لم يُعتمد أيّ منهما في الأنشطة بعد.</p>
+  <article>
+    <h2>١. سَنا — الأردن</h2>
+    <audio aria-label="عينة سنا" controls preload="metadata" src="sharara-sana-jordan-v1.mp3"></audio>
+  </article>
+  <article>
+    <h2>٢. ليلى — لبنان</h2>
+    <audio aria-label="عينة ليلى" controls preload="metadata" src="sharara-layla-lebanon-v1.mp3"></audio>
+  </article>
+  <article>
+    <h2>نص العينة</h2>
+    <blockquote>أهلًا، أنا شَرارة. هَيّا نكتشف معًا. اختر الجهاز، ثم جرّب تشغيله. البطّارية تُزوّد سيّارة الألعاب بالكهرباء، فيُحوّل المُحرّك الطاقة إلى حركة. والآن، تأمّل المِسطرة. ما الصِّفة التي تساعدك على معرفة مادّتها؟ خذ وقتك في التفكير. يمكنك تدوير النموذج، والنظر إليه من جهة أخرى.</blockquote>
+  </article>
+  <p class="note">التسجيلات محفوظة محليًا وتعمل دون خدمة صوت خارجية أثناء الاستماع. الصوتان اصطناعيان، وتسميتا البلدين تتبعان إعدادَي الصوت لدى المزوّد.</p>
+</main>
+<script>
+  const players = [...document.querySelectorAll('audio')];
+  for (const player of players) player.addEventListener('play', () => {
+    for (const other of players) if (other !== player) other.pause();
+  });
+</script>
+</html>

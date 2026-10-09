@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120">
+  <defs>
+    <linearGradient id="stripGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#edf2f7"/>
+      <stop offset="100%" stop-color="#cbd5e0"/>
+    </linearGradient>
+    <linearGradient id="chargerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a5568"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+    <filter id="sparkGlow">
+      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#f6ad55"/>
+    </filter>
+  </defs>
+  <!-- خلفية ناعمة -->
+  <rect x="0" y="0" width="160" height="120" rx="14" fill="#f3f0f7"/>
+  <!-- مشترك كهربائي -->
+  <rect x="25" y="45" width="110" height="42" rx="8" fill="url(#stripGrad)" stroke="#a0aec0" stroke-width="1.5"/>
+  <!-- زر التشغيل الأحمر متوهج -->
+  <rect x="32" y="55" width="14" height="22" rx="3" fill="#e53e3e"/>
+  <!-- فتحات المقابس متراكمة -->
+  <circle cx="62" cy="66" r="10" fill="#e2e8f0" stroke="#cbd5e0"/>
+  <circle cx="90" cy="66" r="10" fill="#e2e8f0" stroke="#cbd5e0"/>
+  <circle cx="118" cy="66" r="10" fill="#e2e8f0" stroke="#cbd5e0"/>
+  <!-- شاحن ضخم 1 -->
+  <rect x="52" y="24" width="22" height="34" rx="4" fill="url(#chargerGrad)"/>
+  <!-- شاحن 2 متراكب -->
+  <rect x="76" y="18" width="26" height="38" rx="4" fill="#2d3748"/>
+  <rect x="80" y="10" width="18" height="18" rx="3" fill="#4a5568"/>
+  <!-- شاحن 3 إضافي مائل -->
+  <g transform="rotate(25 110 35)">
+    <rect x="100" y="22" width="24" height="36" rx="4" fill="#1a202c"/>
+  </g>
+  <!-- أسلاك متشابكة كثيفة -->
+  <path d="M63,24 Q45,10 20,35" fill="none" stroke="#2d3748" stroke-width="3" stroke-linecap="round"/>
+  <path d="M88,18 Q95,-5 130,15" fill="none" stroke="#1a202c" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M115,22 Q140,5 150,45" fill="none" stroke="#4a5568" stroke-width="3" stroke-linecap="round"/>
+  <path d="M68,50 Q100,5 145,25" fill="none" stroke="#e53e3e" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- دخان وشرارة حرارة زائدة -->
+  
+  <!-- شارة التحذير -->
+  
+</svg>

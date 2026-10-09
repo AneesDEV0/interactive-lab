@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" width="160" height="120">
+  <rect x="0" y="0" width="160" height="120" rx="14" fill="#f3f0f7"/>
+  <!-- مقبس جداري أبيض -->
+  <rect x="45" y="24" width="70" height="72" rx="10" fill="#ffffff" stroke="#cbd5e0" stroke-width="2"/>
+  <!-- غطاء أمان بلاستيكي عازل مسدود لحماية الأطفال -->
+  <circle cx="80" cy="60" r="24" fill="#bee3f8" stroke="#3182ce" stroke-width="2"/>
+  <!-- مقبض الغطاء البلاستيكي القابل للتدوير لمنع دخول الأجسام -->
+  <rect x="68" y="56" width="24" height="8" rx="4" fill="#3182ce"/>
+  <!-- قفل الأمان الصغير على الغطاء -->
+  <rect x="74" y="44" width="12" height="10" rx="2" fill="#ecc94b" stroke="#b7791f"/>
+  <path d="M77,44 L77,40 A3,3 0 0,1 83,40 L83,44" fill="none" stroke="#b7791f" stroke-width="2"/>
+  </svg>

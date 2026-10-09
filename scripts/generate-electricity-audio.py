@@ -12,7 +12,7 @@ async def main():
             if dest.exists() and dest.stat().st_size>1000:return
             for attempt in range(3):
                 try:
-                    await edge_tts.Communicate(text,'ar-SA-ZariyahNeural',rate='-12%').save(str(dest))
+                    await edge_tts.Communicate(text,'ar-JO-SanaNeural',rate='+0%').save(str(dest))
                     return
                 except Exception as e:
                     if attempt==2:print('FAILED',key,str(e));raise

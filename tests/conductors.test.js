@@ -111,10 +111,10 @@ test('Conductors HTML entry: file exists and has unified architecture', () => {
   const html = readFileSync('conductors.html', 'utf8');
   assert.match(html, /<!doctype html>/i);
   assert.match(html, /dir="rtl"/);
-  assert.match(html, /محطة تصنيف المواد الموصلة والعازلة/);
-  assert.match(html, /البروفيسور/);
-  assert.match(html, /src\/conductors\/app\.js/);
-  assert.match(html, /src\/conductors\/style\.css/);
+  assert.match(html, /اختبر مرور الكهرباء/);
+  assert.match(html, /data-activity="conductors"/);
+  assert.match(html, /src\/shared\/app\.js/);
+  assert.match(html, /src\/shared\/lab\.css/);
 });
 
 test('Educational Assistant "البروفيسور": answer() accurately handles Grade 4 questions', async () => {
