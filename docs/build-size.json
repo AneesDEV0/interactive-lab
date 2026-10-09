@@ -1,6 +1,6 @@
 {
   "files": 788,
-  "uncompressedBytes": 44595612,
-  "sumOfGzipBytes": 30282771,
+  "uncompressedBytes": 44594887,
+  "sumOfGzipBytes": 30282510,
   "note": "Static copy; no framework, bundler or runtime installation. Server does not apply gzip. Fonts and Three.js are local."
 }
