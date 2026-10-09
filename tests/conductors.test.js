@@ -116,3 +116,41 @@ test('Conductors HTML entry: file exists and has unified architecture', () => {
   assert.match(html, /src\/conductors\/app\.js/);
   assert.match(html, /src\/conductors\/style\.css/);
 });
+
+test('Educational Assistant "البروفيسور": answer() accurately handles Grade 4 questions', async () => {
+  const { answer, byId, testClassification } = await import('../src/conductors/data.js');
+  
+  const nail = byId('ironNail');
+  const wood = byId('woodStick');
+
+  assert.equal(nail.id, 'ironNail');
+  assert.equal(wood.id, 'woodStick');
+
+  // فحص التصنيف
+  const correctNail = testClassification('ironNail', 'conductive');
+  assert.equal(correctNail.ok, true);
+  assert.match(correctNail.text, /موصلة|تضيء/);
+
+  const wrongNail = testClassification('ironNail', 'insulating');
+  assert.equal(wrongNail.ok, false);
+
+  const correctWood = testClassification('woodStick', 'insulating');
+  assert.equal(correctWood.ok, true);
+  assert.match(correctWood.text, /عازلة/);
+
+  // فحص الإجابة عن المصباح
+  const lampNail = answer('هل يضيء المصباح؟', nail);
+  assert.match(lampNail.text, /نعم|يضيء/);
+
+  const lampWood = answer('هل يضيء المصباح؟', wood);
+  assert.match(lampWood.text, /لا|لن يضيء/);
+
+  // فحص تلميح
+  const hintAns = answer('أعطني تلميحاً', nail);
+  assert.ok(hintAns.text.length > 10);
+
+  // فحص السلامة
+  const safetyAns = answer('قواعد السلامة', nail);
+  assert.match(safetyAns.text, /مقابس|مقبس|سلامة|صعق/);
+});
+

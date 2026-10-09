@@ -1,7 +1,10 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// src/conductors/audio.js — محرك الصوت والمؤثرات التفاعلية للبروفيسور
+// src/conductors/audio.js — محرك الصوت والمؤثرات التفاعلية لشخصية «البروفيسور»
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * فئة التحكم بالصوت والنطق التفاعلي للمساعد التعليمي "البروفيسور"
+ */
 export class ProfessorVoice {
   constructor(onStatus = () => {}) {
     this.enabled = true;
@@ -10,10 +13,11 @@ export class ProfessorVoice {
     this.audio.preload = 'none';
     this.revision = 0;
     this.audioCtx = null;
+    this.fallbackRevision = 0;
   }
 
   /**
-   * تشغيل سياق Web Audio API لإنتاج المؤثرات الصوتية فورياً
+   * تشغيل سياق Web Audio API لإنتاج المؤثرات الصوتية فورياً دون الحاجة لملفات خارجية
    */
   getAudioContext() {
     if (!this.audioCtx) {
@@ -42,144 +46,169 @@ export class ProfessorVoice {
   }
 
   /**
-   * نطق جملة صوتية للبروفيسور
+   * نطق جملة صوتية خاصة بـ "البروفيسور"
+   * تبحث أولاً عن ملف صوتي مسجل، ثم تلجأ إلى النطق العربي للمتصفح
+   * @param {string} key معرف المقطع الصوتي
    * @param {string} text النص العربي للنطق
-   * @param {boolean} force إجبار التشغيل حتى لو كان الصوت مغلقاً
+   * @param {boolean} force إجبار التشغيل حتى لو كان الصوت مطفأ
    */
-  async speak(text, force = false) {
+  async say(key, text, force = false) {
     this.stop();
     if (!this.enabled && !force) return;
     const revision = this.revision;
 
-    if (!('speechSynthesis' in window)) return;
+    // محاولة تشغيل الملف الصوتي المسجل مسبقاً إن وجد
+    this.audio.src = `assets/audio/conductors/${key}.mp3`;
+    this.onStatus('playing');
+
+    this.audio.onended = () => {
+      if (revision === this.revision) this.onStatus('idle');
+    };
+
+    this.audio.onerror = () => {
+      this.fallback(text, revision);
+    };
 
     try {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ar-SA';
-      utterance.rate = 0.95;
-      utterance.pitch = 1.05;
-
-      const voices = window.speechSynthesis.getVoices();
-      const arabicVoice = voices.find(v => v.lang && v.lang.startsWith('ar'));
-      if (arabicVoice) {
-        utterance.voice = arabicVoice;
-      }
-
-      utterance.onstart = () => {
-        if (this.revision === revision) {
-          this.onStatus('speaking');
-        }
-      };
-
-      utterance.onend = () => {
-        if (this.revision === revision) {
-          this.onStatus('idle');
-        }
-      };
-
-      utterance.onerror = () => {
-        if (this.revision === revision) {
-          this.onStatus('idle');
-        }
-      };
-
-      window.speechSynthesis.speak(utterance);
+      await this.audio.play();
     } catch {
-      this.onStatus('idle');
+      if (revision === this.revision) {
+        this.fallback(text, revision);
+      }
     }
   }
 
   /**
-   * نغمة نجاح وتوصيل صحيح (Electric Success Arpeggio)
+   * نطق نص مباشر (للتوافق مع الاستدعاءات المباشرة)
    */
+  speak(text, force = false) {
+    return this.say('dynamic', text, force);
+  }
+
+  /**
+   * النطق التوليدي الصوتي العربي عبر SpeechSynthesis
+   */
+  fallback(text, revision) {
+    if (revision !== this.revision || this.fallbackRevision === revision) return;
+    this.fallbackRevision = revision;
+
+    const synth = window.speechSynthesis;
+    if (!synth) {
+      this.onStatus('unavailable');
+      return;
+    }
+
+    const voices = synth.getVoices() || [];
+    const arabicVoice = voices.find(v => v.lang.startsWith('ar') || v.lang.includes('Arabic'));
+
+    synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (arabicVoice) {
+      utterance.voice = arabicVoice;
+      utterance.lang = arabicVoice.lang;
+    } else {
+      utterance.lang = 'ar-SA';
+    }
+
+    utterance.rate = 0.88; // سرعة هادئة ومناسبة لطلاب الصف الرابع
+    utterance.pitch = 1.05; // نبرة ذكية ومشجعة للأستاذ والبروفيسور
+
+    utterance.onend = () => {
+      if (revision === this.revision) this.onStatus('idle');
+    };
+    utterance.onerror = () => {
+      this.onStatus('unavailable');
+    };
+
+    synth.speak(utterance);
+  }
+
+  /**
+   * توليد مؤثرات صوتية تفاعلية غنية ومباشرة (SFX)
+   * @param {'correct' | 'wrong' | 'pop' | 'camera' | 'badge'} type
+   */
+  playSfx(type) {
+    if (!this.enabled) return;
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+
+    if (type === 'correct') {
+      // نغمة إشراقة كهربائية مبهجة (C5 -> E5 -> G5 -> C6)
+      const freqs = [523.25, 659.25, 783.99, 1046.50];
+      freqs.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+        gain.gain.setValueAtTime(0, now + idx * 0.08);
+        gain.gain.linearRampToValueAtTime(0.25, now + idx * 0.08 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.28);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + idx * 0.08);
+        osc.stop(now + idx * 0.08 + 0.3);
+      });
+    } else if (type === 'wrong') {
+      // نغمة تنبيه لطيفة ومشجعة على إعادة المحاولة
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(260, now);
+      osc.frequency.exponentialRampToValueAtTime(180, now + 0.22);
+
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.26);
+    } else if (type === 'pop') {
+      // صوت التقاط أو إفلات خفيف
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(450, now);
+      osc.frequency.exponentialRampToValueAtTime(800, now + 0.06);
+
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.09);
+    } else if (type === 'camera') {
+      // صوت غالق الكاميرا
+      const bufferSize = ctx.sampleRate * 0.05;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      noise.connect(gain);
+      gain.connect(ctx.destination);
+      noise.start(now);
+    }
+  }
+
   playSuccess() {
-    if (!this.enabled) return;
-    const ctx = this.getAudioContext();
-    if (!ctx) return;
-
-    const now = ctx.currentTime;
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (نغمة إشراقة علمية)
-
-    notes.forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, now + idx * 0.07);
-
-      gain.gain.setValueAtTime(0.001, now + idx * 0.07);
-      gain.gain.linearRampToValueAtTime(0.18, now + idx * 0.07 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.28);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(now + idx * 0.07);
-      osc.stop(now + idx * 0.07 + 0.3);
-    });
+    this.playSfx('correct');
   }
 
-  /**
-   * نغمة تنبيه لطيفة للمحاولة من جديد (Friendly Hint Tone)
-   */
-  playHint() {
-    if (!this.enabled) return;
-    const ctx = this.getAudioContext();
-    if (!ctx) return;
-
-    const now = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(329.63, now); // E4
-    osc.frequency.exponentialRampToValueAtTime(261.63, now + 0.22); // C4
-
-    gain.gain.setValueAtTime(0.001, now);
-    gain.gain.linearRampToValueAtTime(0.15, now + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + 0.26);
-  }
-
-  /**
-   * نغمة فوز واكتمال التقرير النهائي (Professor Victory Fanfare)
-   */
-  playFanfare() {
-    if (!this.enabled) return;
-    const ctx = this.getAudioContext();
-    if (!ctx) return;
-
-    const now = ctx.currentTime;
-    const melody = [
-      { f: 523.25, t: 0.00, d: 0.12 }, // C5
-      { f: 659.25, t: 0.14, d: 0.12 }, // E5
-      { f: 783.99, t: 0.28, d: 0.12 }, // G5
-      { f: 1046.5, t: 0.44, d: 0.35 }, // C6
-      { f: 880.00, t: 0.82, d: 0.14 }, // A5
-      { f: 1046.5, t: 1.00, d: 0.55 }  // C6 طويلة
-    ];
-
-    melody.forEach(({ f, t, d }) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(f, now + t);
-
-      gain.gain.setValueAtTime(0.001, now + t);
-      gain.gain.linearRampToValueAtTime(0.2, now + t + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + t + d);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(now + t);
-      osc.stop(now + t + d + 0.05);
-    });
+  playRetry() {
+    this.playSfx('wrong');
   }
 }

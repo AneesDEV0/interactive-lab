@@ -1,0 +1,37 @@
+<svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="insBoxGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#34a883"/>
+      <stop offset="100%" stop-color="#195c46"/>
+    </linearGradient>
+    <linearGradient id="insBulbGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f5f6fa"/>
+      <stop offset="60%" stop-color="#dcdde1"/>
+      <stop offset="100%" stop-color="#718093"/>
+    </linearGradient>
+  </defs>
+
+  <!-- الصندوق الحاوي ثلاثي الأبعاد -->
+  <path d="M20 70 L80 40 L140 70 L140 120 L80 148 L20 120 Z" fill="url(#insBoxGrad)" opacity="0.95"/>
+  <path d="M20 70 L80 98 L140 70" stroke="#7be3c1" stroke-width="2.5" fill="none"/>
+  <path d="M80 98 L80 148" stroke="#7be3c1" stroke-width="2.5"/>
+
+  <!-- درع الأمان العازل في الخلف -->
+  <path d="M56 30 Q80 18 104 30 Q106 58 80 74 Q54 58 56 30 Z" fill="#e2f4ed" stroke="#247a5e" stroke-width="2"/>
+
+  <!-- المصباح المطفأ غير الموصل 💡 -->
+  <g transform="translate(80 50)">
+    <!-- زجاج المصباح المطفأ الرمادي -->
+    <path d="M-15 -6 C-17 -19 17 -19 15 -6 C14 3 8 8 7 13 L-7 13 C-8 8 -14 3 -15 -6 Z" fill="url(#insBulbGrad)"/>
+    <!-- فتيل مطفأ -->
+    <path d="M-5 -2 L0 -7 L5 -2" stroke="#7f8c8d" stroke-width="1.5" fill="none"/>
+    <!-- قاعدة المصباح -->
+    <rect x="-7" y="13" width="14" height="4" rx="1.5" fill="#95a5a6"/>
+    <rect x="-6" y="18" width="12" height="3" rx="1.5" fill="#7f8c8d"/>
+    <ellipse cx="0" cy="22" rx="4" ry="2" fill="#2c3e50"/>
+
+    <!-- علامة القفل / درع الأمان العازل -->
+    <rect x="-6" y="-2" width="12" height="9" rx="2" fill="#247a5e"/>
+    <path d="M-4 -2 V-5 C-4 -7 4 -7 4 -5 V-2" stroke="#247a5e" stroke-width="2" fill="none"/>
+  </g>
+</svg>
