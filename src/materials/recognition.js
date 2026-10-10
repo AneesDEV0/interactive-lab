@@ -134,8 +134,10 @@ export async function recognize(source) {
     for (const item of items) {
       // التحقق من وجود صورة مرجعية في مجلد صور الكتاب
       const refPaths = [
+        `assets/book/${item.id}.png`,
+        `assets/book/${item.id}.jpg`,
         `assets/materials/book/${item.id}.jpg`,
-        `assets/book/${item.id}.jpg`
+        `assets/thumbnails/materials/${item.id}.svg`
       ];
 
       for (const refPath of refPaths) {

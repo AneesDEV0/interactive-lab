@@ -1,25 +1,38 @@
 // Pixel rectangles measured on the supplied textbook scans, excluding labels/answer bulbs.
 // A reference belongs to one item; a whole shared page must never be used as every item's reference.
 import { devices } from '../electricity/data.js';
-export const materialReferences=[
-  {id:'metalSpoon',rect:[320,134,115,76]},
-  {id:'paperEnvelope',rect:[168,172,114,89]},
-  {id:'fabricCloth',rect:[447,200,124,115]},
-  {id:'ironNail',rect:[118,272,96,95]},
-  {id:'eraser',rect:[514,315,91,68]},
-  {id:'glassCup',rect:[126,410,78,138]},
-  {id:'chalk',rect:[488,445,118,101]},
-  {id:'woodStick',rect:[203,540,144,123]},
-  {id:'paperClip',rect:[381,538,117,106]},
-].map(r=>({...r,source:'/assets/book/conductors_page67.png'}));
-export const safetyReferences=[
-  {id:'overloaded_socket',source:'/assets/book/safety_page89.png',rect:[137,68,184,150]},
-  {id:'kids_playing_cords',source:'/assets/book/safety_page89.png',rect:[393,68,194,150]},
-  {id:'baby_biting_cord',source:'/assets/book/safety_page90.png',rect:[353,188,180,123]},
-  {id:'exposed_damaged_wire',source:'/assets/book/safety_page90.png',rect:[353,345,180,123]},
-  {id:'inserting_scissors_socket',source:'/assets/book/safety_page90.png',rect:[353,505,180,123]},
+
+export const materialReferences = [
+  { id: 'metalSpoon', source: '/assets/book/metalSpoon.png', rect: [0, 0, 180, 130] },
+  { id: 'paperEnvelope', source: '/assets/book/paperEnvelope.png', rect: [0, 0, 186, 108] },
+  { id: 'fabricCloth', source: '/assets/book/fabricCloth.png', rect: [0, 0, 191, 163] },
+  { id: 'ironNail', source: '/assets/book/ironNail.png', rect: [0, 0, 169, 154] },
+  { id: 'eraser', source: '/assets/book/eraser.png', rect: [0, 0, 149, 75] },
+  { id: 'glassCup', source: '/assets/book/glassCup.png', rect: [0, 0, 147, 169] },
+  { id: 'chalk', source: '/assets/book/chalk.png', rect: [0, 0, 174, 135] },
+  { id: 'woodStick', source: '/assets/book/woodStick.png', rect: [0, 0, 224, 164] },
+  { id: 'paperClip', source: '/assets/book/paperClip.png', rect: [0, 0, 279, 153] },
+  { id: 'woolBall', source: '/assets/book/woolBall.png', rect: [0, 0, 225, 115] },
+  { id: 'goldRing', source: '/assets/book/goldRing.png', rect: [0, 0, 185, 108] },
+  { id: 'brassMortar', source: '/assets/book/brassMortar.png', rect: [0, 0, 128, 178] },
+  { id: 'keys', source: '/assets/book/keys.png', rect: [0, 0, 157, 138] },
+  { id: 'plasticRuler', source: '/assets/book/plasticRuler.png', rect: [0, 0, 340, 340] },
+  { id: 'glassJar', source: '/assets/book/glassJar.png', rect: [0, 0, 340, 340] }
 ];
-export function referencesFor(activity){
-  const refs=activity.id==='electricity'?devices.map(d=>({id:d.id,source:`/assets/book/${d.id}.jpg`})) : activity.id==='safety'?safetyReferences:materialReferences;
-  return refs.filter(r=>activity.items.some(d=>d.id===r.id));
+
+export const safetyReferences = [
+  { id: 'overloaded_socket', source: '/assets/book/overloaded_socket.png', rect: [0, 0, 230, 177] },
+  { id: 'kids_playing_cords', source: '/assets/book/kids_playing_cords.png', rect: [0, 0, 245, 175] },
+  { id: 'baby_biting_cord', source: '/assets/book/baby_biting_cord.png', rect: [0, 0, 363, 226] },
+  { id: 'exposed_damaged_wire', source: '/assets/book/exposed_damaged_wire.png', rect: [0, 0, 274, 209] },
+  { id: 'inserting_scissors_socket', source: '/assets/book/inserting_scissors_socket.png', rect: [0, 0, 298, 221] }
+];
+
+export function referencesFor(activity) {
+  const refs = activity.id === 'electricity'
+    ? devices.map(d => ({ id: d.id, source: `/assets/book/${d.id}.jpg` }))
+    : activity.id === 'safety'
+      ? safetyReferences
+      : materialReferences;
+  return refs.filter(r => activity.items.some(d => d.id === r.id));
 }

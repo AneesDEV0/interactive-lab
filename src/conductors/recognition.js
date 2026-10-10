@@ -105,6 +105,8 @@ export async function recognize(source) {
 
     for (const item of items) {
       const refPaths = [
+        `assets/book/${item.id}.png`,
+        `assets/book/${item.id}.jpg`,
         `assets/thumbnails/conductors/${item.id}.svg`,
         `assets/book/conductors_page67.png`
       ];
