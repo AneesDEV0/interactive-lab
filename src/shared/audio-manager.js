@@ -14,7 +14,7 @@ export class AudioManager {
       }).catch(()=>{}),
     ]);
     this.voices=()=>window.speechSynthesis?.getVoices().filter(v=>v.localService&&/^ar(?:[-_]|$)/i.test(v.lang))||[];
-    window.speechSynthesis?.getVoices();
+    if(this.preferences.mode==='device')window.speechSynthesis?.getVoices();
     window.addEventListener('pagehide',()=>this.stop());
     document.addEventListener('visibilitychange',()=>{if(document.hidden)this.stop();});
   }
@@ -23,7 +23,7 @@ export class AudioManager {
     try{localStorage.setItem('sharara-voice-v1',JSON.stringify(this.preferences));}catch{}
   }
   toggle(){this.unlocked=true;this.enabled=!this.enabled;try{localStorage.setItem('sharara-sound',this.enabled?'on':'off');}catch{}if(!this.enabled)this.stop();}
-  stop(){++this.revision;this.audio.onended=null;this.audio.onerror=null;this.audio.pause();this.audio.removeAttribute('src');window.speechSynthesis?.cancel();this.onStatus('idle');}
+  stop(){++this.revision;this.audio.onended=null;this.audio.onerror=null;this.audio.pause();this.audio.removeAttribute('src');if(window.speechSynthesis?.speaking||window.speechSynthesis?.pending)window.speechSynthesis.cancel();this.onStatus('idle');}
   async speak(text,explicit=false){
     this.stop();if(explicit)this.unlocked=true;
     if(!this.unlocked||(!this.enabled&&!explicit))return;

@@ -43,5 +43,5 @@ export class ModelViewer extends LabScene {
     if(!this.activity||this.activity==='electricity'){super.frame(t,frame);return;}
     this.controls.update();this.renderer.render(this.scene,this.camera);
   }
-  destroy(){++this.revision;this.renderer.setAnimationLoop(null);this.observer.disconnect();this.controls.dispose();this.clearVR();if(this.model)this.disposeModel(this.model);this.scene.traverse(o=>{if(o.isMesh||o.isLine){o.geometry?.dispose();for(const m of (Array.isArray(o.material)?o.material:[o.material]).filter(Boolean)){m.map?.dispose();m.dispose();}}});this.renderer.dispose();}
+  destroy(){++this.revision;this.renderer.setAnimationLoop(null);this.observer.disconnect();window.removeEventListener('resize',this.handleResize);this.controls.dispose();this.clearVR();if(this.model)this.disposeModel(this.model);this.scene.traverse(o=>{if(o.isMesh||o.isLine){o.geometry?.dispose();for(const m of (Array.isArray(o.material)?o.material:[o.material]).filter(Boolean)){m.map?.dispose();m.dispose();}}});this.renderer.dispose();}
 }

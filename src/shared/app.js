@@ -50,7 +50,7 @@ async function selectItem(id){
  const item=itemById(activity,id);if(!item)return;
  audio.stop();state=newAttempt(id,state?.mode||'play');
  const saved=attempts[activity.id+':'+id];if(saved&&typeof saved==='object'){state.attempts=Number.isInteger(saved.attempts)&&saved.attempts>=0?saved.attempts:0;state.hints=Number.isInteger(saved.hints)?Math.max(0,Math.min(3,saved.hints)):0;state.revealed=saved.revealed===true;}if(state.mode==='learn'){state.revealed=true;rememberAttempt();}
- progress.last={activity:activity.id,item:id};persist();const url=new URL(location.href);url.searchParams.set('item',id);url.searchParams.delete('device');history.replaceState(null,'',url);
+ progress.last={activity:activity.id,item:id};persist();const url=new URL(location.href);url.searchParams.set('item',id);url.searchParams.delete('device');if(url.href!==location.href)history.replaceState(null,'',url);
  render();say(guidance(activity,state));const rev=++loadRevision;$('#model-status').hidden=false;$('#model-status').textContent='نجهّز المجسم…';
  if(scene){try{await scene.setItem(item);if(rev===loadRevision){$('#model-status').hidden=true;$('#scene').dataset.loaded=id;}}catch{if(rev===loadRevision)fallback();}}else if($('#scene .fallback-image'))fallback();
 }

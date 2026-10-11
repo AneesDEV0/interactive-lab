@@ -20,11 +20,12 @@ export class LabScene {
     this.reticle=new THREE.Mesh(new THREE.RingGeometry(.075,.10,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0x57ba9f}));this.reticle.matrixAutoUpdate=false;this.reticle.visible=false;this.scene.add(this.reticle);
     this.raycaster=new THREE.Raycaster();this.controller=this.renderer.xr.getController(0);this.scene.add(this.controller);
     const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3(0,0,-5)]),new THREE.LineBasicMaterial({color:0xa190e4}));this.controller.add(line);this.controller.addEventListener('select',()=>this.selectXR());
+    this.handleResize=()=>this.resize();window.addEventListener('resize',this.handleResize,{passive:true});
     this.observer=new ResizeObserver(()=>this.resize());this.observer.observe(container);this.resize();
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();hooks.error('توقّف العرض الثلاثي الأبعاد. تابع التجربة بالأزرار أو أعد تحميل الصفحة.');});
     this.renderer.setAnimationLoop((ms,frame)=>this.frame(ms/1000,frame));this.revision=0;this.ready=false;
   }
-  resize(){if(this.renderer.xr.isPresenting)return;const {width,height}=this.container.getBoundingClientRect();if(!width||!height)return;this.renderer.setSize(width,height);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();}
+  resize(){if(this.renderer.xr.isPresenting)return;const {width,height}=this.container.getBoundingClientRect(),w=Math.round(width),h=Math.round(height);if(!w||!h||(w===this.width&&h===this.height))return;this.width=w;this.height=h;this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
   async setDevice(device){
     const rev=++this.revision;this.ready=false;
     if(this.model){this.world.remove(this.model);this.disposeModel(this.model);this.model=null;}

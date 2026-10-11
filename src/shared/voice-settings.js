@@ -16,7 +16,7 @@ export async function mountVoiceSettings(audio){
   (document.querySelector('.assistant details')||document.querySelector('#help')).append(button);
   const $=id=>document.getElementById(id);
   const refresh=()=>{
-    const voices=audio.voices();$('device-voice').innerHTML=voices.length?voices.map(v=>`<option value="${esc(v.voiceURI)}">${esc(v.name)}</option>`).join(''):'<option value="">لا يوجد صوت عربي محلي</option>';
+    const voices=audio.preferences.mode==='device'?audio.voices():[];$('device-voice').innerHTML=voices.length?voices.map(v=>`<option value="${esc(v.voiceURI)}">${esc(v.name)}</option>`).join(''):'<option value="">لا يوجد صوت عربي محلي</option>';
     if(voices.some(v=>v.voiceURI===audio.preferences.voiceURI))$('device-voice').value=audio.preferences.voiceURI;
     $('voice-mode').value=audio.preferences.mode;$('voice-rate').value=String(audio.preferences.rate);
     $('device-voice-options').hidden=audio.preferences.mode!=='device';
