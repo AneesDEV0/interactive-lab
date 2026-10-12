@@ -1,0 +1,40 @@
+{
+  "id": "./?app=sharara-lab-v3",
+  "name": "مختبر الكهرباء والمغناطيسية · شرارة",
+  "short_name": "مختبر شرارة",
+  "description": "مختبر علوم تفاعلي للصف الرابع الأساسي. ثمانية أنشطة للقراءة والتجربة مع شرارة.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html?app=sharara-lab-v3",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f8f7fb",
+  "theme_color": "#7052a3",
+  "icons": [
+    {
+      "src": "./public/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./public/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./public/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./public/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

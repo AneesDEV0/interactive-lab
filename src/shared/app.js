@@ -4,6 +4,7 @@ import { readProgress, saveProgress, recordSuccess, newAttempt, transition, guid
 import { header, footer, helpDialog, ActivityLayout, DiscoveryLayout, ItemPicker, esc, num, modal } from './components.js';
 import { AudioManager } from './audio-manager.js';
 import { mountVoiceSettings } from './voice-settings.js';
+import { mountPWA } from './pwa.js';
 import { CameraCapture } from './camera.js';
 import { icon } from '../electricity/icons.js';
 
@@ -160,6 +161,7 @@ if(activity&&!discovering&&new URLSearchParams(location.search).get('mode')==='l
 if(activity&&discovering)await startDiscovery();else if(activity)await startActivity();else if(document.body.dataset.page==='about')renderAbout();else renderHome();
 soundButton();
 await mountVoiceSettings(audio);
+mountPWA();
 // Inspection handle for browser integration tests; no private student data is collected.
 window.lab={get state(){return state;},get scene(){return scene;},get progress(){return progress;},get discovery(){return discovery;},get camera(){return camera;},selectItem,choose,submit,audio};
 }
