@@ -28,11 +28,21 @@ export const safetyReferences = [
   { id: 'inserting_scissors_socket', source: '/assets/book/inserting_scissors_socket.png', rect: [0, 0, 298, 221] }
 ];
 
+export const frictionReferences = [
+  { id: 'winterHands', source: '/assets/book/winterHands.png', rect: [230, 80, 320, 320] },
+  { id: 'balloonWool', source: '/assets/book/woolBall.png', rect: [0, 0, 225, 115] },
+  { id: 'rulerWool', source: '/assets/book/plasticRuler.png', rect: [0, 0, 340, 340] },
+  { id: 'combHair', source: '/assets/book/paperClip.png', rect: [0, 0, 279, 153] },
+  { id: 'woodFriction', source: '/assets/book/woodStick.png', rect: [0, 0, 224, 164] }
+];
+
 export function referencesFor(activity) {
   const refs = activity.id === 'electricity'
     ? devices.map(d => ({ id: d.id, source: `/assets/book/${d.id}.jpg` }))
     : activity.id === 'safety'
       ? safetyReferences
-      : materialReferences;
+      : activity.id === 'friction'
+        ? frictionReferences
+        : materialReferences;
   return refs.filter(r => activity.items.some(d => d.id === r.id));
 }

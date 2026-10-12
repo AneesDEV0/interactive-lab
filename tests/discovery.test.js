@@ -6,8 +6,8 @@ import {DISCOVERY_KEY,readDiscovery,recordDiscovery,saveDiscovery} from '../src/
 import {readProgress,STORAGE_KEY} from '../src/shared/learning.js';
 
 const memory=values=>({getItem:key=>values[key]??null,setItem:(key,value)=>{values[key]=value;}});
-test('Eight independent entry pages expose reading and experiment activities for each subject',async()=>{
- assert.equal(activityPages.length,8);assert.equal(new Set(activityPages.map(p=>p.href)).size,8);
+test('Ten independent entry pages expose reading and experiment activities for each subject',async()=>{
+ assert.equal(activityPages.length,10);assert.equal(new Set(activityPages.map(p=>p.href)).size,10);
  for(const page of activityPages){const html=await readFile(new URL('../'+page.href,import.meta.url),'utf8');assert.ok(html.includes(`data-kind="${page.kind}"`));assert.ok(html.includes(`data-activity="${page.subject}"`));}
 });
 test('All picture cards have real content; reading never refers to an already performed conductor test',()=>{

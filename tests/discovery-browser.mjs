@@ -9,7 +9,7 @@ const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[],
 page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)failed.push(r.url());});page.on('request',r=>requests.push(r.url()));
 const open=async path=>{await page.goto(`${base}/${path}`);await page.waitForFunction(()=>window.lab);await page.evaluate(()=>document.fonts.ready);};
 try{
- await open('index.html');await expect(page.locator('.activity-card')).toHaveCount(8);
+ await open('index.html');await expect(page.locator('.activity-card')).toHaveCount(10);
  for(const activity of activities){
   requests.length=0;await open(`${activity.id}-discover.html`);
   await expect(page.locator('#answer-controls,[data-mode]')).toHaveCount(0);

@@ -22,6 +22,7 @@ button:active:not(:disabled),.primary:active{transform:scale(.97)}
 .group-heading h2 span{font-size:16px;font-weight:400;margin-inline-start:10px;color:var(--muted)}
 .group-symbol{display:grid;place-items:center;width:39px;height:39px;border-radius:12px;background:var(--lilac);color:var(--deep)}
 #discover .group-symbol{background:var(--reading-bg);color:var(--reading)}
+.activity-cards{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
 .activity-art{height:162px}
 .activity-art img,.activity-card:first-child .activity-art img{height:135px;width:80%}
 .activity-copy{padding:19px}
@@ -40,6 +41,9 @@ button:active:not(:disabled),.primary:active{transform:scale(.97)}
 .paired-link:hover{background:#e7ddf3;text-decoration:none}
 .stage-result{position:absolute;bottom:48px;inset-inline:15%;padding:9px 14px;border:1px solid #bcdcc9;border-radius:14px;background:#eff9f3;color:var(--success);font-size:17px;font-weight:700;text-align:center;pointer-events:none;animation:result-arrive var(--motion-normal) var(--motion-ease) both}
 .feedback:not([hidden]){animation:result-arrive var(--motion-normal) var(--motion-ease) both}
+.answer-controls.choices-stack{grid-template-columns:1fr;gap:9px}
+.answer-controls.choices-stack button{justify-content:flex-start;padding-inline:18px;font-size:17px;min-height:52px}
+.friction-svg{height:108px}
 .answer-controls button.answer-correct{opacity:1;border-color:var(--success);background:#edf7f0;color:var(--success)}
 .answer-correct svg{animation:answer-settle 360ms var(--motion-ease) both}
 .answer-correct .sorted-item{width:42px;height:38px;object-fit:contain;animation:answer-settle 360ms var(--motion-ease) both}
@@ -100,7 +104,8 @@ button:active:not(:disabled),.primary:active{transform:scale(.97)}
 .pwa-note{font-size:15px;color:var(--muted);margin-bottom:10px}
 .pwa-steps{margin:0;font-size:16px;line-height:1.7}
 .pwa-steps svg{width:18px;height:18px;color:var(--purple);margin-inline:3px}
-@media(max-width:950px){.discovery-copy{padding:25px}.discovery-copy>p:first-of-type{font-size:19px}.activity-art{height:165px}.activity-copy p{min-height:0}}
+@media(max-width:1100px){.activity-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:950px){.activity-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.discovery-copy{padding:25px}.discovery-copy>p:first-of-type{font-size:19px}.activity-art{height:165px}.activity-copy p{min-height:0}}
 @media(max-width:700px){
  .site-header nav .pwa-install-btn{flex:0 0 auto;width:auto;padding:8px 11px;font-size:13px;gap:5px}
  .site-header nav .pwa-install-btn span{position:static;width:auto;height:auto;padding:0;margin:0;overflow:visible;clip:auto;white-space:nowrap}
@@ -109,7 +114,7 @@ button:active:not(:disabled),.primary:active{transform:scale(.97)}
  .group-heading{flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px}.group-heading>div{justify-content:center}.group-heading h2{font-size:25px}.group-heading h2 span{font-size:15px}.group-symbol{display:none}.group-heading>span{font-size:13px}
  .activity-art{height:130px}.activity-art img,.activity-card:first-child .activity-art img{height:108px;width:85%}.activity-copy{padding:14px 11px;text-align:center}.activity-copy h3{font-size:20px;min-height:58px}.activity-copy p{font-size:15px;min-height:48px}.activity-copy .card-bottom{align-items:center}.start-link{font-size:16px;justify-content:center;width:auto}.card-bottom small{font-size:12px}
  .activity-heading{align-items:center}.activity-heading h1{font-size:26px}.activity-heading .progress-block{width:min(220px,100%);font-size:13px;margin-top:0}.activity-kind{font-size:14px;justify-content:center}.model-label{font-size:12px}.paired-link{font-size:16px}
- .section-line button{font-size:14px}.item-picker{grid-template-columns:repeat(3,minmax(0,1fr))}.item-picker .item-card{font-size:15px}.item-picker .item-card:nth-child(n+4){display:none}.answer-controls.bins{grid-template-columns:repeat(3,minmax(0,1fr))}.bins button{font-size:16px;min-height:78px}.assistant-actions button{font-size:15px}.assistant-heading .listen{font-size:14px}
+ .section-line button{font-size:14px}.item-picker{grid-template-columns:repeat(3,minmax(0,1fr))}.item-picker .item-card{font-size:15px}.item-picker .item-card:nth-child(n+4){display:none}.answer-controls.bins{grid-template-columns:repeat(3,minmax(0,1fr))}.bins button{font-size:16px;min-height:78px}.answer-controls.choices-stack button{justify-content:center;text-align:center;font-size:16px}.assistant-actions button{font-size:15px}.assistant-heading .listen{font-size:14px}
  .discovery-toolbar{margin-top:14px;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}.discovery-toolbar p{font-size:16px}.discovery-toolbar button{flex-shrink:0;font-size:15px}
  .discovery-sheet{grid-template-columns:1fr;border-radius:20px}.discovery-picture{height:270px;min-height:270px}.picture-label{top:10px;font-size:12px}#card-position{bottom:8px;font-size:14px}
  .discovery-copy{padding:24px;align-items:center;text-align:center}.discovery-copy h2{font-size:26px;margin-bottom:10px}.discovery-copy>p:first-of-type{font-size:20px;line-height:1.8}.fact-tag{margin:16px 0;align-items:center;text-align:center}.reading-navigation{gap:10px}.reading-navigation button{font-size:17px;padding-inline:18px}.reading-navigation .primary{min-width:0;flex:1}.stage-result{font-size:15px;inset-inline:12%}

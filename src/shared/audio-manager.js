@@ -8,8 +8,8 @@ export class AudioManager {
     try{this.enabled=localStorage.getItem('sharara-sound')==='on';this.preferences=readVoicePreferences(localStorage.getItem('sharara-voice-v1'));}catch{}
     this.unlocked=false;this.manifest={};this.humanRecordings=[];
     this.manifestReady=Promise.all([
-      fetch('/assets/audio/electricity/manifest.json').then(r=>r.ok?r.json():{}).then(m=>{this.manifest=m;}).catch(()=>{}),
-      fetch('/assets/audio/narration/manifest.json').then(r=>r.ok?r.json():{}).then(m=>{
+      fetch('assets/audio/electricity/manifest.json').then(r=>r.ok?r.json():{}).then(m=>{this.manifest=m;}).catch(()=>{}),
+      fetch('assets/audio/narration/manifest.json').then(r=>r.ok?r.json():{}).then(m=>{
         this.humanRecordings=Array.isArray(m.recordings)?m.recordings.filter(r=>typeof r.text==='string'&&typeof r.file==='string'&&/^[a-zA-Z0-9_-]+\.(mp3|wav|ogg)$/.test(r.file)):[];
       }).catch(()=>{}),
     ]);
@@ -32,14 +32,14 @@ export class AudioManager {
     let source;
     if(this.preferences.mode==='human'){
       const clip=this.humanRecordings.find(r=>normalizeSpeechText(r.text)===normalizeSpeechText(text));
-      if(clip)source='/assets/audio/narration/'+clip.file;
+      if(clip)source='assets/audio/narration/'+clip.file;
     }else{
       const clip=this.humanRecordings.find(r=>normalizeSpeechText(r.text)===normalizeSpeechText(text));
       if(clip){
-        source='/assets/audio/narration/'+clip.file;
+        source='assets/audio/narration/'+clip.file;
       }else{
         const key=findRecording(this.manifest,text);
-        if(key)source=`/assets/audio/electricity/${key}.mp3`;
+        if(key)source=`assets/audio/electricity/${key}.mp3`;
       }
     }
     if(!source){this.onStatus('missing-recording');return;}

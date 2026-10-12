@@ -17,10 +17,11 @@ export class ModelViewer extends LabScene {
     if(this.activity==='electricity'){await super.setDevice(item);this.fit();return;}
     const rev=++this.revision;this.ready=false;
     if(this.model){this.world.remove(this.model);this.disposeModel(this.model);this.model=null;}
-    const module=await (this.activity==='safety'?import('../safety/models.js'):import('../materials/models.js'));
-    const model=await (module.loadSafetyItem||module.loadMaterialItem)(item);
+    const module=await (this.activity==='safety'?import('../safety/models.js'):this.activity==='friction'?import('../friction/models.js'):import('../materials/models.js'));
+    const model=await (module.loadSafetyItem||module.loadFrictionItem||module.loadMaterialItem)(item);
     if(rev!==this.revision){this.disposeModel(model);return;}
     this.model=model;this.baseScale=model.scale.clone();this.feedbackStarted=null;this.world.add(model);this.device=item;this.ready=true;this.fit();
+    this.model?.userData?.updateFrictionState?.(Boolean(this.state?.tested||this.state?.phase==='success'||this.state?.mode==='learn'),this.reduced);
   }
   fit(){
     if(!this.model||this.xrMode)return;
@@ -44,6 +45,7 @@ export class ModelViewer extends LabScene {
   setState(state){
     if(state.phase==='success'&&this.state?.phase!=='success')this.feedbackStarted=performance.now();
     super.setState({...state,source:state.choice});
+    this.model?.userData?.updateFrictionState?.(Boolean(state.tested||state.phase==='success'||state.mode==='learn'),this.reduced);
   }
   frame(t,frame){
     if(!this.activity||this.activity==='electricity'){super.frame(t,frame);return;}
@@ -51,6 +53,9 @@ export class ModelViewer extends LabScene {
       const elapsed=this.feedbackStarted===null?1:Math.min(1,(performance.now()-this.feedbackStarted)/450);
       const pulse=this.reduced||elapsed>=1?1:1+Math.sin(Math.PI*(1-(1-elapsed)**3))*.035;
       this.model.scale.copy(this.baseScale).multiplyScalar(pulse);
+    }
+    if(this.activity==='friction'&&this.model){
+      this.model.userData?.updateFrictionState?.(Boolean(this.state?.tested||this.state?.phase==='success'||this.state?.mode==='learn'),this.reduced);
     }
     this.controls.update();this.renderer.render(this.scene,this.camera);
   }

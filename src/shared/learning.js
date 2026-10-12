@@ -29,11 +29,11 @@ export function transition(activity,state,event) {
   if(event.type==='mode')return {...newAttempt(state.id,event.mode),attempts:state.attempts,hints:state.hints,revealed:event.mode==='learn'||state.revealed};
   if(event.type==='hint')return {...state,hints:Math.min(3,state.hints+1),revealed:state.revealed||state.hints>=2,lastAction:'hint'};
   if(state.mode!=='play')return state;
-  if(event.type==='test'&&activity.id==='conductors')return {...state,tested:true,lastAction:'test'};
+  if(event.type==='test'&&(activity.id==='conductors'||activity.id==='friction'))return {...state,tested:true,lastAction:'test'};
   if(state.phase==='success')return state;
   if(event.type==='choose'&&optionsFor(activity,item).some(o=>o.id===event.choice))return {...state,choice:event.choice,phase:'choose',feedback:'',error:null,lastAction:'choose'};
   if(event.type==='submit'){
-    if(!state.choice || (activity.id==='conductors'&&!state.tested))return state;
+    if(!state.choice || ((activity.id==='conductors'||activity.id==='friction')&&!state.tested))return state;
     const ok=evaluate(activity,item,state.choice),attempts=state.attempts+1;
     return {...state,attempts,phase:ok?'success':'retry',running:ok&&activity.id==='electricity',lastAction:'submit',error:ok?null:'classification',feedback:ok?bank.explanation:attempts>=3?`لنراجع معًا: ${bank.explanation}`:bank.wrong,revealed:state.revealed||(!ok&&attempts>=3)};
   }
@@ -49,6 +49,7 @@ export function guidance(activity,state,intent='now') {
   if(state.phase==='retry')return state.feedback;
   if(activity.id==='electricity'&&state.choice)return 'اضغط «جرّب التشغيل» لتختبر المصدر الذي اخترته.';
   if(activity.id==='conductors'&&state.tested)return 'لاحظ المصباح، ثم اختر: موصلة أم عازلة؟';
+  if(activity.id==='friction'&&state.tested)return item.promptQuestion||'لاحظ ما حدث بعد الدلك والاحتكاك، ثم اختر السبب الصحيح.';
   return `${item.label}: ${bank.start}`;
 }
 export function parseIntent(text){const q=String(text).normalize('NFKC').replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').trim();return /تلميح|ساعد|مساعد/.test(q)?'hint':/لماذا|ليش|سبب/.test(q)?'why':/افعل|اعمل|الان|التالي|اشرح|شرح/.test(q)?'now':'unknown';}

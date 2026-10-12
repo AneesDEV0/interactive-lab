@@ -13,7 +13,7 @@ page.on('response',r=>{if(r.status()>=400)failed.push([r.status(),r.url()]);});
 async function ready(){await page.waitForFunction(()=>window.lab && (!document.body.dataset.activity||lab.scene?.ready||document.querySelector('.fallback-image')));await page.evaluate(()=>document.fonts.ready);}
 async function open(path){await page.goto(`${base}/${path}`);await ready();}
 try{
- await open('');await expect(page.locator('.activity-card')).toHaveCount(8);await expect(page.locator('.resume')).toHaveCount(0);await page.screenshot({path:`${out}/home-desktop.png`,fullPage:true});checks.push('Home: eight direct activity links and no invented progress');
+ await open('');await expect(page.locator('.activity-card')).toHaveCount(10);await expect(page.locator('.resume')).toHaveCount(0);await page.screenshot({path:`${out}/home-desktop.png`,fullPage:true});checks.push('Home: ten direct activity links and no invented progress');
  await page.locator('#experiment .activity-card .start-link').first().click();await ready();
  await expect(page.locator('#submit-answer')).toBeDisabled();await expect(page.locator('[data-choice][aria-pressed=true]')).toHaveCount(0);await expect(page.locator('#sound-status')).toBeEmpty();
  await page.locator('[data-choice=mains]').click();await page.locator('#submit-answer').click();assert.equal(await page.evaluate(()=>lab.state.phase),'retry');assert.equal(await page.evaluate(()=>Object.keys(lab.progress.completed.electricity||{}).length),0);
@@ -34,7 +34,7 @@ try{
   for(const d of a.items){
    await page.locator('[data-open=library]').click();await page.locator(`#library-grid [data-item="${d.id}"]`).click();await expect(page.locator('#scene')).toHaveAttribute('data-loaded',d.id);
    await expect(page.locator('#answer-controls [aria-pressed=true]')).toHaveCount(0);
-   if(a.id==='conductors'){await expect(page.locator('#answer-controls')).toBeHidden();await page.locator('#test-material').click();await expect(page.locator('.circuit-status')).toContainText(d.category==='conductive'?'أضاء':'مطفأ');}
+   if(a.id==='conductors'||a.id==='friction'){await expect(page.locator('#answer-controls')).toBeHidden();await page.locator('#test-material').click();if(a.id==='conductors')await expect(page.locator('.circuit-status')).toContainText(d.category==='conductive'?'أضاء':'مطفأ');}
    await page.locator(`[data-choice="${d.source||d.category}"]`).click();if(a.id==='electricity')await page.locator('#submit-answer').click();await expect(page.locator('#feedback')).toHaveClass(/success/);
    if(d.id==='fridge'){await page.locator('#door').click();assert.equal(await page.evaluate(()=>lab.state.doorOpen),true);}
    assert.equal(await page.evaluate(()=>lab.state.id),d.id);

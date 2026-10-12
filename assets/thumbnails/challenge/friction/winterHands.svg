@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 180">
+  <rect width="220" height="180" rx="22" fill="#fdf6ec"/>
+  <text x="110" y="24" text-anchor="middle" font-family="Tajawal, Arial, sans-serif" font-size="13" font-weight="700" fill="#1e7b4c">برر! أشعر بالدفء!</text>
+  <!-- Pom-pom & Beanie -->
+  <circle cx="105" cy="36" r="8" fill="#f5c838" stroke="#8c6218" stroke-width="2"/>
+  <path d="M80 62c0-16 11-24 25-24s25 8 25 24z" fill="#f5c838" stroke="#8c6218" stroke-width="2"/>
+  <rect x="78" y="57" width="54" height="9" rx="4.5" fill="#eab308" stroke="#8c6218" stroke-width="2"/>
+  <!-- Face -->
+  <circle cx="105" cy="76" r="19" fill="#fad2b0" stroke="#7c4f2b" stroke-width="2"/>
+  <circle cx="98" cy="74" r="2.2" fill="#241c2c"/>
+  <circle cx="112" cy="74" r="2.2" fill="#241c2c"/>
+  <circle cx="92" cy="80" r="3.8" fill="#f48c7f" opacity="0.65"/>
+  <circle cx="118" cy="80" r="3.8" fill="#f48c7f" opacity="0.65"/>
+  <path d="M100 83q5 5 10 0" fill="none" stroke="#7c4f2b" stroke-width="2" stroke-linecap="round"/>
+  <!-- Scarf & Winter Coat -->
+  <rect x="86" y="92" width="38" height="10" rx="5" fill="#f5c838" stroke="#8c6218" stroke-width="2"/>
+  <path d="M74 102h62l8 46H66z" fill="#2589e8" stroke="#1e4e8c" stroke-width="2" stroke-linejoin="round"/>
+  <line x1="105" y1="102" x2="105" y2="148" stroke="#e03b3b" stroke-width="4"/>
+  <!-- Rubbing Hands in yellow mittens -->
+  <ellipse cx="118" cy="116" rx="10" ry="13" transform="rotate(-15 118 116)" fill="#f5c838" stroke="#8c6218" stroke-width="2"/>
+  <ellipse cx="126" cy="116" rx="10" ry="13" transform="rotate(15 126 116)" fill="#fde047" stroke="#8c6218" stroke-width="2"/>
+  <!-- Warmth / Friction waves -->
+  <path d="M142 102q5-4 10 0t10 0M144 114q5-4 10 0t10 0M142 126q5-4 10 0t10 0" fill="none" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+  <text x="110" y="168" text-anchor="middle" font-family="Tajawal, Arial, sans-serif" font-size="12" font-weight="700" fill="#1e7b4c">افرك يديك معًا!</text>
+</svg>
