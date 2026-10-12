@@ -1,0 +1,98 @@
+/* Reading feels like a picture card; experiments keep one clear action. */
+:root{--reading:#236955;--reading-bg:#e6f2ed;--motion-quick:140ms;--motion-normal:280ms;--motion-ease:cubic-bezier(.2,.8,.2,1)}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+button,.primary,.start-link{transition:transform var(--motion-quick) var(--motion-ease),background-color var(--motion-quick) ease,border-color var(--motion-quick) ease}
+button:active:not(:disabled),.primary:active{transform:scale(.97)}
+.welcome{padding-top:32px}
+.welcome h1{font-size:46px}
+.journey-nav{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:0 0 32px}
+.journey-nav>a{display:flex;align-items:center;gap:15px;padding:17px 22px;border:1px solid #c7ded4;border-radius:18px;background:var(--reading-bg);color:var(--reading);min-height:88px}
+.journey-nav>a:last-child{background:var(--lilac);border-color:#d9cdeb;color:var(--deep)}
+.journey-nav>a:hover{text-decoration:none;outline:2px solid currentColor;outline-offset:2px}
+.journey-nav strong{display:block;font-size:24px;line-height:1.4}
+.journey-nav small{display:block;font-size:16px}
+.journey-nav>a>span:last-child{margin-inline-start:auto;font-size:25px}
+.journey-symbol{display:grid;place-items:center;background:#ffffffb0;border-radius:14px;width:48px;height:48px;flex-shrink:0}
+.journey-symbol svg{width:27px;height:27px}
+.activity-group{margin-bottom:35px;scroll-margin-top:20px}
+.group-heading,.group-heading>div{display:flex;align-items:center;gap:12px}
+.group-heading{justify-content:space-between;margin-bottom:15px}
+.group-heading>span{color:var(--muted);font-size:15px}
+.group-heading h2{font-size:27px}
+.group-heading h2 span{font-size:16px;font-weight:400;margin-inline-start:10px;color:var(--muted)}
+.group-symbol{display:grid;place-items:center;width:39px;height:39px;border-radius:12px;background:var(--lilac);color:var(--deep)}
+#discover .group-symbol{background:var(--reading-bg);color:var(--reading)}
+.activity-art{height:162px}
+.activity-art img,.activity-card:first-child .activity-art img{height:135px;width:80%}
+.activity-copy{padding:19px}
+.activity-copy h3{font-size:21px;line-height:1.45;margin:0 0 8px}
+.activity-copy p{min-height:52px;font-size:16px}
+.card-bottom{margin-top:12px;flex-direction:column;align-items:flex-start;gap:1px}
+.start-link{font-size:17px;justify-content:space-between;width:100%}
+#discover .start-link{color:var(--reading)}
+.card-bottom small{font-size:13px}
+.activity-kind{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:700;margin:2px 0 8px;color:var(--deep)}
+.discover-kind{color:var(--reading)}
+.activity-heading h1{font-size:31px}
+.activity-heading .progress-block{font-size:15px;width:170px}
+.model-label{font-size:14px;color:var(--muted)}
+.paired-link{display:flex;align-items:center;justify-content:center;min-height:52px;padding:12px 16px;margin:20px 0 0;background:var(--lilac);border:1px solid #ddd1ed;border-radius:14px;font-size:17px;font-weight:700;text-align:center}
+.paired-link:hover{background:#e7ddf3;text-decoration:none}
+.stage-result{position:absolute;bottom:48px;inset-inline:15%;padding:9px 14px;border:1px solid #bcdcc9;border-radius:14px;background:#eff9f3;color:var(--success);font-size:17px;font-weight:700;text-align:center;pointer-events:none;animation:result-arrive var(--motion-normal) var(--motion-ease) both}
+.feedback:not([hidden]){animation:result-arrive var(--motion-normal) var(--motion-ease) both}
+.answer-controls button.answer-correct{opacity:1;border-color:var(--success);background:#edf7f0;color:var(--success)}
+.answer-correct svg{animation:answer-settle 360ms var(--motion-ease) both}
+.answer-correct .sorted-item{width:42px;height:38px;object-fit:contain;animation:answer-settle 360ms var(--motion-ease) both}
+.answer-correct:has(.sorted-item) svg{display:none}
+.lit .bulb{transform-box:fill-box;transform-origin:center;animation:bulb-on 450ms var(--motion-ease) both}
+.lit .wire{stroke-dasharray:9 5;animation:current-flow 1.2s ease-out 2}
+.discovery-main{max-width:1050px}
+.discovery-toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:22px 0 15px}
+.discovery-toolbar p{font-size:18px;color:var(--muted)}
+.discovery-sheet{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:26px;overflow:hidden;background:white;min-height:390px}
+.discovery-picture{display:flex;align-items:center;justify-content:center;position:relative;padding:55px 25px;background:var(--lilac)}
+.discovery-picture.mint{background:var(--mint)}
+.discovery-picture.peach{background:var(--peach)}
+.discovery-picture.blue{background:var(--blue)}
+.discovery-picture img{width:100%;height:290px;object-fit:contain;mix-blend-mode:multiply}
+.picture-label{position:absolute;top:18px;inset-inline-start:22px;font-size:15px;color:var(--muted)}
+#card-position{position:absolute;bottom:19px;inset-inline:0;text-align:center;font-size:16px}
+.discovery-copy{padding:35px;display:flex;align-items:flex-start;flex-direction:column;justify-content:center}
+.discovery-copy .eyebrow{color:var(--reading);font-size:17px}
+.discovery-copy h2{font-size:30px;margin-bottom:17px}
+.discovery-copy>p:first-of-type{font-size:21px;line-height:1.9}
+.fact-tag{padding:13px 17px;border-radius:13px;background:var(--reading-bg);margin:20px 0;display:flex;flex-direction:column;gap:3px;width:100%;color:var(--reading)}
+.fact-tag span{font-size:15px}.fact-tag strong{font-size:20px}
+.discovery-copy .listen{font-size:16px;min-height:48px}
+.discovery-copy #sound-status{margin-top:10px}
+.discovery-copy #sound-status:empty,.read-status:empty{display:none}
+.read-status{font-size:15px;color:var(--reading);margin-top:12px}
+.reading-navigation{display:flex;justify-content:space-between;gap:16px;margin:20px 0}
+.reading-navigation button{min-height:54px;font-size:19px;padding-inline:25px}
+.reading-navigation .primary{min-width:200px;background:var(--reading);border-color:var(--reading)}
+.reading-navigation .primary:hover{background:#194b3d}
+.discovery-main progress{accent-color:var(--reading)}
+.discovery-main progress::-webkit-progress-value{background:var(--reading)}
+.reading-complete{padding:28px;border:1px solid #c7ded4;background:var(--reading-bg);border-radius:22px;text-align:center;margin-top:24px}
+.reading-complete h2{margin:10px 0}.reading-complete p{font-size:19px;margin-bottom:18px}
+.reading-complete .back-link{display:block;margin-top:12px}
+.completion-mark{display:inline-grid;place-items:center;width:50px;height:50px;border-radius:50%;background:var(--reading);color:white;font-size:30px}
+/* Still images and no entrance animations in the reading activity. */
+body[data-kind=discover] .discovery-sheet,body[data-kind=discover] .discovery-picture img{animation:none;transition:none}
+@keyframes result-arrive{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes answer-settle{0%{transform:translateY(-9px) scale(.9)}65%{transform:translateY(2px) scale(1.06)}100%{transform:translateY(0) scale(1)}}
+@keyframes bulb-on{from{transform:scale(.9);fill:#f1edf5}to{transform:scale(1);fill:#ffe283}}
+@keyframes current-flow{from{stroke-dashoffset:56}to{stroke-dashoffset:0}}
+@media(max-width:950px){.discovery-copy{padding:25px}.discovery-copy>p:first-of-type{font-size:19px}.discovery-picture img{height:260px}.activity-art{height:165px}.activity-copy p{min-height:0}}
+@media(max-width:700px){
+ .welcome h1{font-size:35px}.journey-nav{gap:10px;margin-bottom:26px}.journey-nav>a{padding:12px;gap:9px;min-height:92px}.journey-symbol{display:none}.journey-nav strong{font-size:23px}.journey-nav small{font-size:14px}.journey-nav>a>span:last-child{font-size:20px}
+ .group-heading h2{font-size:25px}.group-heading h2 span{font-size:15px}.group-symbol{display:none}.group-heading>span{font-size:13px}
+ .activity-art{height:130px}.activity-art img,.activity-card:first-child .activity-art img{height:108px;width:85%}.activity-copy{padding:14px 11px;text-align:start}.activity-copy h3{font-size:20px;min-height:58px}.activity-copy p{font-size:15px;min-height:48px}.activity-copy .card-bottom{align-items:flex-start}.start-link{font-size:16px}.card-bottom small{font-size:12px}
+ .activity-heading{align-items:flex-start}.activity-heading h1{font-size:26px}.activity-heading .progress-block{width:106px;font-size:13px;margin-top:48px}.activity-kind{font-size:14px}.model-label{font-size:12px}.paired-link{font-size:16px}
+ .section-line button{font-size:14px}.item-picker{grid-template-columns:repeat(3,minmax(0,1fr))}.item-picker .item-card{font-size:15px}.item-picker .item-card:nth-child(n+4){display:none}.answer-controls.bins{grid-template-columns:repeat(3,minmax(0,1fr))}.bins button{font-size:16px;min-height:78px}.assistant-actions button{font-size:15px}.assistant-heading .listen{font-size:14px}
+ .discovery-toolbar{margin-top:14px}.discovery-toolbar p{font-size:16px}.discovery-toolbar button{flex-shrink:0;font-size:15px}
+ .discovery-sheet{grid-template-columns:1fr;border-radius:20px}.discovery-picture{padding:40px 20px;min-height:235px}.discovery-picture img{height:185px}.picture-label{top:10px;font-size:13px}#card-position{bottom:8px;font-size:14px}
+ .discovery-copy{padding:24px}.discovery-copy h2{font-size:26px;margin-bottom:10px}.discovery-copy>p:first-of-type{font-size:20px;line-height:1.8}.fact-tag{margin:16px 0}.reading-navigation{gap:10px}.reading-navigation button{font-size:17px;padding-inline:18px}.reading-navigation .primary{min-width:0;flex:1}.stage-result{font-size:15px;inset-inline:12%}
+}
+@media(max-width:370px){.activity-cards{grid-template-columns:1fr}.activity-card{display:grid;grid-template-columns:95px 1fr}.activity-art{height:100%;min-height:190px}.activity-art img,.activity-card:first-child .activity-art img{width:94%;height:115px}.art-label{display:none}.activity-copy h3{min-height:0}.activity-copy p{min-height:0}.group-heading h2 span{font-size:14px;margin-inline-start:5px}.discovery-copy{padding:20px}.activity-heading .progress-block{width:90px}.activity-heading h1{font-size:24px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.activity-card:hover{transform:none}}

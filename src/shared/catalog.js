@@ -16,6 +16,18 @@ export const activities = [
   { id:'conductors', title:'اختبر مرور الكهرباء', description:'اختبر المادة، ثم لاحظ ضوء المصباح.', tag:'الموصلات والعوازل', image:'assets/thumbnails/challenge/conductors/ironNail.svg', items:prepare('conductors',conductors), instruction:'ضع العنصر في الدائرة بالضغط على «اختبر المادة».', options:[{id:'conductive',name:'موصلة للكهرباء'},{id:'insulating',name:'عازلة للكهرباء'}], color:'blue' },
 ];
 export const activityById = id => activities.find(a=>a.id===id);
+// Four subjects, each with a separate reading activity and experiment activity.
+export const activityPages = activities.flatMap(activity => [
+  { id:`${activity.id}-discover`, subject:activity.id, kind:'discover', title:`تعرّف إلى ${activity.tag}`, href:`${activity.id}-discover.html` },
+  { id:activity.id, subject:activity.id, kind:'experiment', title:activity.title, href:`${activity.id}.html` },
+]);
+export const pageFor = (activity,kind) => activityPages.find(page=>page.subject===activity.id&&page.kind===kind);
+export function discoveryFor(activity,item) {
+  if(activity.id==='electricity')return {label:'مصدر الطاقة',value:(item.accepts||[item.source]).map(id=>sources[id].name).join(' أو '),text:item.fact};
+  if(activity.id==='materials')return {label:'الخامة',value:item.material,text:observations[item.id]};
+  if(activity.id==='safety')return {label:'نتذكّر',value:item.category==='safe'?'تصرف آمن':'تصرف خطر',text:item.goldenRule};
+  return {label:'نوع المادة',value:item.category==='conductive'?'موصلة للكهرباء':'عازلة للكهرباء',text:item.category==='conductive'?'تسمح هذه المادة بمرور الكهرباء في دائرتنا التعليمية. عند وضعها في الدائرة المغلقة، يضيء المصباح.':'لا تسمح هذه المادة بمرور الكهرباء في دائرتنا التعليمية. عند وضعها في الدائرة، يبقى المصباح مطفأً.'};
+}
 export const itemById = (activity,id) => activity.items.find(d=>d.id===id);
 export function optionsFor(activity,item) {
   if(activity.id!=='electricity') return activity.options;

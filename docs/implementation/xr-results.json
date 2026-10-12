@@ -8,8 +8,7 @@
     "explicitTry": true,
     "vrRunning": true,
     "vrStopped": true,
-    "learn": true,
-    "play": true,
+    "separateActivity": true,
     "next": true,
     "exit": true
   },

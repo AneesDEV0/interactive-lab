@@ -1,12 +1,6 @@
 {
-<<<<<<< HEAD
-  "files": 788,
-  "uncompressedBytes": 44594389,
-  "sumOfGzipBytes": 30282263,
-=======
-  "files": 836,
-  "uncompressedBytes": 45885649,
-  "sumOfGzipBytes": 31567260,
->>>>>>> 54972a0 (feat(recognition): unify offline camera recognition across all activities with standalone book assets)
+  "files": 859,
+  "uncompressedBytes": 47472265,
+  "sumOfGzipBytes": 33107397,
   "note": "Static copy; no framework, bundler or runtime installation. Server does not apply gzip. Fonts and Three.js are local."
 }

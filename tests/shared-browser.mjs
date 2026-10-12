@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {activities} from '../src/shared/catalog.js';
 const base=process.env.LAB_URL||'http://127.0.0.1:4173';
-const out='docs/implementation';await mkdir(out,{recursive:true});
+const out=process.env.LAB_ARTIFACTS||'docs/implementation';await mkdir(out,{recursive:true});
 const browser=await chromium.launch({channel:'chrome',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const context=await browser.newContext({viewport:{width:1440,height:1000}});
 const page=await context.newPage(),errors=[],external=[],failed=[],checks=[];
@@ -13,8 +13,8 @@ page.on('response',r=>{if(r.status()>=400)failed.push([r.status(),r.url()]);});
 async function ready(){await page.waitForFunction(()=>window.lab && (!document.body.dataset.activity||lab.scene?.ready||document.querySelector('.fallback-image')));await page.evaluate(()=>document.fonts.ready);}
 async function open(path){await page.goto(`${base}/${path}`);await ready();}
 try{
- await open('');await expect(page.locator('.activity-card')).toHaveCount(4);await expect(page.locator('.resume')).toHaveCount(0);await page.screenshot({path:`${out}/home-desktop.png`,fullPage:true});checks.push('Home: four direct activity links and no invented progress');
- await page.locator('.activity-card .start-link').first().click();await ready();
+ await open('');await expect(page.locator('.activity-card')).toHaveCount(8);await expect(page.locator('.resume')).toHaveCount(0);await page.screenshot({path:`${out}/home-desktop.png`,fullPage:true});checks.push('Home: eight direct activity links and no invented progress');
+ await page.locator('#experiment .activity-card .start-link').first().click();await ready();
  await expect(page.locator('#submit-answer')).toBeDisabled();await expect(page.locator('[data-choice][aria-pressed=true]')).toHaveCount(0);await expect(page.locator('#sound-status')).toBeEmpty();
  await page.locator('[data-choice=mains]').click();await page.locator('#submit-answer').click();assert.equal(await page.evaluate(()=>lab.state.phase),'retry');assert.equal(await page.evaluate(()=>Object.keys(lab.progress.completed.electricity||{}).length),0);
  await page.locator('[data-choice=battery]').click();await page.locator('#submit-answer').click();await expect(page.locator('#feedback')).toContainText('تحرّكت');assert.equal(await page.evaluate(()=>lab.state.running),true);

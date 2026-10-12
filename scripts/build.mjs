@@ -24,7 +24,7 @@ for (const f of targets) {
 }
 
 // Copy root html files to dist
-for (const page of ['index.html', 'electricity.html', 'materials.html', 'conductors.html', 'safety.html', 'about.html', '404.html']) {
+for (const page of ['electricity-discover.html', 'materials-discover.html', 'safety-discover.html', 'conductors-discover.html', 'index.html', 'electricity.html', 'materials.html', 'conductors.html', 'safety.html', 'about.html', '404.html']) {
   if (existsSync(page)) {
     await cp(page, 'dist/' + page);
   }

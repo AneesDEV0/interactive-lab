@@ -4,11 +4,14 @@ import { LabScene } from '../electricity/scene.js';
 // Reuse the existing renderer, device animations and real WebXR session implementation.
 export class ModelViewer extends LabScene {
   constructor(container,hooks,activity){
-    super(container,hooks);this.activity=activity;this.platform.visible=false;
+    super(container,{...hooks,separateActivities:true});this.activity=activity;this.platform.visible=false;
     this.world.children.filter(o=>o!==this.platform).forEach(o=>{o.visible=false;});
     this.controls.addEventListener('start',()=>{this.autoRotate=false;});
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
     this.modelMaterials=new Set();
+    this.motionPreference=matchMedia('(prefers-reduced-motion: reduce)');
+    this.onMotionChange=()=>{this.reduced=this.motionPreference.matches;this.controls.enableDamping=!this.reduced;};
+    this.motionPreference.addEventListener('change',this.onMotionChange);
   }
   async setItem(item){
     if(this.activity==='electricity'){await super.setDevice(item);this.fit();return;}
@@ -17,7 +20,7 @@ export class ModelViewer extends LabScene {
     const module=await (this.activity==='safety'?import('../safety/models.js'):import('../materials/models.js'));
     const model=await (module.loadSafetyItem||module.loadMaterialItem)(item);
     if(rev!==this.revision){this.disposeModel(model);return;}
-    this.model=model;this.world.add(model);this.device=item;this.ready=true;this.fit();
+    this.model=model;this.baseScale=model.scale.clone();this.feedbackStarted=null;this.world.add(model);this.device=item;this.ready=true;this.fit();
   }
   fit(){
     if(!this.model||this.xrMode)return;
@@ -38,10 +41,18 @@ export class ModelViewer extends LabScene {
     this.controls.minDistance=distance*.92;this.controls.maxDistance=Math.max(distance*1.8,sphere.radius/Math.sin(Math.min(halfV,halfH))*1.2);this.controls.update();this.controls.saveState();
   }
   resize(){super.resize();if(this.model&&!this.xrMode)this.fit();}
-  setState(state){super.setState({...state,source:state.choice});}
+  setState(state){
+    if(state.phase==='success'&&this.state?.phase!=='success')this.feedbackStarted=performance.now();
+    super.setState({...state,source:state.choice});
+  }
   frame(t,frame){
     if(!this.activity||this.activity==='electricity'){super.frame(t,frame);return;}
+    if(this.model&&this.baseScale){
+      const elapsed=this.feedbackStarted===null?1:Math.min(1,(performance.now()-this.feedbackStarted)/450);
+      const pulse=this.reduced||elapsed>=1?1:1+Math.sin(Math.PI*(1-(1-elapsed)**3))*.035;
+      this.model.scale.copy(this.baseScale).multiplyScalar(pulse);
+    }
     this.controls.update();this.renderer.render(this.scene,this.camera);
   }
-  destroy(){++this.revision;this.renderer.setAnimationLoop(null);this.observer.disconnect();window.removeEventListener('resize',this.handleResize);this.controls.dispose();this.clearVR();if(this.model)this.disposeModel(this.model);this.scene.traverse(o=>{if(o.isMesh||o.isLine){o.geometry?.dispose();for(const m of (Array.isArray(o.material)?o.material:[o.material]).filter(Boolean)){m.map?.dispose();m.dispose();}}});this.renderer.dispose();}
+  destroy(){++this.revision;this.motionPreference?.removeEventListener('change',this.onMotionChange);this.renderer.setAnimationLoop(null);this.observer.disconnect();window.removeEventListener('resize',this.handleResize);this.controls.dispose();this.clearVR();if(this.model)this.disposeModel(this.model);this.scene.traverse(o=>{if(o.isMesh||o.isLine){o.geometry?.dispose();for(const m of (Array.isArray(o.material)?o.material:[o.material]).filter(Boolean)){m.map?.dispose();m.dispose();}}});this.renderer.dispose();}
 }
