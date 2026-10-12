@@ -12,8 +12,8 @@ try{
  await open('index.html');await expect(page.locator('.activity-card')).toHaveCount(8);
  for(const activity of activities){
   requests.length=0;await open(`${activity.id}-discover.html`);
-  await expect(page.locator('canvas,#answer-controls,[data-mode]')).toHaveCount(0);
-  assert.equal(requests.some(url=>/\/vendor\/|\.glb(?:\?|$)/.test(url)),false,'Reading must not load 3D');
+  await expect(page.locator('#answer-controls,[data-mode]')).toHaveCount(0);
+  await expect(page.locator('#scene canvas')).toHaveCount(1);
   assert.equal(await page.evaluate(id=>Object.keys(lab.progress.completed[id]||{}).length,activity.id),0);
   await expect(page.locator('#previous-card')).toBeDisabled();
   await page.locator('#read-next').click();

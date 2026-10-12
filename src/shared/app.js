@@ -28,13 +28,13 @@ function renderHome(){
  $('#app').innerHTML=`${header()}<main id="main" class="home-main"><section class="welcome"><div><span class="eyebrow">علوم الصف الرابع · مع شرارة</span><h1>اكتشف، ثم <em>جرّب!</em></h1><p>شاهد واقرأ في «تعرّف»، أو جرّب بنفسك في «تعلّم».</p></div>${progress.last&&Object.keys(progress.completed[progress.last.activity]||{}).length<activityById(progress.last.activity).items.length?`<a class="primary resume" href="${progress.last.activity}.html?item=${progress.last.item}">أكمل تجربتك ←</a>`:''}</section><nav class="journey-nav" aria-label="اختر نوع النشاط"><a href="#discover"><span class="journey-symbol" aria-hidden="true">${icon('book')}</span><span><strong>تعرّف</strong><small>شاهد الصور واقرأ</small></span><span aria-hidden="true">↓</span></a><a href="#experiment"><span class="journey-symbol" aria-hidden="true">${icon('play')}</span><span><strong>تعلّم</strong><small>جرّب وشاهد النتيجة</small></span><span aria-hidden="true">↓</span></a></nav><section id="discover" class="activity-group" aria-labelledby="discover-title"><div class="group-heading"><div><span class="group-symbol" aria-hidden="true">${icon('book')}</span><h2 id="discover-title">تعرّف <span>شاهد واقرأ</span></h2></div><span>٤ أنشطة</span></div><div class="activity-cards">${cards('discover')}</div></section><section id="experiment" class="activity-group" aria-labelledby="experiment-title"><div class="group-heading"><div><span class="group-symbol" aria-hidden="true">${icon('play')}</span><h2 id="experiment-title">تعلّم <span>جرّب بنفسك</span></h2></div><span>٤ أنشطة</span></div><div class="activity-cards">${cards('experiment')}</div></section><p class="home-note">${icon('shield')} كل التجارب على الشاشة. تعلّم وجرّب بأمان.</p></main>${footer()}${helpDialog()}`;
 }
 function persistDiscovery(){if(!saveDiscovery(storage,discovery))$('#storage-status').textContent='الحفظ غير متاح الآن. يمكنك متابعة القراءة خلال هذه الزيارة.';}
-function selectDiscovery(id,focus=false){
+async function selectDiscovery(id,focus=false){
  const item=itemById(activity,id);if(!item)return;
  audio.stop();state=newAttempt(id,'learn');
  const fact=discoveryFor(activity,item),index=activity.items.indexOf(item),completed=discovery.completed[activity.id]||{},count=Object.keys(completed).length;
  discovery.last={activity:activity.id,item:id};persistDiscovery();
  const url=new URL(location.href);url.searchParams.set('item',id);url.searchParams.delete('mode');url.searchParams.delete('device');if(url.href!==location.href)history.replaceState(null,'',url);
- $('#item-title').textContent=item.name;$('#discovery-image').src=activity.id==='electricity'?`assets/discovery/electricity/${item.id}.png`:item.thumbnail;$('#discovery-image').alt=item.name;
+ $('#item-title').textContent=item.name;
  $('#discovery-fact').textContent=fact.text;$('#fact-label').textContent=fact.label;$('#fact-value').textContent=fact.value;
  $('#card-position').textContent=`البطاقة ${num(index+1)} من ${num(activity.items.length)}`;
  $('#progress-text').textContent=`قرأت ${num(count)} من ${num(activity.items.length)}`;$('#progress').value=count;
@@ -43,13 +43,17 @@ function selectDiscovery(id,focus=false){
  $('#read-next').textContent=count===activity.items.length?'أنهيت القراءة ✓':'فهمت، التالي ←';
  $('#reading-complete').hidden=true;
  $('#experiment-link').href=pageFor(activity,'experiment').href+'?item='+id;
+ if($('#door')){$('#door').hidden=id!=='fridge';$('#door').textContent=state.doorOpen?'أغلق باب الثلاجة':'افتح باب الثلاجة';}
  say(activity.id==='safety'?contentFor(activity,item).explanation:fact.text);
  if(focus)$('#item-title').focus({preventScroll:true});
+ const rev=++loadRevision;$('#model-status').hidden=false;$('#model-status').textContent='نجهّز المجسم…';
+ scene?.setState(state);
+ if(scene){try{await scene.setItem(item);if(rev===loadRevision){$('#model-status').hidden=true;$('#scene').dataset.loaded=id;}}catch{if(rev===loadRevision)fallback();}}else if($('#scene .fallback-image'))fallback();
 }
-function startDiscovery(){
+async function startDiscovery(){
  $('#app').innerHTML=DiscoveryLayout(activity);
  const params=new URLSearchParams(location.search),id=params.get('item')||params.get('device');
- selectDiscovery(itemById(activity,id)?.id||activity.items[0].id);
+ if($('#door'))$('#door').onclick=()=>{state.doorOpen=!state.doorOpen;$('#door').textContent=state.doorOpen?'أغلق باب الثلاجة':'افتح باب الثلاجة';scene?.setState(state);};
  $('#listen').onclick=()=>soundState==='playing'?audio.stop():audio.speak(currentText,true);
  $('#previous-card').onclick=()=>selectDiscovery(activity.items[activity.items.findIndex(d=>d.id===state.id)-1]?.id,true);
  $('#read-next').onclick=()=>{
@@ -59,7 +63,10 @@ function startDiscovery(){
   if(unread){selectDiscovery(unread.id,true);return;}
   selectDiscovery(state.id);$('#reading-complete').hidden=false;$('#reading-complete-title').focus();
  };
- window.addEventListener('pagehide',()=>audio.stop());
+ await selectDiscovery(itemById(activity,id)?.id||activity.items[0].id);
+ try{const {ModelViewer}=await import('./model-viewer.js');scene=new ModelViewer($('#scene'),{error:()=>fallback(),guidance:()=>currentText,sources:()=>[],action:()=>{},placed:()=>{},ended:()=>scene.fit()},activity.id);scene.setState(state);await scene.setItem(itemById(activity,state.id));$('#model-status').hidden=true;$('#scene').dataset.loaded=state.id;}
+ catch{scene?.destroy();scene=null;fallback();}
+ window.addEventListener('pagehide',()=>{audio.stop();scene?.destroy();});
 }
 function renderAbout(){
  $('#app').innerHTML=`${header()}<main id="main" class="about-main"><a href="index.html" class="back-link">→ الأنشطة</a><h1>عن مختبر شرارة</h1><p class="lead">مختبر علوم تفاعلي لطلبة الصف الرابع الأساسي؛ نتعلّم الكهرباء وخامات البيئة بالملاحظة والتجربة.</p><section><h2>أصحاب المشروع</h2><p><strong>إعداد الباحثة: ولاء حامد الصيداوي</strong><br>باحثة ومصممة المنصة التفاعلية</p><p><strong>إشراف الدكتور: حسن ربحي مهدي</strong><br>إشراف تربوي وأكاديمي</p><p>المشروع البحثي الأصلي يستكشف توظيف الواقع المعزز والذكاء الاصطناعي لمعالجة الفاقد التعليمي. هذه النسخة تنفّذ أنشطة محلية ومساعدًا بإجابات معدّة.</p><p>جميع الحقوق محفوظة © لمنصة العلوم التفاعلية · الصف الرابع الأساسي</p></section><section><h2>التقدم على هذا الجهاز</h2><p>يُحفظ تقدم الأنشطة وتفضيل الصوت محليًا. لا تُرفع الصور أو الأسئلة إلى خادم.</p><button id="reset-progress">مسح تقدم الأنشطة</button><p id="reset-status" role="status"></p></section></main>${footer()}${helpDialog()}${modal('reset-confirm','مسح تقدم الأنشطة؟','<p>سيُمسح التقدم المحفوظ للأنشطة الثمانية على هذا الجهاز. لا يمكن التراجع عن المسح.</p><div class="input-row"><button data-close="reset-confirm">احتفظ بتقدمي</button><button id="confirm-reset">نعم، امسح التقدم</button></div>')}`;
@@ -100,7 +107,7 @@ async function selectItem(id){
  render();say(guidance(activity,state));const rev=++loadRevision;$('#model-status').hidden=false;$('#model-status').textContent='نجهّز المجسم…';
  if(scene){try{await scene.setItem(item);if(rev===loadRevision){$('#model-status').hidden=true;$('#scene').dataset.loaded=id;}}catch{if(rev===loadRevision)fallback();}}else if($('#scene .fallback-image'))fallback();
 }
-function fallback(){scene?.destroy();scene=null;const d=itemById(activity,state.id);$('#scene').innerHTML=`<img class="fallback-image" src="${d.thumbnail}" alt="${esc(d.label)}">`;$('#model-status').hidden=false;$('#model-status').textContent='عرض مبسّط؛ يمكنك متابعة التجربة بالأزرار.';$$('[data-xr]').forEach(b=>b.hidden=true);$('#xr-status').textContent='تابع التجربة بالعرض المبسّط على الشاشة.';}
+function fallback(){scene?.destroy();scene=null;const d=itemById(activity,state.id);$('#scene').innerHTML=`<img class="fallback-image" src="${d.thumbnail}" alt="${esc(d.name||d.label)}">`;$('#model-status').hidden=false;$('#model-status').textContent='عرض مبسّط؛ يمكنك متابعة التجربة بالأزرار.';$$('[data-xr]').forEach(b=>b.hidden=true);if($('#xr-status'))$('#xr-status').textContent='تابع التجربة بالعرض المبسّط على الشاشة.';}
 function submit(){if(scene?.xrMode==='ar'&&!scene.placed){say('ضع الجهاز على الطاولة أولًا.');return;}state=transition(activity,state,{type:'submit'});progress=recordSuccess(progress,activity,state);rememberAttempt();persist();render();say(guidance(activity,state));if(state.phase==='success')$('#next-item').focus({preventScroll:true});else $('#answer-controls [aria-pressed="true"]')?.focus({preventScroll:true});}
 function choose(choice){state=transition(activity,state,{type:'choose',choice});if(activity.id==='electricity'){render();say(guidance(activity,state));$('#answer-controls [aria-pressed="true"]')?.focus({preventScroll:true});}else submit();}
 function next(){if(Object.keys(progress.completed[activity.id]||{}).length===activity.items.length){location.href='index.html';return;}const index=activity.items.findIndex(d=>d.id===state.id);const candidates=[...activity.items.slice(index+1),...activity.items.slice(0,index+1)];selectItem(candidates.find(d=>!progress.completed[activity.id]?.[d.id]).id);}
@@ -137,11 +144,11 @@ document.addEventListener('click',async e=>{
  if(b.dataset.close)$('#'+b.dataset.close).close();
  if(!activity)return;
  if(b.dataset.item){if(discovering)selectDiscovery(b.dataset.item,true);else selectItem(b.dataset.item);$('#library').close();}
+ if(b.dataset.view){if(b.dataset.view==='reset')scene?.reset();else scene?.zoom(b.dataset.view==='in'?.9:1.1);}
  if(discovering)return;
  if(b.dataset.choice)choose(b.dataset.choice);
  if(b.dataset.xrChoice)choose(b.dataset.xrChoice);
  if(b.dataset.intent)assist(b.dataset.intent);
- if(b.dataset.view){if(b.dataset.view==='reset')scene?.reset();else scene?.zoom(b.dataset.view==='in'?.9:1.1);}
  if(b.dataset.xr){audio.stop();try{await scene.enterXR(b.dataset.xr,$('#xr-overlay'));$('#xr-overlay').hidden=false;$('#xr-guidance').textContent=b.dataset.xr==='ar'?'حرّك الهاتف ببطء حتى تظهر دائرة، ثم المس لوضع الجهاز.':'استخدم مؤشر النظارة لاختيار المصدر. زر خروج يعيدك إلى الشاشة.';}catch{$('#xr-status').textContent='تعذر بدء العرض. تابع استكشاف المجسم على الشاشة.';}}
  if(b.id==='xr-exit')scene?.exitXR();
  if(b.id==='xr-recenter'){if(scene?.xrMode==='ar'){scene.placed=false;scene.world.visible=false;}else scene?.world.position.set(0,-.55,-3);}
@@ -150,7 +157,7 @@ for(const event of ['pointerdown','keydown'])document.addEventListener(event,e=>
 window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
 // Old bookmarked reading URLs lead to the independent reading page.
 if(activity&&!discovering&&new URLSearchParams(location.search).get('mode')==='learn'){const target=new URL(pageFor(activity,'discover').href,location.href);const old=new URLSearchParams(location.search);const id=old.get('item')||old.get('device');if(itemById(activity,id))target.searchParams.set('item',id);location.replace(target.href);}else{
-if(activity&&discovering)startDiscovery();else if(activity)await startActivity();else if(document.body.dataset.page==='about')renderAbout();else renderHome();
+if(activity&&discovering)await startDiscovery();else if(activity)await startActivity();else if(document.body.dataset.page==='about')renderAbout();else renderHome();
 soundButton();
 await mountVoiceSettings(audio);
 // Inspection handle for browser integration tests; no private student data is collected.
