@@ -29,11 +29,12 @@ export const safetyReferences = [
 ];
 
 export const frictionReferences = [
-  { id: 'winterHands', source: '/assets/book/winterHands.png', rect: [230, 80, 320, 320] },
-  { id: 'balloonWool', source: '/assets/book/woolBall.png', rect: [0, 0, 225, 115] },
-  { id: 'rulerWool', source: '/assets/book/plasticRuler.png', rect: [0, 0, 340, 340] },
-  { id: 'combHair', source: '/assets/book/paperClip.png', rect: [0, 0, 279, 153] },
-  { id: 'woodFriction', source: '/assets/book/woodStick.png', rect: [0, 0, 224, 164] }
+  // Focus on each experiment, excluding the shared title, logo and classroom edges.
+  { id: 'winterHands', source: '/assets/book/friction/winterHands.jpg', rect: [300, 110, 430, 350] },
+  { id: 'balloonWool', source: '/assets/book/friction/balloonWool.jpg', rect: [300, 130, 540, 410] },
+  { id: 'rulerWool', source: '/assets/book/friction/rulerWool.jpg', rect: [220, 110, 520, 420] },
+  { id: 'combHair', source: '/assets/book/friction/combHair.jpg', rect: [320, 110, 440, 420] },
+  { id: 'woodFriction', source: '/assets/book/friction/woodFriction.jpg', rect: [330, 110, 410, 420] }
 ];
 
 export function referencesFor(activity) {
