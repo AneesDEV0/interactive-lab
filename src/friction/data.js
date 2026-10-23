@@ -106,3 +106,33 @@ export const items = [
     question: 'بماذا نشعر عند لمس سطح قطعتي الخشب بعد فركهما ببعضهما بسرعة؟'
   }
 ];
+
+export const byId = id => items.find(d => d.id === id);
+
+import { findTextbookAnswer } from '../shared/textbook-qa.js';
+
+export function answer(query, currentItem) {
+  const q = String(query || '').replace(/[ًٌٍَُِّْـ]/g, '').replace(/[أإآ]/g, 'ا').toLowerCase().trim();
+  const item = currentItem || items[0];
+
+  if (!q) {
+    return {
+      key: 'clarify',
+      text: 'أهلاً بك يا بطل! اسألني عن أسرار الدلك والاحتكاك، وكيف يولد الدفء والكهرباء الساكنة التي تجذب الورق.'
+    };
+  }
+
+  const tb = findTextbookAnswer(query);
+  if (tb) return { key: tb.id, text: tb.text };
+
+  if (/تلميح|ساعد|وين|كيف/.test(q)) {
+    return { key: 'hint', text: item.hint };
+  }
+
+  if (/لماذا|ليش|سبب|تفسير/.test(q)) {
+    return { key: `${item.id}-fact`, text: item.fact };
+  }
+
+  return { key: `${item.id}-result`, text: item.result };
+}
+

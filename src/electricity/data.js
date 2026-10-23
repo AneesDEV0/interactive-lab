@@ -49,13 +49,14 @@ export const voiceLines = {
   unknown:'أستطيع مساعدتك في أجهزة هذا النشاط ومصادر طاقتها. اختر سؤالًا من الأزرار، أو اسأل: كيف يعمل هذا الجهاز؟',
 };
 export function answer(question, device) {
-  const q = question.replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا');
+  const dev = device || devices[0];
+  const q = String(question || '').replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا');
   if (/خطر|سلام|مقبس|المس/.test(q)) return { key:'safety',text:voiceLines.safety };
   const tb = findTextbookAnswer(question);
   if (tb) return { key: tb.id, text: tb.text };
-  if (/لماذا|ليش|لم يعمل|تلميح/.test(q)) return {key:`${device.id}-hint`,text:device.hint};
-  if (/كيف|معلوم|يعمل|مصدر/.test(q)) return {key:`${device.id}-fact`,text:device.fact};
   if (/بطاري/.test(q)) return {key:'battery',text:voiceLines.battery};
   if (/منزل|شبك/.test(q)) return {key:'mains',text:voiceLines.mains};
+  if (/لماذا|ليش|لم يعمل|تلميح/.test(q)) return {key:`${dev.id}-hint`,text:dev.hint};
+  if (/كيف|معلوم|يعمل|مصدر/.test(q)) return {key:`${dev.id}-fact`,text:dev.fact};
   return {key:'unknown',text:voiceLines.unknown};
 }
