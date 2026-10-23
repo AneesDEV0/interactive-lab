@@ -1,3 +1,4 @@
+import { findTextbookAnswer } from '../shared/textbook-qa.js';
 // ═══════════════════════════════════════════════════════════════════════════
 // src/conductors/data.js — مصفوفة بيانات محطة جدول تصنيف المواد الموصلة والعازلة
 // للصف الرابع الأساسي · المنهاج الفلسطيني (الدارة الكهربائية والمصباح)
@@ -559,6 +560,9 @@ export function answer(query, currentItem) {
       };
     }
   }
+
+  const tb = findTextbookAnswer(query);
+  if (tb) return { key: tb.id, text: tb.text };
 
   // رد تشجيعي افتراضي مرتبط بالعنصر
   return {

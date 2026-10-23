@@ -1,3 +1,4 @@
+import { findTextbookAnswer } from '../shared/textbook-qa.js';
 // ═══════════════════════════════════════════════════════════════════════════
 // src/materials/data.js — مصفوفة بيانات محطة فرز وتصنيف خامات البيئة
 // ═══════════════════════════════════════════════════════════════════════════
@@ -402,6 +403,9 @@ export function answer(question, activeItem = null) {
       text: 'الزجاج مادة شفافة تسمح بمرور الضوء فنرى من خلالها، بينما الخشب والمعادن مواد معتمة تحجب الضوء.'
     };
   }
+
+  const tb = findTextbookAnswer(question);
+  if (tb) return { key: tb.id, text: tb.text };
 
   // الافتراضي
   return {

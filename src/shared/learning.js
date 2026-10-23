@@ -1,4 +1,6 @@
 import { activities, activityById, itemById, evaluate, contentFor, optionsFor } from './catalog.js';
+import { findTextbookAnswer } from './textbook-qa.js';
+
 export const STORAGE_KEY='sharara-progress-v3';
 export const emptyProgress=()=>({version:3,completed:{},last:null});
 export function readProgress(storage) {
@@ -39,8 +41,15 @@ export function transition(activity,state,event) {
   }
   return state;
 }
-export function guidance(activity,state,intent='now') {
+export function guidance(activity,state,intent='now',rawQuery='') {
   const item=itemById(activity,state.id),bank=contentFor(activity,item);
+  if(rawQuery){
+    const tb=findTextbookAnswer(rawQuery);
+    if(tb)return tb.text;
+  }
+  if(typeof intent==='string' && intent.startsWith('textbook:')){
+    return intent.slice('textbook:'.length);
+  }
   if(state.mode==='learn')return activity.id==='electricity'?item.fact:bank.explanation;
   if(intent==='hint')return state.hints>=3?bank.explanation:bank.hints[Math.max(0,state.hints-1)];
   if(intent==='why')return state.attempts||state.tested||state.revealed?bank.explanation:'جرّب اختيارك أولًا، ثم نكتشف السبب معًا.';
@@ -52,4 +61,18 @@ export function guidance(activity,state,intent='now') {
   if(activity.id==='friction'&&state.tested)return item.promptQuestion||'لاحظ ما حدث بعد الدلك والاحتكاك، ثم اختر السبب الصحيح.';
   return `${item.label}: ${bank.start}`;
 }
-export function parseIntent(text){const q=String(text).normalize('NFKC').replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').trim();return /تلميح|ساعد|مساعد/.test(q)?'hint':/لماذا|ليش|سبب/.test(q)?'why':/افعل|اعمل|الان|التالي|اشرح|شرح/.test(q)?'now':'unknown';}
+export function parseIntent(text){
+  const raw = String(text ?? '');
+  const q = raw.normalize('NFKC').replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').trim();
+  if (/^أَعْطِنِي تَلْمِيحًا$|^تلميح$|^ساعدني$|^مساعدة$|^ساعد$/.test(q)) return 'hint';
+  if (/^ليش[؟?]?$|^لماذا[؟?]?$|^شو السبب[؟?]?$/.test(q)) return 'why';
+  if (/^ماذا افعل الان[؟?]?$|^افعل$|^اعمل$|^الان$|^التالي$|^اشرح$|^شرح$/.test(q)) return 'now';
+
+  const tb = findTextbookAnswer(raw);
+  if (tb) return `textbook:${tb.text}`;
+
+  if (/تلميح|ساعد|مساعد/.test(q)) return 'hint';
+  if (/لماذا|ليش|سبب/.test(q)) return 'why';
+  if (/افعل|اعمل|الان|التالي|اشرح|شرح/.test(q)) return 'now';
+  return 'unknown';
+}

@@ -1,4 +1,5 @@
 // Only devices pictured in the three supplied textbook activities.
+import { findTextbookAnswer } from '../shared/textbook-qa.js';
 export const sources = {
   battery: { name: 'البطارية', icon: 'battery' },
   mains: { name: 'كهرباء المنزل', icon: 'plug' },
@@ -50,6 +51,8 @@ export const voiceLines = {
 export function answer(question, device) {
   const q = question.replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا');
   if (/خطر|سلام|مقبس|المس/.test(q)) return { key:'safety',text:voiceLines.safety };
+  const tb = findTextbookAnswer(question);
+  if (tb) return { key: tb.id, text: tb.text };
   if (/لماذا|ليش|لم يعمل|تلميح/.test(q)) return {key:`${device.id}-hint`,text:device.hint};
   if (/كيف|معلوم|يعمل|مصدر/.test(q)) return {key:`${device.id}-fact`,text:device.fact};
   if (/بطاري/.test(q)) return {key:'battery',text:voiceLines.battery};

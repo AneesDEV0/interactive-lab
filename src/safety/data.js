@@ -1,3 +1,4 @@
+import { findTextbookAnswer } from '../shared/textbook-qa.js';
 // ═══════════════════════════════════════════════════════════════════════════
 // src/safety/data.js — مصفوفة بيانات محطة حارس الأمان والسلامة الكهربائية
 // للصف الرابع الأساسي · المنهاج الفلسطيني (أخطار الكهرباء وقواعد السلامة)
@@ -507,6 +508,9 @@ export function answer(query, currentItem) {
       };
     }
   }
+
+  const tb = findTextbookAnswer(query);
+  if (tb) return { key: tb.id, text: tb.text };
 
   // رد افتراضي مرتبط بالموقف الحالي
   return {
