@@ -26,7 +26,9 @@ test('Textbook QA: recognizes questions with typos and varied phrasing', () => {
     ['ما أشكال المغناطيس', 'magnet_shapes_uses'],
     ['ما استخدامات المغناطيس', 'magnet_shapes_uses'],
     ['كيف أصنع مغناطيساً بالدلك', 'how_to_make_magnet'],
-    ['صناعة المغناطيس الكهربائي', 'how_to_make_magnet']
+    ['صناعة المغناطيس الكهربائي', 'how_to_make_magnet'],
+    ['ما هي رموز عناصر الدارة؟', 'circuit_symbols'],
+    ['أذكر استخدامين للكهرباء في حياتنا اليومية', 'electricity_daily_uses']
   ];
 
   for (const [query, expected] of cases) {
