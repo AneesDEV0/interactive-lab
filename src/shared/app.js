@@ -114,9 +114,57 @@ function render(){
 }
 let attempts={};try{const saved=JSON.parse(storage.getItem('sharara-attempts-v3')||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))attempts=saved;}catch{}
 function rememberAttempt(){const key=activity.id+':'+state.id;attempts[key]={attempts:state.attempts,hints:state.hints,revealed:state.revealed};try{storage.setItem('sharara-attempts-v3',JSON.stringify(attempts));}catch{}}
+let isRecording=false,speechRec=null;
+function stopRecording(){
+ if(!isRecording&&!speechRec)return;
+ isRecording=false;
+ if(speechRec){try{speechRec.stop();}catch{}speechRec=null;}
+ const micBtn=$('#mic-btn');
+ if(micBtn){micBtn.classList.remove('recording');micBtn.setAttribute('title','تحدث بالصوت');micBtn.setAttribute('aria-label','تحدث بالصوت');micBtn.innerHTML=icon('mic');}
+ const input=$('#ask-input');
+ if(input&&input.placeholder!=='مثلاً: لماذا؟')input.placeholder='مثلاً: لماذا؟';
+}
+function startRecording(){
+ const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SpeechRec){const status=$('#sound-status');if(status)status.textContent='خاصية التعرف الصوتي غير مدعومة في هذا المتصفح.';return;}
+ if(isRecording){stopRecording();return;}
+ if(soundState==='playing')audio.stop();
+ try{
+  if(speechRec){try{speechRec.abort();}catch{}speechRec=null;}
+  speechRec=new SpeechRec();
+  speechRec.lang='ar-SA';
+  speechRec.interimResults=true;
+  speechRec.continuous=true;
+  speechRec.onstart=()=>{
+   isRecording=true;
+   const micBtn=$('#mic-btn');
+   if(micBtn){micBtn.classList.add('recording');micBtn.setAttribute('title','إيقاف التسجيل الصوتي');micBtn.setAttribute('aria-label','إيقاف التسجيل الصوتي');micBtn.innerHTML=icon('stop');}
+   const input=$('#ask-input');
+   if(input){input.placeholder='جاري الاستماع... تكلّم الآن 🎙️';input.focus();}
+   const status=$('#sound-status');
+   if(status)status.textContent='';
+  };
+  speechRec.onresult=event=>{
+   let text='';
+   for(let i=0;i<event.results.length;i++)text+=event.results[i][0].transcript;
+   const input=$('#ask-input');
+   if(input){input.value=text.slice(0,180);input.dispatchEvent(new Event('input',{bubbles:true}));}
+  };
+  speechRec.onerror=event=>{
+   const status=$('#sound-status');
+   if(status){
+    if(event.error==='not-allowed')status.textContent='يرجى السماح بصلاحية الميكروفون للتحدث.';
+    else if(event.error!=='no-speech'&&event.error!=='aborted')status.textContent='تعذّر التعرف على الصوت. تحقق من ميكروفون جهازك.';
+   }
+   stopRecording();
+  };
+  speechRec.onend=()=>stopRecording();
+  speechRec.start();
+ }catch{stopRecording();}
+}
 async function selectItem(id){
  const item=itemById(activity,id);if(!item)return;
- audio.stop();state=newAttempt(id,'play');
+ audio.stop();stopRecording();state=newAttempt(id,'play');
  const saved=attempts[activity.id+':'+id];if(saved&&typeof saved==='object'){state.attempts=Number.isInteger(saved.attempts)&&saved.attempts>=0?saved.attempts:0;state.hints=Number.isInteger(saved.hints)?Math.max(0,Math.min(3,saved.hints)):0;state.revealed=saved.revealed===true;}
  progress.last={activity:activity.id,item:id};persist();const url=new URL(location.href);url.searchParams.set('item',id);url.searchParams.delete('device');url.searchParams.delete('mode');if(url.href!==location.href)history.replaceState(null,'',url);
  render();say(guidance(activity,state));const rev=++loadRevision;$('#model-status').hidden=false;$('#model-status').textContent='نجهّز المجسم…';
@@ -136,7 +184,8 @@ async function startActivity(){
  $('#test-material').onclick=()=>{state=transition(activity,state,{type:'test'});render();say(guidance(activity,state));$('#answer-controls button')?.focus({preventScroll:true});};
  $('#door').onclick=()=>{state.doorOpen=!state.doorOpen;render();};
  $('#listen').onclick=()=>soundState==='playing'?audio.stop():audio.speak(currentText,true);
- $('#ask-form').onsubmit=e=>{e.preventDefault();assist(parseIntent($('#ask-input').value));$('#ask-input').value='';};
+ const micBtn=$('#mic-btn');if(micBtn)micBtn.onclick=e=>{e.preventDefault();isRecording?stopRecording():startRecording();};
+ $('#ask-form').onsubmit=e=>{e.preventDefault();if(isRecording)stopRecording();assist(parseIntent($('#ask-input').value));$('#ask-input').value='';};
  $('#drag-card').addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',state.id);e.dataTransfer.effectAllowed='move';});
  $('#answer-controls').addEventListener('dragover',e=>{if(e.target.closest('[data-bin]'))e.preventDefault();});
  $('#answer-controls').addEventListener('drop',e=>{e.preventDefault();const b=e.target.closest('[data-bin]');if(b&&e.dataTransfer.getData('text/plain')===state.id)choose(b.dataset.bin);});
@@ -144,7 +193,7 @@ async function startActivity(){
  try{const {ModelViewer}=await import('./model-viewer.js');scene=new ModelViewer($('#scene'),{error:()=>fallback(),guidance:()=>currentText,sources:()=>optionsFor(activity,itemById(activity,state.id)),action:id=>{if(id==='exit')scene.exitXR();else if(id==='next')next();else if(id==='try')submit();else if(id==='stop'&&state.running){state.running=false;render();say('توقّف الجهاز. يمكنك الانتقال إلى العنصر التالي.');}else if(id==='listen'||id==='stop')audio.speak(currentText,true);else choose(id);},placed:()=>say('أصبح الجهاز على الطاولة. تابع تجربتك.'),ended:()=>{$('#xr-overlay').hidden=true;scene.fit();}},activity.id);scene.setState(state);await scene.setItem(itemById(activity,state.id));$('#model-status').hidden=true;$('#scene').dataset.loaded=state.id;}
  catch{scene?.destroy();scene=null;fallback();}
  await checkXR();
- window.addEventListener('pagehide',()=>{audio.stop();camera.close();scene?.destroy();});
+ window.addEventListener('pagehide',()=>{audio.stop();camera.close();scene?.destroy();stopRecording();});
 }
 function assist(intent){if(intent==='hint')state=transition(activity,state,{type:'hint'});if(intent==='why'&&(state.attempts||state.tested))state.revealed=true;rememberAttempt();say(guidance(activity,state,intent));}
 async function checkXR(){
@@ -163,7 +212,7 @@ document.addEventListener('click',async e=>{
  if(discovering)return;
  if(b.dataset.choice)choose(b.dataset.choice);
  if(b.dataset.xrChoice)choose(b.dataset.xrChoice);
- if(b.dataset.intent)assist(b.dataset.intent);
+ if(b.dataset.intent){if(isRecording)stopRecording();assist(b.dataset.intent);}
  if(b.dataset.xr){audio.stop();try{await scene.enterXR(b.dataset.xr,$('#xr-overlay'));$('#xr-overlay').hidden=false;$('#xr-guidance').textContent=b.dataset.xr==='ar'?'حرّك الهاتف ببطء حتى تظهر دائرة، ثم المس لوضع الجهاز.':'استخدم مؤشر النظارة لاختيار المصدر. زر خروج يعيدك إلى الشاشة.';}catch{$('#xr-status').textContent='تعذر بدء العرض. تابع استكشاف المجسم على الشاشة.';}}
  if(b.id==='xr-exit')scene?.exitXR();
  if(b.id==='xr-recenter'){if(scene?.xrMode==='ar'){scene.placed=false;scene.world.visible=false;}else scene?.world.position.set(0,-.55,-3);}
@@ -177,7 +226,7 @@ soundButton();
 await mountVoiceSettings(audio);
 mountPWA();
 // Inspection handle for browser integration tests; no private student data is collected.
-window.lab={get state(){return state;},get scene(){return scene;},get progress(){return progress;},get discovery(){return discovery;},get camera(){return camera;},selectItem,choose,submit,audio};
+window.lab={get state(){return state;},get scene(){return scene;},get progress(){return progress;},get discovery(){return discovery;},get camera(){return camera;},selectItem,choose,submit,audio,startRecording,stopRecording,get isRecording(){return isRecording;}};
 }
 
 
